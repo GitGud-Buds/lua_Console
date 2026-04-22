@@ -96,11 +96,11 @@ goto first
 end
 x=(args.unit+x)%args.far_reach>0 and(args.unit+x)%args.far_reach or args.far_reach
 if x==args.onset then
-return _
+return nil
 end
 ::first::
 local j,elem=1,{}
-while j<=#args.lists and(args.lists[j]or args.unique)[x]~=_ do
+while j<=#args.lists and(args.lists[j]or args.unique)[x]~=nil do
 elem[1+#elem]=args.lists[j][x]
 j=1+j
 end
@@ -115,11 +115,11 @@ goto first
 end
 params.offset=(params.unit+params.offset)%params.far_reach>0 and(params.unit+params.offset)%params.far_reach or params.far_reach
 if params.offset==params.onset then
-return _
+return nil
 end
 ::first::
 local j,elem=1,{}
-while j<=#lis and(lis[j]or params.unique)[params.offset]~=_ do
+while j<=#lis and(lis[j]or params.unique)[params.offset]~=nil do
 elem[1+#elem]=lis[j][params.offset]
 j=1+j
 end
@@ -127,13 +127,13 @@ return elem
 end
 end
 local j,element=1,{}
-while j<=#lists and(lists[j]or params.unique)[params.offset]~=_ do
+while j<=#lists and(lists[j]or params.unique)[params.offset]~=nil do
 element[1+#element]=lists[j][params.offset]
 j=1+j
 end
 params.offset=(params.unit+params.offset)%params.far_reach>0 and(params.unit+params.offset)%params.far_reach or params.far_reach
 if params.offset~=params.onset then
-return element,zip(lists,_,params)
+return element,zip(lists,nil,params)
 else
 return element
 end
@@ -240,7 +240,7 @@ local function table_Player(input_table,params)
 params=params or{}
 local keys={}
 if type(params.key_word)=="boolean"then
-for key in next,input_table,#input_table>0 and #input_table or _ do
+for key in next,input_table,#input_table>0 and #input_table or nil do
 keys[1+#keys]=key
 end
 if params.key_word==true then
@@ -277,24 +277,24 @@ end
 if not params.i then
 if not params.dist then
 if not params.j then
-params.i=(params.key_word==_ or type(params.key_word)=="boolean")and 1 or _
+params.i=(params.key_word==nil or type(params.key_word)=="boolean")and 1 or nil
 else
-params.i=(params.key_word==_ or type(params.key_word)=="boolean")and 1 or params.j
+params.i=(params.key_word==nil or type(params.key_word)=="boolean")and 1 or params.j
 end
 else
 if not params.j then
 if params.dist=="-"then
-params.i=params.key_word==_ and(#input_table>0 and #input_table or _)or(type(params.key_word)=="boolean"and #keys or _)
+params.i=params.key_word==nil and(#input_table>0 and #input_table or nil)or(type(params.key_word)=="boolean"and #keys or nil)
 elseif params.dist>0 then
-params.i=(params.key_word==_ or type(params.key_word)=="boolean")and 1 or _
+params.i=(params.key_word==nil or type(params.key_word)=="boolean")and 1 or nil
 elseif params.dist<0 then
-params.i=params.key_word==_ and(#input_table>0 and #input_table or _)or(type(params.key_word)=="boolean"and #keys or _)
+params.i=params.key_word==nil and(#input_table>0 and #input_table or nil)or(type(params.key_word)=="boolean"and #keys or nil)
 else
-params.i=params.key_word==_ and(#input_table>0 and math.random(1,#input_table)or _)or(type(params.key_word)=="boolean"and math.random(1,#keys)or _)
+params.i=params.key_word==nil and(#input_table>0 and math.random(1,#input_table)or nil)or(type(params.key_word)=="boolean"and math.random(1,#keys)or nil)
 end
 else
 if params.dist=="-"then
-params.i=params.key_word==_ and(#input_table>0 and #input_table or _)or(type(params.key_word)=="boolean"and #keys or params.j)
+params.i=params.key_word==nil and(#input_table>0 and #input_table or nil)or(type(params.key_word)=="boolean"and #keys or params.j)
 elseif params.dist~=0 then
 params.i=params.j-params.dist
 else
@@ -317,15 +317,15 @@ start=params.i
 end
 if not params.dist then
 if not params.j then
-if params.key_word==_ then
-return index_Body(input_table,start,#input_table>0 and #input_table or _,params.stateless)
+if params.key_word==nil then
+return index_Body(input_table,start,#input_table>0 and #input_table or nil,params.stateless)
 elseif type(params.key_word)=="boolean"then
 return key_Body(input_table,start,#keys,params.stateless,keys)
 else
 return serial_Body(input_table,start,start,params.key_word,params.stateless)
 end
 else
-if params.key_word==_ then
+if params.key_word==nil then
 return index_Body(input_table,start,params.j,params.stateless)
 elseif type(params.key_word)=="boolean"then
 return key_Body(input_table,start,params.j,params.stateless,keys)
@@ -336,7 +336,7 @@ end
 else
 if not params.j then
 if params.dist=="-"then
-if params.key_word==_ then
+if params.key_word==nil then
 return index_Body(input_table,start,1,params.stateless)
 elseif type(params.key_word)=="boolean"then
 return key_Body(input_table,start,1,params.stateless,keys)
@@ -344,7 +344,7 @@ else
 return serial_Body(input_table,start,start,params.key_word,params.stateless)
 end
 elseif params.dist~=0 then
-if params.key_word==_ then
+if params.key_word==nil then
 return index_Body(input_table,start,params.dist+params.i,params.stateless)
 elseif type(params.key_word)=="boolean"then
 return key_Body(input_table,start,params.dist+params.i,params.stateless,keys)
@@ -356,7 +356,7 @@ error("Invalid Arguments!")
 end
 else
 if params.dist=="-"then
-if params.key_word==_ then
+if params.key_word==nil then
 return index_Body(input_table,start,params.j,params.stateless)
 elseif type(params.key_word)=="boolean"then
 return key_Body(input_table,start,params.j,params.stateless,keys)
@@ -364,7 +364,7 @@ else
 return serial_Body(input_table,start,params.j,params.key_word,params.stateless)
 end
 elseif params.i-params.j<0 and params.dist>0 then
-if params.key_word==_ then
+if params.key_word==nil then
 return index_Body(input_table,start,math.min(params.j,params.dist+params.i),params.stateless)
 elseif type(params.key_word)=="boolean"then
 return key_Body(input_table,start,math.min(params.j,params.dist+params.i),params.stateless,keys)
@@ -372,7 +372,7 @@ else
 return serial_Body(input_table,start,math.min(params.j,params.dist+params.i),params.key_word,params.stateless)
 end
 elseif params.i-params.j>0 and params.dist<0 then
-if params.key_word==_ then
+if params.key_word==nil then
 return index_Body(input_table,start,math.max(params.j,params.dist+params.i),params.stateless)
 elseif type(params.key_word)=="boolean"then
 return key_Body(input_table,start,math.max(params.j,params.dist+params.i),params.stateless,keys)
@@ -381,7 +381,7 @@ return serial_Body(input_table,start,math.max(params.j,params.dist+params.i),par
 end
 elseif(params.i-params.j)*params.dist>0 then
 if params.i-params.j<params.dist then
-if params.key_word==_ then
+if params.key_word==nil then
 return index_Body(input_table,start,math.max(params.j,params.dist+params.i),params.stateless)
 elseif type(params.key_word)=="boolean"then
 return key_Body(input_table,start,math.max(params.j,params.dist+params.i),params.stateless,keys)
@@ -389,7 +389,7 @@ else
 return serial_Body(input_table,start,math.max(params.j,params.dist+params.i),params.key_word,params.stateless)
 end
 elseif params.i-params.j>params.dist then
-if params.key_word==_ then
+if params.key_word==nil then
 return index_Body(input_table,start,math.min(params.j,params.dist+params.i),params.stateless)
 elseif type(params.key_word)=="boolean"then
 return key_Body(input_table,start,math.min(params.j,params.dist+params.i),params.stateless,keys)
@@ -398,7 +398,7 @@ return serial_Body(input_table,start,math.min(params.j,params.dist+params.i),par
 end
 else
 if params.dist~=0 then
-if params.key_word==_ then
+if params.key_word==nil then
 return index_Body(input_table,start,params.dist+params.i,params.stateless)
 elseif type(params.key_word)=="boolean"then
 return key_Body(input_table,start,params.dist+params.i,params.stateless,keys)
@@ -413,6 +413,8 @@ end
 end
 end
 end
+
+local arithmetiCalc
 
 --mentorship by deepseek
 local function true_Iterator(params,initial_states,comprehension,layer_offset,ctrls,yields1,yields2,args,results)
@@ -450,8 +452,10 @@ states[args or"args"]["bawbdo"..layer]=states[args or"args"]["bawbdo"..layer]or 
 states[args or"args"]["awconds"..layer]=states[args or"args"]["awconds"..layer]or states[args or"args"]["bhrconds"..layer]
 states[args or"args"]["awdo"..layer]=states[args or"args"]["awdo"..layer]or states[args or"args"]["bbhrdo"..layer]
 local cache_layer,cache_ctrl,cache_yield1,cache_yield2
-if type(states[args or"args"][2*layer-1])=="number"and type(states[args or"args"][2*layer])=="number"then
-for ctrl=states[args or"args"][2*layer-1],states[args or"args"][2*layer],states[args or"args"]["step"..layer]or 1 do
+if(type(states[args or"args"][2*layer-1])=="number"and type(states[args or"args"][2*layer])=="number")or(rawequal(debug.getmetatable(states[args or"args"][2*layer-1]),arithmetiCalc)and rawequal(debug.getmetatable(states[args or"args"][2*layer]),arithmetiCalc))then
+local start=rawequal(debug.getmetatable(states[args or"args"][2*layer-1]),arithmetiCalc)and states[args or"args"][2*layer-1]:evaluate()or arithmetiCalc.evaluate(states[args or"args"][2*layer-1])
+local stop=rawequal(debug.getmetatable(states[args or"args"][2*layer]),arithmetiCalc)and states[args or"args"][2*layer]:evaluate()or arithmetiCalc.evaluate(states[args or"args"][2*layer])
+for ctrl=start,stop,states[args or"args"]["step"..layer]or 1 do
 if states[args or"args"]["bhrconds"..layer](states,layer,ctrl)then
 states,cache_layer,cache_ctrl,cache_yield1,cache_yield2=states[args or"args"]["bbhrdo"..layer](states,layer,ctrl)
 return states,cache_layer or layer,cache_ctrl or ctrl,cache_yield1,cache_yield2
@@ -566,7 +570,7 @@ initial_states[args or"args"]=params
 initial_states[results or"results"]=comprehension
 local bool,bool1=true,true
 for layer=1,#params-1 do
-if params["customgen"..layer]or type(params[layer])~="table"or next(params[layer],#params[layer]>0 and #params[layer]or _)or #params[layer]==0 then
+if params["customgen"..layer]or type(params[layer])~="table"or next(params[layer],#params[layer]>0 and #params[layer]or nil)or #params[layer]==0 then
 bool=false
 if layer%2==1 then
 bool1=false
@@ -581,7 +585,7 @@ end
 elseif bool1==true and #params%2==1 then
 local bool2=true
 for idx=2,#params-1,2 do
-if params["customgen"..idx/2]or type(params[idx])~="table"or not next(params[idx],#params[idx]>0 and #params[idx]or _)or #params[idx]>0 then
+if params["customgen"..idx/2]or type(params[idx])~="table"or not next(params[idx],#params[idx]>0 and #params[idx]or nil)or #params[idx]>0 then
 bool2=false
 end
 end
@@ -592,7 +596,7 @@ end
 end
 end
 local states,layer,ctrl,yield1,yield2=iter(initial_states)
-params=type(params.ress)=="function"and params.ress(params,states,comprehension,layer,ctrl,yield1,yield2)or _
+params=type(params.ress)=="function"and params.ress(params,states,comprehension,layer,ctrl,yield1,yield2)or nil
 if not params then
 return comprehension,states,layer,ctrl,yield1,yield2
 else
@@ -601,7 +605,7 @@ end
 end
 
 
-local arithmetiCalc={}
+arithmetiCalc={}
 
 function arithmetiCalc:initialise(parents,inverse_map)
 for k in next,debug.getmetatable(self).map do
@@ -643,15 +647,15 @@ bool=true
 local algorithm=v(debug.getmetatable(self))
 if debug.getmetatable(self).map[algorithm]then
 local ex_method=debug.getmetatable(self).map[algorithm]
-inverse_map[ex_method][1][ex_method]=_
-inverse_map[ex_method]=_
+inverse_map[ex_method][1][ex_method]=nil
+inverse_map[ex_method]=nil
 elseif inverse_map[k]then
 local ex_algo=inverse_map[k][2]
-inverse_map[k][1][k]=_
-debug.getmetatable(self).map[ex_algo]=_
-debug.getmetatable(self)["_"..ex_algo]=_
-debug.getmetatable(self)["__"..ex_algo]=_
-inverse_map[k]=_
+inverse_map[k][1][k]=nil
+debug.getmetatable(self).map[ex_algo]=nil
+debug.getmetatable(self)["_"..ex_algo]=nil
+debug.getmetatable(self)["__"..ex_algo]=nil
+inverse_map[k]=nil
 end
 debug.getmetatable(self).map[algorithm]=k
 rawset(debug.getmetatable(self),"_"..algorithm,debug.getmetatable(self).prototypes[algorithm:match("^(%w%w%w)%w-$").."usc"](debug.getmetatable(self),algorithm))
@@ -928,7 +932,7 @@ arithmetiCalc.__lt=lt_Precursor
 
 local function call_Precursor(self,...)
 if rawequal(debug.getmetatable(self),self)then
-debug.setmetatable(self,_)
+debug.setmetatable(self,nil)
 self.__mode="v"
 end
 local params=table.pack(...)
@@ -996,7 +1000,7 @@ end
 combined[idx1]=table.concat(combined[idx1])
 end
 for k in next,details do
-details[k]=_
+details[k]=nil
 end
 details[1]=table.concat(combined)
 print(details[1])
@@ -1015,7 +1019,7 @@ results=debug.getmetatable(self).prototypes[self[operands[idx1]].algorithm:match
 end
 for idx2=1,#results do
 for idx3=1,math.huge do
-if rawget(self[operands[idx1]],results[idx2]..idx3)==_ then
+if rawget(self[operands[idx1]],results[idx2]..idx3)==nil then
 break
 elseif rawequal(self[operands[idx1]][results[idx2]..idx3],self)then
 self[operands[idx1]][results[idx2]..idx3]=false
@@ -1023,12 +1027,12 @@ end
 end
 end
 end
-self[operands[idx1]]=_
+self[operands[idx1]]=nil
 end
 if rawget(self,"result")then
-self.result=_
+self.result=nil
 end
-self.algorithm=_
+self.algorithm=nil
 collectgarbage()
 elseif dictation=="prtvlu"and rawget(self,"value")then
 print(self.value)
@@ -1053,7 +1057,7 @@ if not potential then
 if not cache_result then
 cache_result=results[idx1][idx2]..idx3
 end
-if rawequal(potential,_)then
+if rawequal(potential,nil)then
 break
 end
 else
@@ -1113,7 +1117,7 @@ if not potential then
 if not cache_result then
 cache_result=results[idx1][idx2]..idx3
 end
-if rawequal(potential,_)then
+if rawequal(potential,nil)then
 break
 end
 else
@@ -1182,7 +1186,7 @@ ks[layer+foothold],ks[idx]=ks[idx],ks[layer+foothold]
 lis[layer+foothold],lis[idx]=lis[idx],lis[layer+foothold]
 if layer>=grps[1+group_layer]then
 if group_layer<#grps-1 then
-permGen(ks,lis,grps,_,1+group_layer)
+permGen(ks,lis,grps,nil,1+group_layer)
 else
 coroutine.yield(ks,lis)
 end
@@ -1206,7 +1210,7 @@ if status then
 return key_yield,permutation_yield
 end
 coroutine.close(args.thread)
-return _
+return nil
 end,params
 end
 local replica_groups=replicate(groups)
@@ -1216,7 +1220,7 @@ if status then
 return permutation_yield
 end
 coroutine.close(thread)
-return _
+return nil
 end
 end
 
@@ -1239,7 +1243,7 @@ ks[layer+foothold],ks[idx]=ks[idx],ks[layer+foothold]
 lis[layer+foothold],lis[idx]=lis[idx],lis[layer+foothold]
 if layer>=grps[1+group_layer]then
 if group_layer<#grps-1 then
-gCombGen(ks,lis,grps,_,_,1+group_layer)
+gCombGen(ks,lis,grps,nil,nil,1+group_layer)
 else
 coroutine.yield(ks,lis)
 end
@@ -1264,7 +1268,7 @@ if status then
 return key_yield,combination_yield
 end
 coroutine.close(args.thread)
-return _
+return nil
 end,params
 end
 local replica_groups=replicate(groups)
@@ -1274,7 +1278,7 @@ if status then
 return combination_yield
 end
 coroutine.close(thread)
-return _
+return nil
 end
 end
 
@@ -1358,7 +1362,7 @@ local algorithm="unasin"
 if rawequal(debug.getmetatable(self),self)and rawequal(debug.getmetatable(self),arithmetiCalc)then
 return algorithm
 elseif not rawequal(debug.getmetatable(self),self)and rawequal(debug.getmetatable(self),arithmetiCalc)then
-if dummy==_ then
+if dummy==nil then
 local operands=debug.getmetatable(self).prototypes[algorithm:match("^(%w%w%w)%w-$").."cfg"].operands
 local distinguished=rawequal(debug.getmetatable(self[operands[1]]),debug.getmetatable(self))and self[operands[1]]:evaluate()or debug.getmetatable(self).evaluate(self[operands[1]])
 return math.sin(math.tointeger(distinguished)or tonumber(distinguished)or load("return "..distinguished)())
@@ -1430,7 +1434,7 @@ if colour[idx]<0 then
 colour[idx]=0
 end
 end
-colour.blue,colour.green,colour.red=_,_,_
+colour.blue,colour.green,colour.red=nil,nil,nil
 colour[4]=255
 return colour
 end
@@ -1444,7 +1448,7 @@ local checked=idx1<2 and initial_states.dimenses or initial_states.animators
 for idx2=1,#checked do
 if rawequal(debug.getmetatable((type(initial_states.animators)~="function"or idx1<2)and checked[idx2].var or checked[idx2]),arithmetiCalc)then
 if rawget(getmetatable((type(initial_states.animators)~="function"or idx1<2)and checked[idx2].var or checked[idx2]),"__mode")then
-getmetatable((type(initial_states.animators)~="function"or idx1<2)and checked[idx2].var or checked[idx2]).__mode=_
+getmetatable((type(initial_states.animators)~="function"or idx1<2)and checked[idx2].var or checked[idx2]).__mode=nil
 end
 else
 error("Invalid Variable Found!")
@@ -1606,11 +1610,11 @@ end
 index=1+index
 if not relations[index] and #cache_parent>0 then
 new_relations=cache_parent_new[#cache_parent_new]
-cache_parent_new[#cache_parent_new]=_
+cache_parent_new[#cache_parent_new]=nil
 relations=cache_parent[#cache_parent]
-cache_parent[#cache_parent]=_
+cache_parent[#cache_parent]=nil
 index=cache_index[#cache_index]
-cache_index[#cache_index]=_
+cache_index[#cache_index]=nil
 goto escape
 end
 end
@@ -1716,8 +1720,8 @@ for idx1=initial_states.animation and 2 or 1,1,-1 do
 params=idx1<2 and{}or initial_states.frame_args
 local sources=(not initial_states.animation or idx1>1)and initial_states.dimenses or initial_states.animators
 for idx2=1,type(initial_states.animation)=="function"and idx1<2 and 1 or #sources do
-params[2*idx2-1]=type(initial_states.animation)=="function"and sources.arg1 or(rawequal(debug.getmetatable(sources[idx2][1]),arithmetiCalc)and sources[idx2][1]:evaluate()or arithmetiCalc.evaluate(sources[idx2][1]))
-params[2*idx2]=type(initial_states.animation)=="function"and sources.arg2 or(rawequal(debug.getmetatable(sources[idx2][2]),arithmetiCalc)and sources[idx2][2]:evaluate()or arithmetiCalc.evaluate(sources[idx2][2]))
+params[2*idx2-1]=type(initial_states.animation)=="function"and idx1<2 and sources.arg1 or sources[idx2][1]
+params[2*idx2]=type(initial_states.animation)=="function"and idx1<2 and sources.arg2 or sources[idx2][2]
 if type(initial_states.animation)=="function"and idx1<2 then
 params["customgen"..idx2]=initial_states.animation
 else
@@ -1743,11 +1747,11 @@ elementary_evaluations[idx]=states.relation_Constructor(((not states.animation o
 end
 end
 if(not always_noyield and type(states.animation)=="function")or states.relation_Constructor(elementary_evaluations)then
-if type(states.pace)=="number"then
+if not always_noyield and states.animation and type(states.pace)=="number"then
 states.count_to_pace=1+(states.count_to_pace or 0)
 end
 local pixel_colour={blue={},green={},red={}}
-for idx=1,type(states.animation)=="function"and 0 or #elementary_evaluations do
+for idx=1,not always_noyield and type(states.animation)=="function"and 0 or #elementary_evaluations do
 if elementary_evaluations[idx]then
 pixel_colour.blue[1+#pixel_colour.blue]=(states.colours[idx]or{})[1]or math.random(0,255)
 pixel_colour.green[1+#pixel_colour.green]=(states.colours[idx]or{})[2]or math.random(0,255)
@@ -1757,7 +1761,7 @@ end
 if #pixel_colour.blue>1 and #pixel_colour.green>1 and #pixel_colour.red>1 then
 pixel_colour=states.colour_Blend(pixel_colour)
 elseif #pixel_colour.blue==0 and #pixel_colour.green==0 and #pixel_colour.red==0 then
-pixel_colour={table.unpack(states.colours[6])}
+pixel_colour={table.unpack(states.colours[1])}
 pixel_colour[4]=255
 else
 pixel_colour={pixel_colour.blue[1],pixel_colour.green[1],pixel_colour.red[1],255}
@@ -1834,26 +1838,15 @@ elseif #cache_route==2 then
 if not result_table[cache_route[1]][cache_route[2]]then
 result_table[cache_route[1]][cache_route[2]]=idx1>1 and{}or pixel_colour
 elseif idx1<=1 then
-result_table[cache_route[1]][cache_route[2]]=states.colour_Blend{blue={result_table[cache_route[1]][cache_route[2]][1],pixel_colour[1]},green={result_table[cache_route[1]][cache_route[2]][2],pixel_colour[2]},red={result_table[cache_route[1]][cache_route[2]][3],pixel_colour[3]}}
+result_table[cache_route[1]][cache_route[2]]=states.override and pixel_colour or states.colour_Blend{blue={result_table[cache_route[1]][cache_route[2]][1],pixel_colour[1]},green={result_table[cache_route[1]][cache_route[2]][2],pixel_colour[2]},red={result_table[cache_route[1]][cache_route[2]][3],pixel_colour[3]}}
 end
 elseif #cache_route==3 then
-result_table[cache_route[1]][cache_route[2]][cache_route[3]]=not result_table[cache_route[1]][cache_route[2]][cache_route[3]]and pixel_colour or states.colour_Blend{blue={result_table[cache_route[1]][cache_route[2]][cache_route[3]][1],pixel_colour[1]},green={result_table[cache_route[1]][cache_route[2]][cache_route[3]][2],pixel_colour[2]},red={result_table[cache_route[1]][cache_route[2]][cache_route[3]][3],pixel_colour[3]}}
-end
-local args
-for idx1=states.animation and 2 or 1,1,-1 do
-args=idx1<2 and states.args or states.frame_args
-local sources=(not states.animation or idx1>1)and states.dimenses or states.animators
-for idx2=1,type(states.animation)=="function"and idx1<2 and 0 or #sources do
-args[2*idx2-1]=rawequal(debug.getmetatable(sources[idx2][1]),arithmetiCalc)and sources[idx2][1]:evaluate()or arithmetiCalc.evaluate(sources[idx2][1])
-args[2*idx2]=rawequal(debug.getmetatable(sources[idx2][2]),arithmetiCalc)and sources[idx2][2]:evaluate()or arithmetiCalc.evaluate(sources[idx2][2])
+result_table[cache_route[1]][cache_route[2]][cache_route[3]]=(not result_table[cache_route[1]][cache_route[2]][cache_route[3]]or states.override)and pixel_colour or states.colour_Blend{blue={result_table[cache_route[1]][cache_route[2]][cache_route[3]][1],pixel_colour[1]},green={result_table[cache_route[1]][cache_route[2]][cache_route[3]][2],pixel_colour[2]},red={result_table[cache_route[1]][cache_route[2]][cache_route[3]][3],pixel_colour[3]}}
 end
 end
 if not always_noyield and states.animation and states.trail and(type(states.pace)~="number"or(states.count_to_pace-1)//states.pace<states.count_to_pace//states.pace)then
-if type(states.animation)=="function"then
-states.frame_results=coroutine.yield()
-end
+states.frame_results=coroutine.yield(control_table)
 states.frame_results=states.frame_results or replicate(states.results)
-end
 end
 if always_noyield or type(states.pace)~="number"or(states.count_to_pace-1)//states.pace<states.count_to_pace//states.pace then
 return false
@@ -1870,7 +1863,7 @@ if type(initial_states.animation)=="function"then
 params["nuptconds"..1]=on_Toggle
 end
 params["ndlvconds"..(type(initial_states.animation)=="function"and 1 or #initial_states.axes)]=meta_Processor(false)
-params["customdlv"..(type(initial_states.animation)=="function"and 1 or #initial_states.axes)]=true_Iterator(_,_,_,type(initial_states.animation)=="function"and 1 or #initial_states.axes,"frame_ctrls",_,_,"frame_args","frame_results")
+params["customdlv"..(type(initial_states.animation)=="function"and 1 or #initial_states.axes)]=true_Iterator(nil,nil,nil,type(initial_states.animation)=="function"and 1 or #initial_states.axes,"frame_ctrls",nil,nil,"frame_args","frame_results")
 for idx=1,#initial_states.axes do
 initial_states.frame_args["customdlv"..idx]=params["customdlv"..(type(initial_states.animation)=="function"and 1 or #initial_states.axes)]
 end
@@ -1932,6 +1925,7 @@ end
 end
 end
 if type(definition)=="table"and(#definition==4 or #definition==6)then
+definition=true_Iterator{definition,function(states)return math.floor(table.unpack(states.yields1))end}
 pixels.definition=definition
 end
 if #pixels.definition==6 then
@@ -1971,7 +1965,7 @@ end
 
 
 local function gfind(string,pattern,init,upbound)
-init,upbound=upbound and init or _,upbound or init or 5
+init,upbound=upbound and init or nil,upbound or init or 5
 if type(string)~="string"or type(pattern)~="string"then
 error("Invalid Arguments!")
 end
@@ -2200,14 +2194,14 @@ if sum1 == sum2 then
 print("No difference found!")
 else
 for idx,k2,v2 in table_Player(compare2,{key_word=false,stateless=true})do
-if compare1[k2] == _ then
+if compare1[k2] == nil then
 result = k2.." in "..compare2.absolute_path.." unfound in "..compare1.absolute_path
 print(result)
 table.insert(results,result)
 end
 end
 for idx1,k1,v1 in table_Player(compare1,{key_word=false,stateless=true})do
-if compare2[k1] == _ then
+if compare2[k1] == nil then
 result = k1.." in "..compare1.absolute_path.." unfound in "..compare2.absolute_path
 print(result)
 table.insert(results,result)
@@ -2331,8 +2325,8 @@ end
 --range[6][12]
 
 _ENV[...]={
-version=0.9921875,
-renewed=20260409,
+version=1.0234375,
+renewed=20260413,
 ["Pointers in Practice"]="Treating certain parameters as tables or pointing to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-call time.",
 ["Class Paradigm"]=[=[Each disparate metamethod along the hierarchy should share a function that explicitly indexes self of a particular, named field, which in turn should be implemented at top-class nodes as one sees appropriate.
 In case of multiple inheritance, set a proxy for each parent wherein metatable of the mutual heir shall search for methods, where in particular:
@@ -2367,7 +2361,7 @@ sort_File=sort_File
 --a few declarations:
 --range[4][15]
 local status="ready for run"
-local digest="80745455834943021"
+local digest="-1156158235613522376"
 --range[2][12]
 --[===[
 ⚙
@@ -2444,9 +2438,9 @@ if directory and true or bootstrap[relative_path]then
 if handle then
 if type(handle)~="table"then
 if directory and true or item~=handle then
-handle={where_in and io.popen('find "'..where_in..'" 2>/dev/null')or io.popen('find "'..handle..'" 2>/dev/null'),handle,where_in,[handle]=not directory and true or _}
+handle={where_in and io.popen('find "'..where_in..'" 2>/dev/null')or io.popen('find "'..handle..'" 2>/dev/null'),handle,where_in,[handle]=not directory and true or nil}
 if where_in then
-where_in=_
+where_in=nil
 end
 end
 end
@@ -2465,7 +2459,7 @@ end
 end
 end
 mini_handle:close()
-mini_handle=_
+mini_handle=nil
 if not handle and not where_in then
 error("Nothing Matched by BootStrapping!")
 elseif type(handle)~="table"then
@@ -2475,7 +2469,7 @@ end
 handle=where_in and io.popen('find "'..where_in..'" 2>/dev/null')or io.popen('find "'..handle..'" 2>/dev/null')
 elseif not directory then
 for idx=2,#handle,2 do
-handle[handle[idx]]=_
+handle[handle[idx]]=nil
 end
 end
 elseif os.getenv("OS")=="Windows_NT"then
@@ -2490,7 +2484,7 @@ if handle then
 if type(handle)~="table"then
 handle={where_in and io.popen('dir "'..where_in..'" /S /B')or io.popen('dir "'..handle..'" /S /B'),handle,where_in}
 if where_in then
-where_in=_
+where_in=nil
 end
 end
 handle[1+#handle]=temp and io.popen('dir "'..temp..'" /S /B')or io.popen('dir "'..absolute_path..'" /S /B')
@@ -2525,7 +2519,7 @@ absolute_path=item
 necessary_func()
 end
 mini_handle:close()
-mini_handle=_
+mini_handle=nil
 else
 for idx=1,math.huge do
 absolute_path=os.getenv("directory"..idx)
@@ -2554,7 +2548,18 @@ local function meta_Hash(self,hashed,layer,sum,nb,xy,imba)
 hashed,layer,sum=hashed or{},layer or 1,sum or 0
 nb=nb or function(n,byte)return byte+n*(n+byte-1)end --before Hornor optimisation: n^2-n+n*byte+byte
 xy=xy or function(x,y)return x^2+y*(x+y*(x+y-1))end --before Hornor optimisation: y^3-y^2+x*y^2+x*y+x^2
-imba=imba or function(ref,content)return content>=1e3*ref^3 and math.ceil(content/ref^3)*(content%ref)or math.ceil(content/ref)*(content%ref)end
+imba=imba or function(ref,content)
+local smaller,larger
+if math.abs(ref)<math.abs(content)then
+smaller,larger=ref,content
+else
+smaller,larger=content,ref
+end
+if smaller==0 then
+return 0
+end
+return math.ceil(larger/smaller^(larger>=1e3*smaller^3 and 3 or 1))*(math.abs(smaller)==1 and 1 or larger%smaller)
+end
 local type_of_function,ishandle,first_line
 if type(self)=="function"then
 type_of_function=debug.getinfo(self,"S").what
@@ -2620,7 +2625,7 @@ else
 hashed[self]=layer
 end
 for k,v in next,self do
-sum=math.tointeger(imba(meta_Hash(k,hashed,1+layer,type(k)=="table"and sum or _,nb,xy,imba),meta_Hash(v,hashed,1+layer,type(v)=="table"and sum or _,nb,xy,imba)))+sum
+sum=math.tointeger(imba(meta_Hash(k,hashed,1+layer,type(k)=="table"and sum or nil,nb,xy,imba),meta_Hash(v,hashed,1+layer,type(v)=="table"and sum or nil,nb,xy,imba)))+sum
 end
 return math.tointeger(imba(2969,sum==0 and 2971 or sum))
 end
@@ -2697,7 +2702,7 @@ return debug.traceback([===[栈回溯：
 end
 local cache__index=rawget(object,"__index")
 rawset(object,"__index",function(self,key)
-local got=type(cache__index)=="function"and cache__index(self,key)or _
+local got=type(cache__index)=="function"and cache__index(self,key)or nil
 if type(got or debug.getmetatable(self)[key])=="function"then
 local call_stacks={}
 return function(...)
@@ -2791,7 +2796,7 @@ end
 end
 end
 for idx=1,#collect do
-rawset(object,collect[idx],_)
+rawset(object,collect[idx],nil)
 end
 return debug.setmetatable(proxy,object)
 else
@@ -2820,7 +2825,7 @@ local iter_func,invar_state,ctrl_var
 if not module_path then
 iter_func,invar_state,ctrl_var=ipairs(module_finder)
 end
-for i,v in module_path and module_finder:lines()or iter_func,not module_path and invar_state or _,not module_path and ctrl_var or _ do
+for i,v in module_path and module_finder:lines()or iter_func,not module_path and invar_state or nil,not module_path and ctrl_var or nil do
 if(module_path and true or(i%3==2 and module_finder[1+i]))and(module_path and i or v):match(]===].._ENV[...].version..[===[)then
 package.path=(module_path and i or v)..';'..package.path
 if os.getenv('ANDROID_ROOT')=='/system'then
@@ -2835,7 +2840,7 @@ require(module_name)
 end]===]):gsub("\n","n\\\n"),string.format("%q",[===[local script_path
 if os.getenv('ANDROID_ROOT')=='/system'then
 local success,script_finder,script_location
-success,script_finder,script_path,script_location=pcall(directory_Match or _ENV[module_name].directory_Match,_)
+success,script_finder,script_path,script_location=pcall(directory_Match or _ENV[module_name].directory_Match,nil)
 if not success then
 return false
 elseif not script_path then
@@ -2858,7 +2863,7 @@ io.output(where..keystone(_ENV[...].version,_ENV[...].renewed)..keystone(_ENV[..
 #include<lauxlib.h>
 
 #define PCALL_ERRH(NARGS,NRESULTS,ERR_MSG) if(lua_pcall(L,NARGS,NRESULTS,0)!=LUA_OK){\
-printf("%s",lua_isstring(L,-1)?luaL_checklstring(L,-1,NULL):"Non-String Error Object!");\
+printf("%s",lua_isstring(L,-1)?luaL_checkstring(L,-1):"Non-String Error Object!");\
 lua_pop(L,1);\
 luaL_error(L,ERR_MSG);\
 }
@@ -3395,7 +3400,7 @@ return 0;
 int inspect(lua_State *L){
 lua_settop(L,2);
 lua_getglobal(L,"module_name");
-lua_getglobal(L,luaL_checklstring(L,-1,NULL));
+lua_getglobal(L,luaL_checkstring(L,-1));
 lua_getfield(L,-1,"serialise");
 lua_remove(L,-2);
 lua_remove(L,-2);
@@ -3534,7 +3539,7 @@ lua_rotate(L,3,-1);
 else{
 lua_remove(L,3);
 lua_getglobal(L,"module_name");
-lua_getglobal(L,luaL_checklstring(L,-1,NULL));
+lua_getglobal(L,luaL_checkstring(L,-1));
 lua_getfield(L,-1,"meta_Hash");
 lua_remove(L,-2);
 lua_remove(L,-2);
@@ -3587,7 +3592,7 @@ lua_rotate(L,3,-1);
 else{
 lua_remove(L,3);
 lua_getglobal(L,"module_name");
-lua_getglobal(L,luaL_checklstring(L,-1,NULL));
+lua_getglobal(L,luaL_checkstring(L,-1));
 lua_getfield(L,-1,"meta_Hash");
 lua_remove(L,-2);
 lua_remove(L,-2);
@@ -3672,7 +3677,7 @@ luaL_Reg c_UpBinds[]={
 };
 
 #define DOSTR_ERRH(SCRIPT,LABEL) if(luaL_dostring(L,SCRIPT)!=LUA_OK){\
-printf("%s",lua_isstring(L,-1)?luaL_checklstring(L,-1,NULL):"Non-String Error Object!");\
+printf("%s",lua_isstring(L,-1)?luaL_checkstring(L,-1):"Non-String Error Object!");\
 lua_pop(L,1);\
 goto LABEL;\
 }
@@ -3690,7 +3695,7 @@ struct variable_lengthed_array array[];
 };
 
 void* individual_Thread(void *arg){
-lua_State *L=luaL_newstate();
+lua_State *L=(lua_State*)arg;
 luaL_openlibs(L);
 lua_pushboolean(L,0);
 lua_setglobal(L,"c_thread");
@@ -3700,7 +3705,7 @@ pthread_mutex_lock(&lock);
 DOSTR_ERRH(script,premature_end)
 pthread_mutex_unlock(&lock);
 lua_getglobal(L,"module_name");
-lua_getglobal(L,luaL_checklstring(L,-1,NULL));
+lua_getglobal(L,luaL_checkstring(L,-1));
 if(luaL_getsubtable(L,-1,"c_UpBinds"))
 luaL_error(L,"Field Already Exists!");
 lua_remove(L,-2);
@@ -3722,23 +3727,22 @@ lua_setfield(L,-2,c_UpBinds[idx].name);
 }
 lua_pop(L,1);
 int ctop=lua_gettop(L);
-DOSTR_ERRH(arg,premature_end)
+PCALL_ERRH(0,LUA_MULTRET,"Error Executing Task Script!")
 luaL_checkstack(L,3,"Unable to Allocate Memory for the Extra Stack Space!");
 lua_getglobal(L,"module_name");
-lua_getglobal(L,luaL_checklstring(L,-1,NULL));
+lua_getglobal(L,luaL_checkstring(L,-1));
 lua_getfield(L,-1,"serialise");
-lua_insert(L,1+ctop);
+lua_insert(L,ctop);
 lua_pop(L,2);
-results=malloc(sizeof(int)+(lua_gettop(L)-ctop-1)*sizeof(struct variable_lengthed_array));
-results->length=lua_gettop(L)-ctop-1;
+results=malloc(sizeof(int)+(lua_gettop(L)-ctop)*sizeof(struct variable_lengthed_array));
+results->length=lua_gettop(L)-ctop;
 int count_up=-1;
-for(int idx=1+ctop-lua_gettop(L);idx<=-1;idx++){
+for(int idx=ctop-lua_gettop(L);idx<=-1;idx++){
 luaL_checkstack(L,3,"Unable to Allocate Memory for the Extra Stack Space!");
-lua_pushvalue(L,1+ctop);
+lua_pushvalue(L,ctop);
 lua_pushvalue(L,idx-1);
-lua_pushstring(L,"");
-if(lua_pcall(L,2,1,0)!=LUA_OK)
-luaL_error(L,"Error Serialising Result!");
+lua_pushstring(L,"\t");
+PCALL_ERRH(2,1,"Error Serialising Result!")
 size_t len;
 const char *cache_result=lua_tolstring(L,-1,&len);
 results->array[++count_up].array=malloc(len);
@@ -3758,15 +3762,13 @@ int thread_Consolidator(lua_State *L){
 lua_settop(L,1);
 luaL_checktype(L,-1,LUA_TTABLE);
 pthread_t threads[luaL_len(L,-1)];
-char *scripts[luaL_len(L,-1)];
+lua_State *states[luaL_len(L,-1)];
 for(int idx=0;idx<luaL_len(L,-1);idx++){
 lua_geti(L,-1,1+idx);
-size_t len;
-const char *cache_script=lua_tolstring(L,-1,&len);
-scripts[idx]=malloc(1+len);
-memset(scripts[idx],0,1+len);
-strncpy(scripts[idx],cache_script,1+len);
-pthread_create(&threads[idx],NULL,individual_Thread,scripts[idx]);
+states[idx]=luaL_newstate();
+if(luaL_loadstring(states[idx],luaL_checkstring(L,-1))!=LUA_OK)
+luaL_error(L,"Error Loading Task Script: %s",luaL_checkstring(states[idx],-1));
+pthread_create(&threads[idx],NULL,individual_Thread,states[idx]);
 lua_pop(L,1);
 }
 struct array_of_arrays *cache_result[luaL_len(L,-1)];
@@ -3787,7 +3789,6 @@ free(cache_result[idx]->array[count_up].array);
 lua_seti(L,-2,1+luaL_len(L,-2));
 free(cache_result[idx]);
 }
-free(scripts[idx]);
 }
 return 1;
 }
@@ -3957,7 +3958,7 @@ if(parse_console_command_options(nargs,args,states)->traversal[strlen(states->tr
 luaL_error(L,"Erroneous Return!");
 else{
 if(lua_pcall(L,1+lua_gettop(L)-ctop,states->tracks[strlen(states->tracks)-1]>1?LUA_MULTRET:states->tracks[strlen(states->tracks)-1],0)!=LUA_OK){
-printf("%s",lua_isstring(L,-1)?luaL_checklstring(L,-1,NULL):"Non-String Error Object!");
+printf("%s",lua_isstring(L,-1)?luaL_checkstring(L,-1):"Non-String Error Object!");
 lua_pop(L,1);
 goto premature;
 }
@@ -4123,7 +4124,7 @@ luaL_openlibs(L);
 char script[]===]..3+script_len..']='..script1..[===[;
 DOSTR_ERRH(script,premature_end)
 lua_getglobal(L,"module_name");
-lua_getglobal(L,luaL_checklstring(L,-1,NULL));
+lua_getglobal(L,luaL_checkstring(L,-1));
 if(luaL_getsubtable(L,-1,"c_UpBinds"))
 luaL_error(L,"Field Already Exists!");
 lua_remove(L,-2);
@@ -4148,13 +4149,13 @@ memset(script,0,sizeof script);
 strcpy(script,]===]..script2..[===[);
 DOSTR_ERRH(script,premature_end)
 if(lua_isstring(L,-1)){
-luaL_loadfile(L,luaL_checklstring(L,-1,NULL));
+luaL_loadfile(L,luaL_checkstring(L,-1));
 lua_remove(L,-2);
 int ctop=lua_gettop(L);
 if(parse_console_command_options(n,args,states)->traversal[0]==-1)
 goto premature_end;
 if(lua_pcall(L,lua_gettop(L)-ctop,LUA_MULTRET,0)!=LUA_OK){
-printf("%s",lua_isstring(L,-1)?luaL_checklstring(L,-1,NULL):"Non-String Error Object!");
+printf("%s",lua_isstring(L,-1)?luaL_checkstring(L,-1):"Non-String Error Object!");
 lua_pop(L,1);
 }
 }else if(lua_isboolean(L,-1)&& !lua_toboolean(L,-1)){
