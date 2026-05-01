@@ -139,6 +139,37 @@ return element
 end
 end
 
+local function binary_Search(sequence,sought,rule,range)
+if type(sequence)~="table" or #sequence<1 then
+error("Sequence Expected!")
+end
+if type(rule)~="function"then
+rule=function(l,r)
+if type(l)~=type(r)then
+return type(l)<type(r)
+elseif type(l)=="number"or type(l)=="string"then
+return l<r
+end
+return tostring(l)<tostring(r)
+end
+table.sort(sequence,rule)
+end
+range=range or{1,#sequence}
+range[1]=range[1]or 1
+range[2]=range[2]or #sequence
+repeat
+local middle=(range[1]+range[2])//2
+if sought==sequence[middle]then
+return middle
+elseif rule(sought,sequence[middle])then
+range[2]=middle-1
+else
+range[1]=1+middle
+end
+until range[1]>range[2]
+return false
+end
+
 local function index_Body(input_table,start,stop,stateless)
 local unit_forward
 if stop==start then
@@ -244,22 +275,34 @@ for key in next,input_table,#input_table>0 and #input_table or nil do
 keys[1+#keys]=key
 end
 if params.key_word==true then
-table.sort(keys,type(params.comp_func)~="function"and function(l,r)
+if type(params.comp_func)~="function"then
+params.comp_func=function(l,r)
 if type(l)~=type(r)then
 return type(l)<type(r)
 elseif type(l)=="number"or type(l)=="string"then
 return l<r
 end
 return tostring(l)<tostring(r)
-end or params.comp_func)
 end
-if(params.i and type(params.i)~="number")or(params.j and type(params.j)~="number")then
+end
+table.sort(keys,params.comp_func)
+end
+if params.i and type(params.i)~="number"or params.j and type(params.j)~="number"then
+if not params.key_word then
 for idx,vlu in ipairs(keys)do
-if vlu==params.i then
+if params.i and type(params.i)~="number"and vlu==params.i then
 params.i=idx
 end
-if vlu==params.j then
+if params.j and type(params.j)~="number"and vlu==params.j then
 params.j=idx
+end
+end
+else
+if params.i and type(params.i)~="number"then
+params.i=binary_Search(keys,params.i,params.comp_func)
+end
+if params.j and type(params.j)~="number"then
+params.j=binary_Search(keys,params.j,params.comp_func)
 end
 end
 end
@@ -614,7 +657,7 @@ rawset(debug.getmetatable(self),"_"..k,debug.getmetatable(self).prototypes[confi
 rawset(debug.getmetatable(self),"__"..k:match("^%w%w%w(%w-)$"),debug.getmetatable(self).prototypes[config.."mm"](debug.getmetatable(self),k))
 end
 parents=parents or{}
-rawset(debug.getmetatable(self),"_index",function(self,method)
+rawset(debug.getmetatable(self),"__index",function(self,method)
 local found=rawget(debug.getmetatable(self),method)
 if found then
 return found
@@ -640,6 +683,9 @@ processed[math_lib]=layer
 end
 local bool
 for k,v in next,math_lib do
+if type(k)=="table"then
+import_Facility(self,k,processed,1+layer)
+end
 if type(v)=="table"then
 import_Facility(self,v,processed,1+layer)
 elseif type(v)=="function"then
@@ -663,7 +709,7 @@ rawset(debug.getmetatable(self),"__"..algorithm,debug.getmetatable(self).prototy
 inverse_map[k]={math_lib,algorithm}
 end
 end
-if bool then
+if not math_lib.__index and bool then
 math_lib.__index=math_lib
 parents[1+#parents]=debug.setmetatable({},math_lib)
 end
@@ -756,18 +802,18 @@ if idx>1 or(dummy.algorithm~="binunm"and dummy.algorithm~="binbnot")then
 results.width=(idx==2 and tonumber(power)and math.tointeger(1/tonumber(power))and #tostring(math.tointeger(1/tonumber(power)))or width[idx])+results.width
 end
 if idx<#width and dummy.algorithm~="binpow"then
-results.width=(debug.getmetatable(dummy).map[dummy.algorithm]:find("%w-$",2)==2 and 1 or #debug.getmetatable(dummy).map[dummy.algorithm]-1)+results.width
+results.width=(debug.getmetatable(dummy).map[dummy.algorithm]:find("%w-$",2)==2 and 1 or utf8.len(debug.getmetatable(dummy).map[dummy.algorithm],1,#debug.getmetatable(dummy).map[dummy.algorithm])-1)+results.width
 end
 end
 if debug.getmetatable(dummy).map[dummy.algorithm]:find("%w-$",2)==2 then
-results.width=(not rawget(dummy,"result")and 0 or 1+#tostring(dummy.result))+2+#debug.getmetatable(dummy).map[dummy.algorithm]+results.width
+results.width=(not rawget(dummy,"result")and 0 or 1+#tostring(dummy.result))+2+utf8.len(debug.getmetatable(dummy).map[dummy.algorithm],1,#debug.getmetatable(dummy).map[dummy.algorithm])+results.width
 else
 results.width=paretheses+results.width
 end
 end
 else
 results.height=1
-results.width=#tostring(rawequal(debug.getmetatable(dummy),arithmetiCalc)and dummy:evaluate()or arithmetiCalc.evaluate(dummy))
+results.width=utf8.len(tostring(rawequal(debug.getmetatable(dummy),arithmetiCalc)and dummy:evaluate()or arithmetiCalc.evaluate(dummy)),1,#tostring(rawequal(debug.getmetatable(dummy),arithmetiCalc)and dummy:evaluate()or arithmetiCalc.evaluate(dummy)))
 end
 return results
 end
@@ -783,7 +829,7 @@ sizes[1]=false
 end
 for idx1=sizes[1]and 2 or 1,pieces.n do
 if sizes[1]then
-sizes[idx1]=rawequal(debug.getmetatable(pieces[idx1]),arithmetiCalc)and #pieces[idx1]or #tostring(arithmetiCalc.evaluate(pieces[idx1]))
+sizes[idx1]=rawequal(debug.getmetatable(pieces[idx1]),arithmetiCalc)and #pieces[idx1]or utf8.len(tostring(arithmetiCalc.evaluate(pieces[idx1])),1,#tostring(arithmetiCalc.evaluate(pieces[idx1])))
 end
 if rawequal(debug.getmetatable(pieces[idx1]),arithmetiCalc)and rawget(pieces[idx1],"algorithm")then
 local collect,operands={},debug.getmetatable(pieces[idx1]).prototypes[pieces[idx1].algorithm:match("^(%w%w%w)%w-$").."cfg"].operands
@@ -849,7 +895,7 @@ local max_height=math.max(table.unpack(height))
 if arithmetiCalc.map[pieces[1][1]]:find("%w-$",2)==2 then
 height[0]=1
 height[1+#height]=1
-width[0]=(not pieces[1][2]and 0 or 1+#tostring(pieces[1][2]))+1+#arithmetiCalc.map[pieces[1][1]]
+width[0]=(not pieces[1][2]and 0 or 1+utf8.len(tostring(pieces[1][2]),1,#tostring(pieces[1][2])))+1+utf8.len(arithmetiCalc.map[pieces[1][1]],1,#arithmetiCalc.map[pieces[1][1]])
 width[1+#width]=1
 end
 for idx1=1,max_height do
@@ -872,7 +918,7 @@ end
 ::unary_omission::
 if idx2>0 and(arithmetiCalc.map[pieces[1][1]]:find("%w-$",2)==2 and 1 or 0)+idx2<#width then
 if idx1~=1+max_height//2 then
-combined[idx1][1+#combined[idx1]]=string.rep(" ",arithmetiCalc.map[pieces[1][1]]:find("%w-$",2)==2 and 1 or #arithmetiCalc.map[pieces[1][1]]-1)
+combined[idx1][1+#combined[idx1]]=string.rep(" ",arithmetiCalc.map[pieces[1][1]]:find("%w-$",2)==2 and 1 or utf8.len(arithmetiCalc.map[pieces[1][1]],1,#arithmetiCalc.map[pieces[1][1]])-1)
 else
 combined[idx1][1+#combined[idx1]]=arithmetiCalc.map[pieces[1][1]]:find("%w-$",2)==2 and","or arithmetiCalc.map[pieces[1][1]]:match(".-$",2)
 end
@@ -948,30 +994,26 @@ end
 
 arithmetiCalc.__call=call_Precursor
 
-function arithmetiCalc.__index(self,key)
-return debug.getmetatable(self)._index(self,key)
-end
-
 function arithmetiCalc.__newindex(self,dictation,details)
 if dictation=="initcalc"then
-self:initialise((type(details)~="table"and{}or details).select and table.unpack(details)or details)
+self:initialise((type(details)~="table"and{}or details).n and table.unpack(details,1,details.n)or details)
 elseif dictation=="imptalgo"then
-self:import_Algorithms((type(details)~="table"and{}or details).select and table.unpack(details)or details)
+self:import_Algorithms((type(details)~="table"and{}or details).n and table.unpack(details,1,details.n)or details)
 elseif dictation=="prtalgo"and rawget(self,"algorithm")then
 details=details or{}
 local height,width,algorithms,operands={},{},{},debug.getmetatable(self).prototypes[self.algorithm:match("^(%w%w%w)%w-$").."cfg"].operands
 for idx=1,#operands-1 do
 local size
 if idx<#operands-1 then
-size=rawequal(debug.getmetatable(self[operands[idx]]),debug.getmetatable(self))and #self[operands[idx]]or{height=1,width=#tostring(debug.getmetatable(self).evaluate(self[operands[idx]]))}
+size=rawequal(debug.getmetatable(self[operands[idx]]),debug.getmetatable(self))and #self[operands[idx]]or{height=1,width=utf8.len(tostring(debug.getmetatable(self).evaluate(self[operands[idx]])),1,#tostring(debug.getmetatable(self).evaluate(self[operands[idx]])))}
 height[1+#height]=size.height
 width[1+#width]=size.width
 algorithms[1+#algorithms]=(self[operands[idx]]..self[operands[1+idx]])[1]
 else
-size=rawequal(debug.getmetatable(self[operands[idx]]),debug.getmetatable(self))and #self[operands[idx]]or{height=1,width=#tostring(debug.getmetatable(self).evaluate(self[operands[idx]]))}
+size=rawequal(debug.getmetatable(self[operands[idx]]),debug.getmetatable(self))and #self[operands[idx]]or{height=1,width=utf8.len(tostring(debug.getmetatable(self).evaluate(self[operands[idx]])),1,#tostring(debug.getmetatable(self).evaluate(self[operands[idx]])))}
 height[1+#height]=size.height
 width[1+#width]=size.width
-size=rawequal(debug.getmetatable(self[operands[1+idx]]),debug.getmetatable(self))and #self[operands[1+idx]]or{height=1,width=#tostring(debug.getmetatable(self).evaluate(self[operands[1+idx]]))}
+size=rawequal(debug.getmetatable(self[operands[1+idx]]),debug.getmetatable(self))and #self[operands[1+idx]]or{height=1,width=utf8.len(tostring(debug.getmetatable(self).evaluate(self[operands[1+idx]])),1,#tostring(debug.getmetatable(self).evaluate(self[operands[1+idx]])))}
 height[1+#height]=size.height
 width[1+#width]=size.width
 algorithms[1+#algorithms],algorithms[2+#algorithms]=table.unpack(self[operands[idx]]..self[operands[1+idx]])
@@ -981,29 +1023,28 @@ local combined,max_height={},math.max(table.unpack(height))
 for idx1=1,max_height do
 combined[idx1]={}
 for idx2=1,#width do
+if idx1~=1+max_height//2 then
+combined[idx1][1+#combined[idx1]]=string.rep(" ",utf8.len(tostring(details[idx2]or"Undefined "..(idx2>1 and"Operation"or"Prefix")),1,#tostring(details[idx2]or"Undefined "..(idx2>1 and"Operation"or"Prefix"))))
+else
+combined[idx1][1+#combined[idx1]]=tostring(details[idx2]or"Undefined "..(idx2>1 and"Operation"or"Prefix"))
+end
 if idx1<=math.ceil((max_height-height[idx2])/2)or idx1>max_height-(max_height-height[idx2])//2 then
 combined[idx1][1+#combined[idx1]]=string.rep(" ",width[idx2])
 else
 combined[idx1][1+#combined[idx1]]=table.concat(algorithms[idx2][2][idx1-math.ceil((max_height-height[idx2])/2)])
 end
-if idx2<#width then
+if idx2>=#width then
 if idx1~=1+max_height//2 then
-combined[idx1][1+#combined[idx1]]=string.rep(" ",#tostring(details[idx2]or"Undefined Operation"))
+combined[idx1][1+#combined[idx1]]=string.rep(" ",utf8.len(tostring(details[1+idx2]or"Undefined Suffix"),1,#tostring(details[1+idx2]or"Undefined Suffix")))
 else
-combined[idx1][1+#combined[idx1]]=tostring(details[idx2]or"Undefined Operation")
+combined[idx1][1+#combined[idx1]]=tostring(details[1+idx2]or"Undefined Suffix")
 end
 end
-end
-if idx1<max_height then
-combined[idx1][1+#combined[idx1]]="\n"
 end
 combined[idx1]=table.concat(combined[idx1])
 end
-for k in next,details do
-details[k]=nil
-end
-details[1]=table.concat(combined)
-print(details[1])
+details.block=table.concat(combined,"\n")
+details.target:write(details.block)
 elseif dictation=="prteval"and rawget(self,"algorithm")then
 print(self:evaluate(details))
 elseif dictation=="upteval"and rawget(self,"algorithm")then
@@ -1320,9 +1361,9 @@ rawset(arithmetiCalc,"constresultfield","convey")
 
 rawset(arithmetiCalc,"map",{
 binadd="1+",
-binsub="1--",
-binmul="2*",
-bindiv="3/",
+binsub="1－",
+binmul="2×",
+bindiv="3÷",
 binmod="2%",
 binpow="3^",
 binunm="1-",
@@ -1346,6 +1387,12 @@ binmm=ordinary_metamethods,
 bincfg={
 operands={"left","right"},
 results={"sole"}
+},
+ttrusc=ordinary_underscores,
+ttrmm=ordinary_metamethods,
+ttrcfg={
+operands={"one","two","three","four"},
+results={"convergence"}
 },
 frkusc=selective_underscores,
 frkmm=selective_metamethods,
@@ -1372,20 +1419,37 @@ end
 return arithmetiCalc["__"..algorithm](self,dummy)
 end
 
-function algorithms:modf(switch)
-local algorithm="frkmodf"
+function algorithms:ln(dummy)
+local algorithm="unaln"
 if rawequal(debug.getmetatable(self),self)and rawequal(debug.getmetatable(self),arithmetiCalc)then
 return algorithm
 elseif not rawequal(debug.getmetatable(self),self)and rawequal(debug.getmetatable(self),arithmetiCalc)then
-if not switch then
+if dummy==nil then
 local operands=debug.getmetatable(self).prototypes[algorithm:match("^(%w%w%w)%w-$").."cfg"].operands
 local distinguished=rawequal(debug.getmetatable(self[operands[1]]),debug.getmetatable(self))and self[operands[1]]:evaluate()or debug.getmetatable(self).evaluate(self[operands[1]])
-return math.modf(math.tointeger(distinguished)or tonumber(distinguished)or load("return "..distinguished)())
-elseif type(switch)=="table"and not debug.getmetatable(switch)then
+return math.log(math.tointeger(distinguished)or tonumber(distinguished)or load("return "..distinguished)())
+elseif type(dummy)=="table"and not debug.getmetatable(dummy)then
 end
 end
-switch=switch or 1
-return arithmetiCalc["__"..algorithm](switch,self)
+return arithmetiCalc["__"..algorithm](self,dummy)
+end
+
+function algorithms:log(base)
+local algorithm="binlog"
+if rawequal(debug.getmetatable(self),self)and rawequal(debug.getmetatable(self),arithmetiCalc)then
+return algorithm
+elseif not rawequal(debug.getmetatable(self),self)and rawequal(debug.getmetatable(self),arithmetiCalc)then
+if not base then
+local respective,operands={},debug.getmetatable(self).prototypes[algorithm:match("^(%w%w%w)%w-$").."cfg"].operands
+for idx=1,#operands do
+respective[1+#respective]=rawequal(debug.getmetatable(self[operands[idx]]),debug.getmetatable(self))and self[operands[idx]]:evaluate()or debug.getmetatable(self).evaluate(self[operands[idx]])
+respective[#respective]=math.tointeger(respective[#respective])or tonumber(respective[#respective])or load("return "..respective[#respective])()
+end
+return math.log(table.unpack(respective,1,2))
+elseif type(base)=="table"and not debug.getmetatable(base)then
+end
+end
+return arithmetiCalc["__"..algorithm](self,base)
 end
 
 function algorithms:fmod(divider)
@@ -1404,6 +1468,34 @@ elseif type(divider)=="table"and not debug.getmetatable(divider)then
 end
 end
 return arithmetiCalc["__"..algorithm](self,divider)
+end
+
+function algorithms:modf(switch)
+local algorithm="frkmodf"
+if rawequal(debug.getmetatable(self),self)and rawequal(debug.getmetatable(self),arithmetiCalc)then
+return algorithm
+elseif not rawequal(debug.getmetatable(self),self)and rawequal(debug.getmetatable(self),arithmetiCalc)then
+if not switch then
+local operands=debug.getmetatable(self).prototypes[algorithm:match("^(%w%w%w)%w-$").."cfg"].operands
+local distinguished=rawequal(debug.getmetatable(self[operands[1]]),debug.getmetatable(self))and self[operands[1]]:evaluate()or debug.getmetatable(self).evaluate(self[operands[1]])
+return math.modf(math.tointeger(distinguished)or tonumber(distinguished)or load("return "..distinguished)())
+elseif type(switch)=="table"and not debug.getmetatable(switch)then
+end
+end
+switch=switch or 1
+return arithmetiCalc["__"..algorithm](switch,self)
+end
+
+function algorithms:dummy4(...extra_operands)
+local algorithm="ttrdummy4"
+if rawequal(debug.getmetatable(self),self)and rawequal(debug.getmetatable(self),arithmetiCalc)then
+return algorithm
+elseif not rawequal(debug.getmetatable(self),self)and rawequal(debug.getmetatable(self),arithmetiCalc)then
+if extra_operands.n==0 then
+elseif type(extra_operands[1])=="table"and not debug.getmetatable(extra_operands[1])then
+end
+end
+return arithmetiCalc["__"..algorithm](self,...)
 end
 
 local function vector_Addition(vectors)
@@ -2325,16 +2417,17 @@ end
 --range[6][12]
 
 _ENV[...]={
-version=1.0234375,
-renewed=20260413,
+version=1.0859375,
+renewed=20260501,
 ["Pointers in Practice"]="Treating certain parameters as tables or pointing to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-call time.",
-["Class Paradigm"]=[=[Each disparate metamethod along the hierarchy should share a function that explicitly indexes self of a particular, named field, which in turn should be implemented at top-class nodes as one sees appropriate.
+["Class Paradigm"]=[=[Each disparate metamethod along the hierarchy should share a function that explicitly indexes self of a particular, named field, which in turn shall be implemented at top-class nodes as one sees appropriate.
 In case of multiple inheritance, set a proxy for each parent wherein metatable of the mutual heir shall search for methods, where in particular:
 __index should be a function that indexes proxies of parents one by one;
-Other metamethod fields should be functions that index proxies of parents of respective named fields one by one.]=],
+Other metamethod fields should be functions that explicitly index self of respective named fields.]=],
 serialise=serialise,
 replicate=replicate,
 zip=zip,
+binary_Search=binary_Search,
 table_Player=table_Player,
 true_Iterator=true_Iterator,
 arithmetiCalc=arithmetiCalc,
@@ -2361,7 +2454,7 @@ sort_File=sort_File
 --a few declarations:
 --range[4][15]
 local status="ready for run"
-local digest="-1156158235613522376"
+local digest="-7157688021489370809"
 --range[2][12]
 --[===[
 ⚙
@@ -2814,7 +2907,8 @@ end
 --autorun part 1:
 if status=="off maintenance"then
 status="mained by c"
-local script1,script2=string.format("%q","package.path="..string.format("%q",find_self)..[===[..';'..package.path
+local script1,script2=string.format("%q",[===[local cache_package_path=package.path
+package.path=]===]..string.format("%q",find_self)..[===[..';'..package.path
 local success=pcall(require,']===]..required_name..[===[')
 if success then
 module_name=']===]..required_name..[===['
@@ -2837,7 +2931,8 @@ break
 end
 end
 require(module_name)
-end]===]):gsub("\n","n\\\n"),string.format("%q",[===[local script_path
+end
+package.path=cache_package_path]===]):gsub("\n","n\\\n"),string.format("%q",[===[local script_path
 if os.getenv('ANDROID_ROOT')=='/system'then
 local success,script_finder,script_location
 success,script_finder,script_path,script_location=pcall(directory_Match or _ENV[module_name].directory_Match,nil)
@@ -3676,11 +3771,104 @@ luaL_Reg c_UpBinds[]={
 {NULL,NULL}
 };
 
+#define UTF8_OFFSETS lua_pushinteger(L,1);\
+lua_arith(L,LUA_OPSUB);\
+lua_getglobal(L,"utf8");\
+lua_getfield(L,-1,"offset");\
+lua_getfield(L,-2,"len");\
+lua_remove(L,-3);\
+lua_pushvalue(L,1);\
+lua_pushinteger(L,1);\
+lua_pushinteger(L,string_length);\
+PCALL_ERRH(3,1,"Error Obtaining UTF-8 String Length!")\
+lua_rotate(L,-3,-1);\
+lua_insert(L,-2);\
+lua_arith(L,LUA_OPMOD);\
+lua_pushinteger(L,1);\
+lua_arith(L,LUA_OPADD);\
+lua_pushvalue(L,1);\
+lua_insert(L,-2);\
+PCALL_ERRH(2,2,"Error Obtaining UTF-8 Character Offsets!")
+
+int string_Subscription(lua_State *L){
+lua_settop(L,2);
+size_t string_length;
+const char *string_itself=luaL_checklstring(L,-2,&string_length);
+if(lua_isinteger(L,-1)){
+UTF8_OFFSETS
+lua_pushlstring(L,string_itself+luaL_checkinteger(L,-2)-1,1+luaL_checkinteger(L,-1)-luaL_checkinteger(L,-2));
+}else if(lua_isstring(L,-1)){
+lua_getmetatable(L,-2);
+lua_pushstring(L,"_index");
+lua_rawget(L,-2);
+lua_replace(L,-2);
+lua_insert(L,-2);
+lua_rawget(L,-2);
+}else
+luaL_error(L,"Invalid Subscript!");
+return 1;
+}
+
+int string_Modification(lua_State *L){
+lua_settop(L,3);
+size_t string_length;
+const char *string_itself=luaL_checklstring(L,-3,&string_length);
+luaL_checktype(L,-1,LUA_TTABLE);
+if(lua_isinteger(L,-2)){
+lua_insert(L,-2);
+UTF8_OFFSETS
+lua_pushlstring(L,string_itself,luaL_checkinteger(L,-2)-1);
+lua_geti(L,2,2);
+lua_pushlstring(L,luaL_checkinteger(L,-3)+string_itself,string_length-luaL_checkinteger(L,-3));
+lua_concat(L,3);
+lua_seti(L,2,1);
+}else
+luaL_error(L,"Invalid Subscript!");
+return 0;
+}
+
 #define DOSTR_ERRH(SCRIPT,LABEL) if(luaL_dostring(L,SCRIPT)!=LUA_OK){\
 printf("%s",lua_isstring(L,-1)?luaL_checkstring(L,-1):"Non-String Error Object!");\
 lua_pop(L,1);\
 goto LABEL;\
 }
+
+#define REG lua_pushstring(L,"");\
+lua_getmetatable(L,-1);\
+lua_replace(L,-2);\
+lua_pushstring(L,"__index");\
+lua_pushstring(L,"_index");\
+lua_pushvalue(L,-2);\
+lua_rawget(L,-4);\
+lua_rawset(L,-4);\
+lua_pushcfunction(L,string_Subscription);\
+lua_rawset(L,-3);\
+lua_pushstring(L,"__newindex");\
+lua_pushcfunction(L,string_Modification);\
+lua_rawset(L,-3);\
+lua_getglobal(L,"module_name");\
+lua_replace(L,-2);\
+lua_getglobal(L,luaL_checkstring(L,-1));\
+if(luaL_getsubtable(L,-1,"c_UpBinds"))\
+luaL_error(L,"Field Already Exists!");\
+lua_remove(L,-2);\
+lua_remove(L,-2);\
+int idx=-1;\
+while(++idx,udc_UpBinds[idx].name || udc_UpBinds[idx].func){\
+lua_createtable(L,0,1);\
+lua_pushcfunction(L,udc_UpBinds[idx].func);\
+lua_setfield(L,-2,"__call");\
+lua_setfield(L,LUA_REGISTRYINDEX,udc_UpBinds[idx].name);\
+lua_newuserdatauv(L,sizeof(luaL_Reg),0);\
+luaL_setmetatable(L,udc_UpBinds[idx].name);\
+lua_setfield(L,-2,udc_UpBinds[idx].name);\
+}\
+idx=-1;\
+while(++idx,c_UpBinds[idx].name || c_UpBinds[idx].func){\
+lua_pushcfunction(L,c_UpBinds[idx].func);\
+lua_setfield(L,-2,c_UpBinds[idx].name);\
+}\
+lua_pop(L,1);
 
 pthread_mutex_t lock=PTHREAD_MUTEX_INITIALIZER;
 
@@ -3704,28 +3892,7 @@ char script[]===]..3+script_len..']='..script1..[===[;
 pthread_mutex_lock(&lock);
 DOSTR_ERRH(script,premature_end)
 pthread_mutex_unlock(&lock);
-lua_getglobal(L,"module_name");
-lua_getglobal(L,luaL_checkstring(L,-1));
-if(luaL_getsubtable(L,-1,"c_UpBinds"))
-luaL_error(L,"Field Already Exists!");
-lua_remove(L,-2);
-lua_remove(L,-2);
-int idx=-1;
-while(++idx,udc_UpBinds[idx].name || udc_UpBinds[idx].func){
-lua_createtable(L,0,1);
-lua_pushcfunction(L,udc_UpBinds[idx].func);
-lua_setfield(L,-2,"__call");
-lua_setfield(L,LUA_REGISTRYINDEX,udc_UpBinds[idx].name);
-lua_newuserdatauv(L,sizeof(luaL_Reg),0);
-luaL_setmetatable(L,udc_UpBinds[idx].name);
-lua_setfield(L,-2,udc_UpBinds[idx].name);
-}
-idx=-1;
-while(++idx,c_UpBinds[idx].name || c_UpBinds[idx].func){
-lua_pushcfunction(L,c_UpBinds[idx].func);
-lua_setfield(L,-2,c_UpBinds[idx].name);
-}
-lua_pop(L,1);
+REG
 int ctop=lua_gettop(L);
 PCALL_ERRH(0,LUA_MULTRET,"Error Executing Task Script!")
 luaL_checkstack(L,3,"Unable to Allocate Memory for the Extra Stack Space!");
@@ -4123,28 +4290,7 @@ L=luaL_newstate();
 luaL_openlibs(L);
 char script[]===]..3+script_len..']='..script1..[===[;
 DOSTR_ERRH(script,premature_end)
-lua_getglobal(L,"module_name");
-lua_getglobal(L,luaL_checkstring(L,-1));
-if(luaL_getsubtable(L,-1,"c_UpBinds"))
-luaL_error(L,"Field Already Exists!");
-lua_remove(L,-2);
-lua_remove(L,-2);
-int idx=-1;
-while(++idx,udc_UpBinds[idx].name || udc_UpBinds[idx].func){
-lua_createtable(L,0,1);
-lua_pushcfunction(L,udc_UpBinds[idx].func);
-lua_setfield(L,-2,"__call");
-lua_setfield(L,LUA_REGISTRYINDEX,udc_UpBinds[idx].name);
-lua_newuserdatauv(L,sizeof(luaL_Reg),0);
-luaL_setmetatable(L,udc_UpBinds[idx].name);
-lua_setfield(L,-2,udc_UpBinds[idx].name);
-}
-idx=-1;
-while(++idx,c_UpBinds[idx].name || c_UpBinds[idx].func){
-lua_pushcfunction(L,c_UpBinds[idx].func);
-lua_setfield(L,-2,c_UpBinds[idx].name);
-}
-lua_pop(L,1);
+REG
 memset(script,0,sizeof script);
 strcpy(script,]===]..script2..[===[);
 DOSTR_ERRH(script,premature_end)
@@ -4170,13 +4316,16 @@ io.close()
 if os.getenv("ANDROID_ROOT")~="/system"then
 goto not_bother
 end
-os.execute("rm -rvf $PREFIX/c_M")
-os.execute("mkdir -v -m=rwx $PREFIX/c_M")
-if os.execute('clang -x c "'..where..keystone(_ENV[...].version,_ENV[...].renewed)..keystone(_ENV[...].renewed,_ENV[...].version)..keystone(status,_ENV[...].renewed)..keystone(status,_ENV[...].version)..'" -fPIC -ggdb -O0 -Wall -o $PREFIX/c_M/lua_Console -llua -lm -pthread')then
-os.execute("cat > ~/.bashrc << 'EOF'")
-os.execute("echo 'export \"LUA_INIT=@/sdcard/Download/Codes/lua_StandAlone\"' >> ~/.bashrc")
-os.execute("echo 'export \"PATH=$PREFIX/c_M:$PREFIX/bin\"' >> ~/.bashrc")
-os.execute("source ~/.bashrc")
+os.execute("rm -rvf $PREFIX/local/c_M")
+os.execute("mkdir -v -m=rwx $PREFIX/local/c_M")
+if os.execute('clang -x c "'..where..keystone(_ENV[...].version,_ENV[...].renewed)..keystone(_ENV[...].renewed,_ENV[...].version)..keystone(status,_ENV[...].renewed)..keystone(status,_ENV[...].version)..'" -fPIC -ggdb -O0 -Wall -o $PREFIX/local/c_M/lua_Console -L$PREFIX/local/lib -llua -L. -lm -pthread')then
+os.execute([===[unset LUA_INIT
+cat > ~/.bashrc << EOF
+$(luarocks path)
+export "PATH=$PREFIX/local/bin:$PREFIX/local/c_M:$PATH"
+export "LUA_INIT=@/sdcard/Download/Codes/lua_StandAlone"
+EOF
+source ~/.bashrc]===])
 print("Main Program Ready for Run!")
 end
 os.remove(where..keystone(_ENV[...].version,_ENV[...].renewed)..keystone(_ENV[...].renewed,_ENV[...].version)..keystone(status,_ENV[...].renewed)..keystone(status,_ENV[...].version))
