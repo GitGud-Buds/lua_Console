@@ -287,30 +287,30 @@ end
 end
 table.sort(keys,params.comp_func)
 end
-if params.i and type(params.i)~="number"or params.j and type(params.j)~="number"then
+if params.i and(type(params.i)~="number"or math.type(params.i)~="integer")or params.j and(type(params.j)~="number"or math.type(params.j)~="integer")then
 if not params.key_word then
 for idx,vlu in ipairs(keys)do
-if params.i and type(params.i)~="number"and vlu==params.i then
+if params.i and(type(params.i)~="number"or math.type(params.i)~="integer")and vlu==params.i then
 params.i=idx
 end
-if params.j and type(params.j)~="number"and vlu==params.j then
+if params.j and(type(params.j)~="number"or math.type(params.j)~="integer")and vlu==params.j then
 params.j=idx
 end
 end
 else
-if params.i and type(params.i)~="number"then
+if params.i and(type(params.i)~="number"or math.type(params.i)~="integer")then
 params.i=binary_Search(keys,params.i,params.comp_func)
 end
-if params.j and type(params.j)~="number"then
+if params.j and(type(params.j)~="number"or math.type(params.j)~="integer")then
 params.j=binary_Search(keys,params.j,params.comp_func)
 end
 end
 end
 local unfound_keys={}
-if params.i and type(params.i)~="number"then
+if params.i and(type(params.i)~="number"or math.type(params.i)~="integer")then
 unfound_keys[1+unfound_keys]=tostring(params.i)
 end
-if params.j and type(params.j)~="number"then
+if params.j and(type(params.j)~="number"or math.type(params.j)~="integer")then
 unfound_keys[1+unfound_keys]=tostring(params.j)
 end
 if #unfound_keys>0 then
@@ -822,7 +822,7 @@ arithmetiCalc.__len=len_Precursor
 
 local function concat_Precursor(...)
 local sizes,pieces={},table.pack(...)
-if not rawequal(debug.getmetatable(pieces[1]),arithmetiCalc)and arithmetiCalc.map[pieces[1][1]]then
+if not rawequal(debug.getmetatable(pieces[1]),arithmetiCalc)and arithmetiCalc.map[(type(pieces[1])=="table"and pieces[1]or sizes)[1]]then
 sizes[1]=true
 else
 sizes[1]=false
@@ -1214,7 +1214,7 @@ for key,item in next,input_table do
 keys[1+#keys]=key
 list[1+#list]=item
 end
-groups=groups or{stateless=true}
+groups=groups or{}
 groups[1]=groups[1]or math.random(2,#list-1)
 local function permGen(ks,lis,grps,layer,group_layer)
 layer,group_layer=layer or 1,group_layer or 0
@@ -1271,7 +1271,7 @@ for key,item in next,input_table do
 keys[1+#keys]=key
 list[1+#list]=item
 end
-groups=groups or{stateless=true}
+groups=groups or{}
 groups[1]=groups[1]or math.random(2,#list-1)
 local function gCombGen(ks,lis,grps,elim,layer,group_layer)
 elim,layer,group_layer=elim or 0,layer or 1,group_layer or 0
@@ -1496,6 +1496,39 @@ elseif type(extra_operands[1])=="table"and not debug.getmetatable(extra_operands
 end
 end
 return arithmetiCalc["__"..algorithm](self,...)
+end
+
+local function group_Generator(total,number_of_groups)
+total,groups=total or 1,number_of_groups or 1
+local function gGen(ttl,ngrps,grps,layer)
+layer,grps=layer or 1,grps or{}
+local sum=0
+for idx=1,layer-1 do
+sum=grps[idx]+sum
+end
+if layer<ngrps then
+for idx=0,ttl-sum do
+grps[layer]=idx
+gGen(ttl,ngrps,grps,1+layer)
+end
+else
+grps[layer]=ttl-sum
+coroutine.yield(grps)
+end
+end
+local thread=coroutine.create(gGen)
+local params={}
+params.thread=thread
+params.total=total
+params.number_of_groups=number_of_groups
+return function(args)
+local status,group_yield=coroutine.resume(args.thread,args.total,args.number_of_groups)
+if status then
+return group_yield
+end
+coroutine.close(args.thread)
+return nil
+end,params
 end
 
 local function vector_Addition(vectors)
@@ -2417,8 +2450,8 @@ end
 --range[6][12]
 
 _ENV[...]={
-version=1.0859375,
-renewed=20260501,
+version=1.1015625,
+renewed=20260502,
 ["Pointers in Practice"]="Treating certain parameters as tables or pointing to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-call time.",
 ["Class Paradigm"]=[=[Each disparate metamethod along the hierarchy should share a function that explicitly indexes self of a particular, named field, which in turn shall be implemented at top-class nodes as one sees appropriate.
 In case of multiple inheritance, set a proxy for each parent wherein metatable of the mutual heir shall search for methods, where in particular:
@@ -2440,6 +2473,7 @@ uni_Inc_Rand=uni_Inc_Rand,
 kahan_Product=kahan_Product,
 kahan_Sum=kahan_Sum,
 algorithms=algorithms,
+group_Generator=group_Generator,
 vector_Addition=vector_Addition,
 vector_Length=vector_Length,
 dimensional_Animator=dimensional_Animator,
@@ -2454,7 +2488,7 @@ sort_File=sort_File
 --a few declarations:
 --range[4][15]
 local status="ready for run"
-local digest="-7157688021489370809"
+local digest="-4043907582162754852"
 --range[2][12]
 --[===[
 ⚙
@@ -4318,7 +4352,7 @@ goto not_bother
 end
 os.execute("rm -rvf $PREFIX/local/c_M")
 os.execute("mkdir -v -m=rwx $PREFIX/local/c_M")
-if os.execute('clang -x c "'..where..keystone(_ENV[...].version,_ENV[...].renewed)..keystone(_ENV[...].renewed,_ENV[...].version)..keystone(status,_ENV[...].renewed)..keystone(status,_ENV[...].version)..'" -fPIC -ggdb -O0 -Wall -o $PREFIX/local/c_M/lua_Console -L$PREFIX/local/lib -llua -L. -lm -pthread')then
+if os.execute('clang -x c "'..where..keystone(_ENV[...].version,_ENV[...].renewed)..keystone(_ENV[...].renewed,_ENV[...].version)..keystone(status,_ENV[...].renewed)..keystone(status,_ENV[...].version)..'" -fPIC -ggdb -O0 -ffp-contract=fast -Wall -o $PREFIX/local/c_M/lua_Console -L$PREFIX/local/lib -llua -L. -lm -pthread')then
 os.execute([===[unset LUA_INIT
 cat > ~/.bashrc << EOF
 $(luarocks path)
