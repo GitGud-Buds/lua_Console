@@ -1361,9 +1361,9 @@ rawset(arithmetiCalc,"constresultfield","convey")
 
 rawset(arithmetiCalc,"map",{
 binadd="1+",
-binsub="1－",
+binsub="1--",
 binmul="2×",
-bindiv="3÷",
+bindiv="3/",
 binmod="2%",
 binpow="3^",
 binunm="1-",
@@ -2450,8 +2450,8 @@ end
 --range[6][12]
 
 _ENV[...]={
-version=1.1015625,
-renewed=20260502,
+version=1.1171875,
+renewed=20260504,
 ["Pointers in Practice"]="Treating certain parameters as tables or pointing to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-call time.",
 ["Class Paradigm"]=[=[Each disparate metamethod along the hierarchy should share a function that explicitly indexes self of a particular, named field, which in turn shall be implemented at top-class nodes as one sees appropriate.
 In case of multiple inheritance, set a proxy for each parent wherein metatable of the mutual heir shall search for methods, where in particular:
@@ -2488,7 +2488,7 @@ sort_File=sort_File
 --a few declarations:
 --range[4][15]
 local status="ready for run"
-local digest="-4043907582162754852"
+local digest="-208526276320094450"
 --range[2][12]
 --[===[
 ⚙
@@ -4353,12 +4353,14 @@ end
 os.execute("rm -rvf $PREFIX/local/c_M")
 os.execute("mkdir -v -m=rwx $PREFIX/local/c_M")
 if os.execute('clang -x c "'..where..keystone(_ENV[...].version,_ENV[...].renewed)..keystone(_ENV[...].renewed,_ENV[...].version)..keystone(status,_ENV[...].renewed)..keystone(status,_ENV[...].version)..'" -fPIC -ggdb -O0 -ffp-contract=fast -Wall -o $PREFIX/local/c_M/lua_Console -L$PREFIX/local/lib -llua -L. -lm -pthread')then
-os.execute([===[unset LUA_INIT
-cat > ~/.bashrc << EOF
+os.execute([===[export "PATH=$PREFIX/bin"
+unset LUA_INIT
+unset LUA_INIT_]===]..select(3,gfind(_VERSION,"(<%d-%s-%.%s->*%d*)")):gsub("%.","_").."\n"..[===[cat > ~/.bashrc << EOF
 $(luarocks path)
-export "PATH=$PREFIX/local/bin:$PREFIX/local/c_M:$PATH"
-export "LUA_INIT=@/sdcard/Download/Codes/lua_StandAlone"
 EOF
+source ~/.bashrc
+echo 'export "PATH=$PREFIX/local/bin:$PREFIX/local/c_M:$PATH"' >> ~/.bashrc
+echo 'export "LUA_INIT_]===]..select(3,gfind(_VERSION,"(<%d-%s-%.%s->*%d*)")):gsub("%.","_")..[===[=@/sdcard/Download/Codes/lua_StandAlone"' >> ~/.bashrc
 source ~/.bashrc]===])
 print("Main Program Ready for Run!")
 end
