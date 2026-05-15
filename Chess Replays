@@ -1,0 +1,557 @@
+potential polishments:
+preserve won games
+adaptive day_thresh
+
+o-o短易位
+x吃
++将君
+#将死
+exd6兵斜过列，d6找不到被吃的子d5找并确认是兵
+
+rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq – 0 1
+[Piece Placement] [Active Color] [Castling Rights] [En Passant] [Halfmove Clock] [Fullmove Number]
+
+local function consolidate_Replays(exclude_dir,playcount_thresh,day_thresh)
+local try,catch=io.input(exclude_dir):read()
+if try or catch~="Is a directory"then
+io.input():close()
+error("Invalid Directory!")
+end
+if exclude_dir:match(".$")~="/"then
+exclude_dir=exclude_dir.."/"
+end
+playcount_thresh,day_thresh=math.ceil(playcount_thresh or 5),day_thresh or 90
+if playcount_thresh<=3 then
+error("Meaningless PlayCount!")
+end
+local rounds,file_list,handle,current_date={},io.popen('find /sdcard/ -path "*.pgn" -type f 2>/dev/null'),io.popen('find /sdcard/ -path "*.pgn" -type f 2>/dev/null'),os.date("*t")
+if not handle:read()then
+error(".PGN File Non-Existent throughout File System!")
+end
+for pgn in file_list:lines()do
+if pgn:find(exclude_dir)==1 then
+goto exclude
+end
+local line_thresh,text_stream,header,playcount,date,moves,discarded=0,""
+for line in io.input(pgn):lines("L")do
+line_thresh=1+line_thresh
+text_stream=text_stream..line
+if line_thresh>5 then
+if not header then
+header=text_stream:match("%s-(%[.+%])%f[%s]%s-\n%s-\n%s-%f[%S]%w-%.?")
+if header then
+playcount=header:match("PlyCount.-(%d+).-%]")
+if playcount then
+playcount=tonumber(playcount)
+end
+local year,month,day=header:match("Date.-(%d+)%.(%d+)%.(%d+).-\n")
+date={year=year,month=month,day=day}
+end
+elseif not discarded then
+text_stream=text_stream:match("%]%f[%s]%s-\n%s-\n%s-%f[%S]%w-%.?.*$")
+discarded=true
+elseif not moves then
+moves=text_stream:match("%]%f[%s]%s-\n%s-\n%s-%f[%S](%w-%.?.*)%f[%s]%s-\n%s-\n%s-%f[%S]%[")
+elseif moves:find("%s*$")~=1 and(playcount or playcount_thresh)>=playcount_thresh and os.difftime(os.time(date),os.time(current_date))<=day_thresh*86400 then
+rounds[header]=moves
+text_stream=text_stream:match("%s-(%[.+)$")
+line_thresh,header,playcount,date,moves,discarded=0,_,_,_,_,_
+else
+text_stream=text_stream:match("%s-(%[.+)$")
+line_thresh,header,playcount,date,moves,discarded=0,_,_,_,_,_
+end
+end
+end
+io.input():close()
+if line_thresh>0 and header and not moves then
+moves=text_stream:match("%]%f[%s]%s-\n%s-\n%s-%f[%S](%w-%.?.*)$")
+if moves and moves:find("%s*$")~=1 and(playcount or playcount_thresh)>=playcount_thresh and os.difftime(os.time(date),os.time(current_date))<=day_thresh*86400 then
+rounds[header]=moves
+end
+end
+line_thresh,header,playcount,date,moves,discarded,text_stream=0,_,_,_,_,_,""
+--os.remove(pgn)
+::exclude::
+end
+file_list:close()
+
+local another_day,marked,dates,combined,headlines=0,{},{},{},{"Event","Site","Round","White","Black",""}
+for header1,moves1 in next,rounds do
+if header1:match(headlines[1]..".-Rehearsal.-\n")and not header1:match(headlines[2]..".-(%d+).-\n")then
+for header2,moves2 in next,rounds do
+if not header2:match(headlines[1]..".-Rehearsal.-\n")then
+local opening_moves1=moves1:match(playcount_thresh%2==1 and string.rep("%d+%.%s-(%S+)%s+(%S+)%s*",playcount_thresh//2).."%d+%.%s-(%S+)"or string.rep("%d+%.%s-(%S+)%s+(%S+)%s*",playcount_thresh/2))
+local opening_moves2=moves2:match(playcount_thresh%2==1 and string.rep("%d+%.%s-(%S+)%s+(%S+)%s*",playcount_thresh//2).."%d+%.%s-(%S+)"or string.rep("%d+%.%s-(%S+)%s+(%S+)%s*",playcount_thresh/2))
+if opening_moves1==opening_moves2 then
+marked[header1:match(headlines[1]..".-(%d+).-\n")]=true
+end
+end
+end
+end
+end
+for header,moves in next,rounds do
+if header:match(headlines[1]..".-Rehearsal.-\n")and marked[header:match(headlines[1]..".-(%d+).-\n")]then
+local date=header:match("Date.-(%d+%.%d+%.%d+).-\n")
+if not dates[date]then
+another_day=1+another_day
+dates[date]=another_day
+end
+combined[1+#combined]=header
+local temp=rounds
+for idx=1,6 do
+local directive=header:match(headlines[idx]..".-(%d+).-\n")
+if directive then
+temp[idx==1 and"Rehearsal"..dates[date] or directive]={}
+if idx==1 then
+combined[1+#combined]="Rehearsal"..dates[date]
+end
+temp=temp[idx==1 and"Rehearsal"..dates[date] or directive]
+else
+temp.moves=moves
+temp.fragments=idx-1
+break
+end
+end
+end
+end
+
+local function split_Tree(input_tree,output_table,round)
+output_table,round=output_table or{},round or{}
+if type(input_tree)~="table"then
+error("Invalid Tree!")
+else
+round[1+#round]=input_tree.moves
+if input_tree.fragments and #input_tree==0 then
+output_table[1+#output_table]=table.concat(round).."\t"..input_tree.fragments
+else
+for idx=1,#input_tree do
+output_table=split_Tree(input_tree[idx],output_table,round)
+end
+end
+round[#round]=_
+end
+return output_table
+end
+
+for serial,_,tree in table_Player(rounds,{i=1,j=another_day,key_word="Rehearsal",stateless=true})do
+split_Tree(tree,rounds)
+rounds[serial]=rounds[serial]:gsub("%s*%*%s*"," ",tonumber(rounds[serial]:match("\t(%d+)$"))-1):gsub("\t%d+$","")
+local found,move_serial,progress,rebuilt=true,0,1,""
+while found do
+move_serial=1+move_serial
+found,_,progress,move,rounds[serial]=rounds[serial]:find("%d+()(%..-)%f[%d](.-)$",progress)
+rebuilt=rebuilt..move_serial..move
+end
+rounds[serial]=rebuilt..rounds[serial]
+end
+
+for idx=1,#combined do
+rounds[combined[idx]]=_
+end
+combined={}
+
+local roots={}
+for header,moves in next,rounds do
+if header:match(headlines[1]..".-Rehearsal.-\n")then
+goto left_alone
+end
+local opening_moves=table.pack(moves:match(playcount_thresh%2==1 and string.rep("%d+%.%s-(%S+)%s+(%S+)%s*",playcount_thresh//2).."%d+%.%s-(%S+)"or string.rep("%d+%.%s-(%S+)%s+(%S+)%s*",playcount_thresh/2)))
+if not roots[table.concat(opening_moves," ")]then
+roots[table.concat(opening_moves," ")]={}
+end
+table.insert(roots[table.concat(opening_moves," ")],moves)
+if combined[table.concat(opening_moves," ")]==_ then
+combined[table.concat(opening_moves," ")]=header
+elseif combined[table.concat(opening_moves," ")]then
+table.insert(combined,combined[table.concat(opening_moves," ")])
+table.insert(combined,header)
+combined[table.concat(opening_moves," ")]=false
+else
+table.insert(combined,header)
+end
+::left_alone::
+end
+
+for idx=1,#combined do
+rounds[combined[idx]]=_
+end
+for k,v in next,combined,#combined>0 and #combined or _ do
+if v then
+roots[k]=_
+end
+end
+
+local function generate_Tree(parallel_rounds,halfmove,halfmove_since,divergence,output_tree)
+halfmove_since,divergence,output_tree=halfmove_since or 1,divergence or 0,output_tree or{}
+local max_halfmoves,diverge=math.huge
+for idx=1,#parallel_rounds do
+max_halfmoves=#parallel_rounds[idx]-1<max_halfmoves and #parallel_rounds[idx]or max_halfmoves
+end
+while not diverge and divergence<5 do
+halfmove=1+halfmove
+if halfmove>=max_halfmoves then
+diverge=true
+goto sticky_end
+end
+for i=1,#parallel_rounds do
+local j=1+i%#parallel_rounds
+if parallel_rounds[i][halfmove]~=parallel_rounds[j][halfmove]then
+diverge=true
+end
+end
+if not diverge then
+goto next_half
+end
+::sticky_end::
+output_tree.moves={}
+for idx=halfmove_since,halfmove-1 do
+output_tree.moves[1+#output_tree.moves]=parallel_rounds[1][idx]
+end
+local set={}
+for idx=1,#parallel_rounds do
+if set[parallel_rounds[idx][halfmove]]==_ then
+set[parallel_rounds[idx][halfmove]]=idx
+elseif type(set[parallel_rounds[idx][halfmove]])=="number"then
+local trunk={parallel_rounds[set[parallel_rounds[idx][halfmove]]]}
+table.insert(trunk,parallel_rounds[idx])
+set[parallel_rounds[idx][halfmove]]=trunk
+else
+table.insert(set[parallel_rounds[idx][halfmove]],parallel_rounds[idx])
+end
+end
+for _,v in next,set do
+if type(v)=="number"then
+output_tree[1+#output_tree]={moves={}}
+for idx=halfmove,#parallel_rounds[v]do
+table.insert(output_tree[#output_tree].moves,parallel_rounds[v][idx])
+end
+else
+output_tree[1+#output_tree]=generate_Tree(v,halfmove,halfmove,1+divergence)
+end
+end
+::next_half::
+end
+if divergence<5 then
+return output_tree
+end
+for idx1=1,#parallel_rounds do
+output_tree["moves"..(idx1-1>0 and idx1-1 or"")]={}
+for idx2=halfmove_since,#parallel_rounds[idx1]do
+table.insert(output_tree["moves"..(idx1-1>0 and idx1-1 or"")],parallel_rounds[idx1][idx2])
+end
+end
+return output_tree
+end
+
+local trees={}
+for _,v in next,roots do
+for idx=1,#v do
+local moves={}
+for halfmove,fullmove in v[idx]:gmatch("%d+%.%s-(%S+)%s+(%S+)%s*")do
+moves[1+#moves]=halfmove
+moves[1+#moves]=fullmove
+end
+if v[idx]:match("%d+%.%s-(%S+)%s+(%S+)%s+(%S+)%s*$")then
+moves[1+#moves]=v[idx]:match("(%S+)%s*$")
+end
+v[idx]=moves
+end
+trees[1+#trees]=generate_Tree(v,playcount_thresh)
+end
+
+local initial_pieces={
+k={{101,8}},
+K={{101,1}},
+q={{100,8},rule=function(dest,onset)if dest[1]==onset[1]or dest[2]==onset[2]or math.abs(dest[2]-onset[2])==math.abs(dest[1]-onset[1])then return true end return false end},
+Q={{100,1}},
+b={{99,8},{102,8},rule=function(dest,onset)if math.abs(dest[2]-onset[2])==math.abs(dest[1]-onset[1])then return true end return false end},
+B={{99,1},{102,1}},
+n={{98,8},{103,8},rule=function(dest,onset)if(dest[2]-onset[2])^2+(dest[1]-onset[1])^2==5 then return true end return false end},
+N={{98,1},{103,1}},
+r={{97,8},{104,8},rule=function(dest,onset)if dest[1]==onset[1]or dest[2]==onset[2]then return true end return false end},
+R={{97,1},{104,1}},
+p={{97,7},{98,7},{99,7},{100,7},{101,7},{102,7},{103,7},{104,7},rule=function(dest,onset)if dest[2]<onset[2]and math.abs(dest[1]-onset[1])+math.abs(dest[2]-onset[2])<=2 then return true end return false end},
+P={{97,2},{98,2},{99,2},{100,2},{101,2},{102,2},{103,2},{104,2},rule=function(dest,onset)if dest[2]>onset[2]and math.abs(dest[1]-onset[1])+math.abs(dest[2]-onset[2])<=2 then return true end return false end}
+}
+initial_pieces.Q.rule=initial_pieces.q.rule
+initial_pieces.B.rule=initial_pieces.b.rule
+initial_pieces.N.rule=initial_pieces.n.rule
+initial_pieces.R.rule=initial_pieces.r.rule
+
+local start_positions={
+{[97]="R",[98]="N",[99]="B",[100]="Q",[101]="K",[102]="B",[103]="N",[104]="R",[105]="/"},
+{[97]="P",[98]="P",[99]="P",[100]="P",[101]="P",[102]="P",[103]="P",[104]="P",[105]="/"},
+{[105]="/"},{[105]="/"},{[105]="/"},{[105]="/"},
+{[97]="p",[98]="p",[99]="p",[100]="p",[101]="p",[102]="p",[103]="p",[104]="p",[105]="/"},
+{[97]="r",[98]="n",[99]="b",[100]="q",[101]="k",[102]="b",[103]="n",[104]="r",[105]="/"},
+castling={"K","Q","k","q"},
+halfmove=0,
+clock=0
+}
+
+local function generate_FEN(moves,pieces,board)
+for idx1=1,#moves do
+board.halfmove=1+board.halfmove
+if board.en_passant and board.clock>1 then
+board.en_passant=_
+end
+local piece,disamb,capt,dest,promo,check=moves[idx1]:match("^(%u?)([a-h]?[1-8]?)(x?)([a-h][1-8])(%u?)([%+#]?)$")
+if piece==""then
+piece=_
+end
+if disamb==""then
+disamb=_
+end
+if capt==""then
+capt=_
+end
+if promo==""then
+promo=_
+end
+if check==""then
+check=_
+end
+if capt or not piece then
+board.clock=0
+else
+board.clock=1+board.clock
+end
+if not dest then
+if moves[idx1]=="O-O"then
+board.castling[board.halfmove%2==1 and 1 or 3]=""
+board.castling[board.halfmove%2==1 and 2 or 4]=""
+pieces[board.halfmove%2==1 and"K"or"k"][1][1]=103
+for idx2=1,#pieces[board.halfmove%2==1 and"R"or"r"]do
+if pieces[board.halfmove%2==1 and"R"or"r"][idx2][1]==104 and pieces[board.halfmove%2==1 and"R"or"r"][idx2][2]==1 then
+pieces[board.halfmove%2==1 and"R"or"r"][idx2][1]=102
+end
+end
+board[board.halfmove%2==1 and 1 or 8][104]=_
+board[board.halfmove%2==1 and 1 or 8][101]=_
+board[board.halfmove%2==1 and 1 or 8][103]=board.halfmove%2==1 and"K"or"k"
+board[board.halfmove%2==1 and 1 or 8][102]=board.halfmove%2==1 and"R"or"r"
+elseif moves[idx1]=="O-O-O"then
+board.castling[board.halfmove%2==1 and 1 or 3]=""
+board.castling[board.halfmove%2==1 and 2 or 4]=""
+pieces[board.halfmove%2==1 and"K"or"k"][1][1]=99
+for idx2=1,#pieces[board.halfmove%2==1 and"R"or"r"]do
+if pieces[board.halfmove%2==1 and"R"or"r"][idx2][1]==97 and pieces[board.halfmove%2==1 and"R"or"r"][idx2][2]==1 then
+pieces[board.halfmove%2==1 and"R"or"r"][idx2][1]=100
+end
+end
+board[board.halfmove%2==1 and 1 or 8][97]=_
+board[board.halfmove%2==1 and 1 or 8][101]=_
+board[board.halfmove%2==1 and 1 or 8][99]=board.halfmove%2==1 and"K"or"k"
+board[board.halfmove%2==1 and 1 or 8][100]=board.halfmove%2==1 and"R"or"r"
+end
+else
+local dx,dy,ox,oy,piece_type,which_piece=dest:match("^."):byte(),tonumber(dest:match(".$"))
+if disamb then
+ox=disamb:match("^[a-h]")
+oy=tonumber(disamb:match("[1-8]$"))
+if ox then
+ox=ox:byte()
+end
+if #disamb==2 then
+piece_type=board[oy][ox]
+if piece and piece_type~=(board.halfmove%2==1 and piece or piece:lower())then
+error("System Error!")
+end
+elseif piece then
+piece_type=board.halfmove%2==1 and piece or piece:lower()
+end
+elseif piece then
+piece_type=board.halfmove%2==1 and piece or piece:lower()
+else
+ox,oy=dx,board[board.halfmove%2==1 and dy-1 or 1+dy][dx]==(board.halfmove%2==1 and"P"or"p")and(board.halfmove%2==1 and dy-1 or 1+dy)or(board.halfmove%2==1 and dy-2 or 2+dy)
+if oy==(board.halfmove%2==1 and dy-2 or 2+dy)and(board[dy][dx-1]==(board.halfmove%2==1 and"p"or"P")or board[dy][1+dx]==(board.halfmove%2==1 and"p"or"P"))then
+board.en_passant={ox,board.halfmove%2==1 and 1+oy or oy-1}
+end
+end
+if not piece and not piece_type then
+piece_type=board.halfmove%2==1 and"P"or"p"
+end
+for idx2=1,#pieces[piece_type]do
+if(not ox and true or pieces[piece_type][idx2][1]==ox)and(not oy and true or pieces[piece_type][idx2][2]==oy)and(not pieces[piece_type].rule and true or pieces[piece_type].rule({dx,dy},pieces[piece_type][idx2]))then
+which_piece=idx2
+break
+end
+end
+if piece_type==(board.halfmove%2==1 and"K"or"k")and(board.castling[board.halfmove%2==1 and 1 or 3]~=""or board.castling[board.halfmove%2==1 and 2 or 4]~="")then
+board.castling[board.halfmove%2==1 and 1 or 3]=""
+board.castling[board.halfmove%2==1 and 2 or 4]=""
+elseif piece_type==(board.halfmove%2==1 and"R"or"r")and(board.castling[board.halfmove%2==1 and 1 or 3]~=""or board.castling[board.halfmove%2==1 and 2 or 4]~="")then
+if pieces[board.halfmove%2==1 and"R"or"r"][which_piece][1]==97 then
+board.castling[board.halfmove%2==1 and 2 or 4]=""
+elseif pieces[board.halfmove%2==1 and"R"or"r"][which_piece][1]==104 then
+board.castling[board.halfmove%2==1 and 1 or 3]=""
+end
+end
+board[oy or pieces[piece_type][which_piece][2]][ox or pieces[piece_type][which_piece][1]]=_
+pieces[piece_type][which_piece][1]=dx
+pieces[piece_type][which_piece][2]=dy
+if capt then
+if board.en_passant and dx==board.en_passant[1]and dy==board.en_passant[2]and piece_type==(board.halfmove%2==1 and"P"or"p")then
+for idx2=1,#pieces[board.halfmove%2==1 and"p"or"P"]do
+if not pieces[board.halfmove%2==1 and"p"or"P"][idx2]then
+break
+end
+if pieces[board.halfmove%2==1 and"p"or"P"][idx2][1]==dx and pieces[board.halfmove%2==1 and"p"or"P"][idx2][2]==oy then
+board[pieces[board.halfmove%2==1 and"p"or"P"][idx2][2]][pieces[board.halfmove%2==1 and"p"or"P"][idx2][1]]=_
+table.remove(pieces[board.halfmove%2==1 and"p"or"P"],idx2)
+end
+end
+board.en_passant=_
+else
+local captured=board[dy][dx]
+for idx2=1,#pieces[captured]do
+if not pieces[captured][idx2]then
+break
+end
+if pieces[captured][idx2][1]==dx and pieces[captured][idx2][2]==dy then
+table.remove(pieces[captured],idx2)
+end
+end
+if captured==(board.halfmove%2==1 and"r"or"R")then
+if dx==97 and dy==(board.halfmove%2==1 and 8 or 1)and board.castling[board.halfmove%2==1 and 4 or 2]~=""then
+board.castling[board.halfmove%2==1 and 4 or 2]=""
+elseif dx==104 and dy==(board.halfmove%2==1 and 8 or 1)and board.castling[board.halfmove%2==1 and 3 or 1]~=""then
+board.castling[board.halfmove%2==1 and 3 or 1]=""
+end
+end
+end
+end
+if promo then
+table.insert(pieces[board.halfmove%2==1 and promo or promo:lower()],{dx,dy})
+table.remove(pieces[piece_type],which_piece)
+piece_type=board.halfmove%2==1 and promo or promo:lower()
+end
+board[dy][dx]=piece_type
+end
+end
+local result_string={}
+for k,v in next,board do
+if type(k)=="number"and type(v)=="table"then
+local consecutive=0
+for idx=97,105 do
+if not v[idx]then
+consecutive=1+consecutive
+else
+result_string[9-k]=(result_string[9-k]or"")..(consecutive>0 and consecutive or"")
+if k~=1 or idx~=105 then
+result_string[9-k]=(result_string[9-k]or"")..v[idx]
+end
+consecutive=0
+end
+end
+elseif k=="castling"then
+for idx=1,4 do
+result_string[10]=(result_string[10]or" ")..v[idx]
+end
+if result_string[10]==" "then
+result_string[10]=" -"
+end
+elseif k=="halfmove"then
+result_string[9]=v%2==1 and" b"or" w"
+result_string[13]=" "..v//2
+elseif k=="clock"then
+result_string[12]=" "..v
+elseif k=="en_passant"then
+result_string[11]=" "..v[1]:code()..v[2]
+end
+end
+if not board.en_passant then
+result_string[11]=" -"
+end
+return'[FEN "'..table.concat(result_string)..'"]'
+end
+
+for idx1=1,#trees do
+local route,back,pieces,board,FEN,node,switch,overgrowth={0},{},{initial_pieces},{start_positions},{},trees[idx1]
+while node do
+if switch then
+pieces[#pieces]=_
+board[#board]=_
+FEN[#FEN]=_
+if #route<=3 and #back==#route-1 then
+overgrowth=_
+else
+error("System Error!")
+end
+goto nogen
+end
+for idx2=0,math.huge do
+if not node["moves"..(idx2>0 and idx2 or"")]then
+break
+end
+local overgrown
+if idx2>0 then
+overgrown=true
+overgrowth=1+(overgrowth or #back[#back])
+end
+pieces[1+#pieces]=replicate(pieces[#pieces])
+board[1+#board]=replicate(board[#board])
+FEN[1+#FEN]=generate_FEN(node["moves"..(idx2>0 and idx2 or"")],pieces[#pieces],board[#board])
+local cache_moves={}
+for idx3=1,#node>0 and #node["moves"..(idx2>0 and idx2 or"")]or #node["moves"..(idx2>0 and idx2 or"")]-1 do
+if idx3%2==(board[#board].halfmove%2==1 and 0 or 1)then
+cache_moves[1+#cache_moves]=board[#board].halfmove%2==1 and idx3/2 or 1+idx3//2
+end
+cache_moves[1+#cache_moves]=node["moves"..(idx2>0 and idx2 or"")][idx3]
+end
+if #node>0 then
+cache_moves[1+#cache_moves]="*"
+else
+cache_moves[1+#cache_moves]=node["moves"..(idx2>0 and idx2 or"")][#node["moves"..(idx2>0 and idx2 or"")]]
+end
+rounds['[Event "Rehearsal'..idx1..'"]\n\z
+[Site "'..(route[1]or'MobLuc')..'"]\n\z
+[Date "'..current_date.year..'.'..current_date.month..'.'..current_date.day..'"]\n\z
+[Round "'..(route[2]or'?')..'"]\n\z
+[White "'..(route[3]or'Moby')..'"]\n\z
+[Black "'..(overgrown and overgrowth or route[4]or'Lucifer')..'"]\n\z
+[Result "'..cache_moves[#cache_moves]..'"]\n'..(FEN[#FEN-1]or"")]=table.concat(cache_moves," ")
+end
+::nogen::
+if node[1+route[#route]]then
+switch=false
+route[#route]=1+route[#route]
+back[1+#back]=node
+node=node[route[#route]]
+route[1+#route]=0
+else
+switch=true
+node=back[#back]
+back[#back]=_
+route[#route]=_
+end
+end
+end
+
+local sorted_headers={}
+for k in next,rounds do
+sorted_headers[1+#sorted_headers]=k
+end
+table.sort(sorted_headers,function(l,r)
+local le,ly,lm,ld=l:match("Event.-\"(%s-%S*%s-)\".-\n"),l:match("Date.-(%d+)%.(%d+)%.(%d+).-\n")
+local re,ry,rm,rd=r:match("Event.-\"(%s-%S*%s-)\".-\n"),r:match("Date.-(%d+)%.(%d+)%.(%d+).-\n")
+if ly~=ry then
+return ly>ry
+elseif lm~=rm then
+return lm>rm
+elseif ld~=rd then
+return ld>rd
+end
+return le<re
+end)
+
+io.output(exclude_dir..current_date.year..current_date.month..current_date.day..current_date.hour..current_date.min..current_date.sec..".pgn")
+for idx=1,#sorted_headers do
+io.write(sorted_headers[idx],"\n\n")
+io.write(rounds[sorted_headers[idx]])
+if idx<#sorted_headers then
+io.write("\n\n")
+end
+end
+io.close()
+end
