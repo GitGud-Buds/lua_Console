@@ -999,7 +999,7 @@ if dictation=="initcalc"then
 self:initialise((type(details)~="table"and{}or details).n and table.unpack(details,1,details.n)or details)
 elseif dictation=="imptalgo"then
 self:import_Algorithms((type(details)~="table"and{}or details).n and table.unpack(details,1,details.n)or details)
-elseif dictation=="prtalgo"and rawget(self,"algorithm")then
+elseif dictation=="optalgo"and rawget(self,"algorithm")then
 details=details or{}
 local height,width,algorithms,operands={},{},{},debug.getmetatable(self).prototypes[self.algorithm:match("^(%w%w%w)%w-$").."cfg"].operands
 for idx=1,#operands-1 do
@@ -1044,7 +1044,7 @@ end
 combined[idx1]=table.concat(combined[idx1])
 end
 details.block=table.concat(combined,"\n")
-details.target:write(details.block)
+details.stream:write(details.block)
 elseif dictation=="prteval"and rawget(self,"algorithm")then
 print(self:evaluate(details))
 elseif dictation=="upteval"and rawget(self,"algorithm")then
@@ -2450,8 +2450,8 @@ end
 --range[6][12]
 
 _ENV[...]={
-version=1.1171875,
-renewed=20260504,
+version=1.1328125,
+renewed=20260518,
 ["Pointers in Practice"]="Treating certain parameters as tables or pointing to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-call time.",
 ["Class Paradigm"]=[=[Each disparate metamethod along the hierarchy should share a function that explicitly indexes self of a particular, named field, which in turn shall be implemented at top-class nodes as one sees appropriate.
 In case of multiple inheritance, set a proxy for each parent wherein metatable of the mutual heir shall search for methods, where in particular:
@@ -2488,7 +2488,7 @@ sort_File=sort_File
 --a few declarations:
 --range[4][15]
 local status="ready for run"
-local digest="-208526276320094450"
+local digest="-8090202618548112577"
 --range[2][12]
 --[===[
 ⚙
@@ -2522,6 +2522,7 @@ end
 local dir_mat=[===[local mini_handle,handle,absolute_path,where_in
 if os.getenv("ANDROID_ROOT")=="/system"then
 local bootstrap
+::rematch::
 if directory then
 mini_handle=io.popen('find '..directory..' 2>/dev/null')
 local try=mini_handle:read()
@@ -2529,7 +2530,7 @@ mini_handle:close()
 if not try then
 error("No Such File or Directory!")
 end
-else
+elseif directory==nil then
 mini_handle=io.popen('find -type f 2>/dev/null')
 local try=mini_handle:read()
 mini_handle:close()
@@ -2545,6 +2546,8 @@ mini_handle:close()
 if io.popen("pwd"):read()=="/data/data/com.termux/files/home/downloads"then
 os.execute("rm ./* -rvf")
 end
+else
+goto work
 end
 mini_handle=directory and io.popen('find '..directory..' 2>/dev/null')or io.popen('find /sdcard/ -type f 2>/dev/null')
 for item in mini_handle:lines()do
@@ -2587,8 +2590,10 @@ end
 end
 mini_handle:close()
 mini_handle=nil
+::work::
 if not handle and not where_in then
-error("Nothing Matched by BootStrapping!")
+directory=io.popen("pwd"):read()
+goto rematch
 elseif type(handle)~="table"then
 if not directory then
 absolute_path=handle
@@ -2647,7 +2652,7 @@ necessary_func()
 end
 mini_handle:close()
 mini_handle=nil
-else
+elseif directory==nil then
 for idx=1,math.huge do
 absolute_path=os.getenv("directory"..idx)
 if not absolute_path or absolute_path==""then
@@ -2703,12 +2708,11 @@ end
 elseif math.type(self)=="integer"then
 return self+sum
 elseif type(self)=="string"then
-local x,y,character=0,1
-while self~=""do
-x=1+x
-character,self=self:match("^(.)(.*)$")
-sum=math.tointeger(nb(math.tointeger(xy(x,y)),character:byte()))+sum
-if character=="\n"then
+local x,y,n=0,1,0
+while n<#self do
+x,n=1+x,1+n
+sum=math.tointeger(nb(math.tointeger(xy(x,y)),self:byte(n)))+sum
+if self:byte(n)==10 then
 x,y=0,1+y
 end
 end
@@ -2716,25 +2720,23 @@ return sum
 elseif type(self)=="function"and type_of_function~="C"then
 return meta_Hash(string.dump(self),hashed,1+layer,sum,nb,xy,imba)
 elseif type(self)=="userdata"and ishandle then
-local x,y,character=0,1
-while first_line~=""do
+local x,y=0,1
+while x<#first_line do
 x=1+x
-character,first_line=first_line:match("^(.)(.*)$")
 if type(layer)=="string"then
-hashed[layer][y]=math.tointeger(nb(x,character:byte()))+(hashed[layer][y]or 0)
+hashed[layer][y]=math.tointeger(nb(x,first_line:byte(x)))+(hashed[layer][y]or 0)
 end
-sum=math.tointeger(nb(math.tointeger(xy(x,y)),character:byte()))+sum
+sum=math.tointeger(nb(math.tointeger(xy(x,y)),first_line:byte(x)))+sum
 end
 for file_line in self:lines("L")do
-x,y,first_line=0,1+y,file_line
+x,y=0,1+y
 local linesum=0
-while first_line~=""do
+while x<#file_line do
 x=1+x
-character,first_line=first_line:match("^(.)(.*)$")
 if type(layer)=="string"then
-linesum=math.tointeger(nb(x,character:byte()))+linesum
+linesum=math.tointeger(nb(x,file_line:byte(x)))+linesum
 end
-sum=math.tointeger(nb(math.tointeger(xy(x,y)),character:byte()))+sum
+sum=math.tointeger(nb(math.tointeger(xy(x,y)),file_line:byte(x)))+sum
 end
 if type(layer)=="string"then
 hashed[layer][y]=linesum
@@ -2986,6 +2988,9 @@ local script_len=math.max(#script1,#script2)
 io.output(where..keystone(_ENV[...].version,_ENV[...].renewed)..keystone(_ENV[...].renewed,_ENV[...].version)..keystone(status,_ENV[...].renewed)..keystone(status,_ENV[...].version)):write([===[
 #include<stdlib.h>
 #include<string.h>
+#include<unistd.h>
+#include<time.h>
+#include<errno.h>
 #include<pthread.h>
 #include<lua.h>
 #include<lualib.h>
@@ -3766,6 +3771,52 @@ luaL_Reg udc_UpBinds[]={
 {NULL,NULL}
 };
 
+int chdir_Conveyed(lua_State *L){
+lua_settop(L,1);
+if(chdir(luaL_checkstring(L,-1))){
+lua_pushboolean(L,0);
+lua_pushstring(L,strerror(errno));
+return 2;
+}else{
+lua_pushboolean(L,1);
+return 1;
+}
+}
+
+int sleep_Conveyed(lua_State *L){
+lua_settop(L,2);
+lua_Integer seconds=lua_isnumber(L,-1)?lua_tonumber(L,-2):lua_tonumber(L,-2)/1000;
+lua_Integer nanoseconds=lua_isnumber(L,-1)?1000000*lua_tonumber(L,-1):1000000*(lua_tonumber(L,-2)-1000*seconds);
+if(nanoseconds<0){
+seconds--;
+nanoseconds+=1000000000;
+}
+struct timespec request={(time_t)seconds,(long)nanoseconds};
+if(lua_isnumber(L,-1)){
+int error_number;
+if((error_number=clock_nanosleep(CLOCK_REALTIME,TIMER_ABSTIME,&request,NULL))){
+lua_pushboolean(L,0);
+lua_pushstring(L,strerror(error_number));
+return 2;
+}else{
+lua_pushboolean(L,1);
+return 1;
+}
+}else{
+struct timespec remain;
+int error_number;
+if((error_number=clock_nanosleep(CLOCK_REALTIME,0,&request,&remain))){
+lua_pushboolean(L,0);
+lua_pushstring(L,strerror(error_number));
+lua_pushnumber(L,remain.tv_sec+remain.tv_nsec/1000000000.0);
+return 3;
+}else{
+lua_pushboolean(L,1);
+return 1;
+}
+}
+}
+
 int primality(lua_State *L){
 lua_Integer till=luaL_checkinteger(L,1);
 lua_Integer from=luaL_checkinteger(L,2);
@@ -3801,6 +3852,8 @@ int thread_Consolidator(lua_State *L);
 
 luaL_Reg c_UpBinds[]={
 {"thread_Consolidator",thread_Consolidator},
+{"chdir",chdir_Conveyed},
+{"sleep",sleep_Conveyed},
 {"prime_Generator",prime_Generator},
 {NULL,NULL}
 };
