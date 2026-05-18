@@ -6,11 +6,5 @@ debugging facility flaws:
 directory_Contrast with non-existent file incurs halting problem;
 debugging with objects induces more bugs
 
+pthread_join to event-driven style
 event loop query futhermore wait upon timeout
-
-replace all character isolations with string:byte(position)
-dir_mat match working directory when invoked with false
-transplant chdir,sleep from c
-
-optalgo
-details.stream
