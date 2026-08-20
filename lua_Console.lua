@@ -1208,6 +1208,39 @@ return meta_class["_"..algorithm](result,...)
 end
 end
 
+local function group_Generator(total,incomplete,number_of_groups)
+number_of_groups=tonumber(number_of_groups)or tonumber(incomplete)or 2
+local function gGen(ttl,ngrps,grps,layer)
+layer,grps=layer or 1,grps or{}
+local sum=0
+for idx=1,layer-1 do
+sum=grps[idx]+sum
+end
+if layer<ngrps then
+for idx=incomplete and 1 or 0,incomplete and ttl-sum-ngrps+layer or ttl-sum do
+grps[layer]=idx
+gGen(ttl,ngrps,grps,1+layer)
+end
+else
+grps[layer]=ttl-sum
+coroutine.yield(grps)
+end
+end
+local thread=coroutine.create(gGen)
+local params={}
+params.thread=thread
+params.total=total
+params.number_of_groups=number_of_groups
+return function(args)
+local status,group_yield=coroutine.resume(args.thread,args.total,args.number_of_groups)
+if status then
+return group_yield
+end
+coroutine.close(args.thread)
+return nil
+end,params
+end
+
 local function permutation_Generator(input_table,groups)
 local keys,list={},{}
 for key,item in next,input_table do
@@ -1215,7 +1248,7 @@ keys[1+#keys]=key
 list[1+#list]=item
 end
 groups=groups or{}
-groups[1]=groups[1]or math.random(2,#list-1)
+groups[1]=groups[1]or #list
 local function permGen(ks,lis,grps,layer,group_layer)
 layer,group_layer=layer or 1,group_layer or 0
 local foothold=0
@@ -1321,6 +1354,232 @@ end
 coroutine.close(thread)
 return nil
 end
+end
+
+local function partially_Determined_Permutation_Generator(free_elements,ordered_groups)
+if #ordered_groups>0 then
+for idx=1,#ordered_groups do
+if type(ordered_groups[idx])=="table"then
+if #ordered_groups[idx]<=0 then
+error("Table at vararg position "..idx.." lacks a sequence!")
+end
+elseif type(ordered_groups[idx])~="string"then
+error(type(ordered_groups[idx]).." at vararg position "..idx.." is invalid!")
+end
+end
+end
+local function pPermGen(ks,lis,ogrps,layer)
+layer=layer or 1
+local posits=true_Iterator{1,1+#ks,function(states)return table.unpack(states.ctrls)end}
+for num_of_grps=1,type(ogrps[layer])=="string"and utf8.len(ogrps[layer])or #ogrps[layer]do
+for grp_lyot in group_Generator(type(ogrps[layer])=="string"and utf8.len(ogrps[layer])or #ogrps[layer],num_of_grps)do
+for pos in grouped_Combination_Generator(posits,{#grp_lyot,stateless=true})do
+local srtd_pos,keys,list=true_Iterator{pos,{j=#grp_lyot,stateless=true},function(states)return table.unpack(states.yields1)end},replicate(ks),replicate(lis)
+table.sort(srtd_pos)
+for idx1=type(ogrps[layer])=="string"and utf8.len(ogrps[layer])or #ogrps[layer],1,-1 do
+local sum,fnl_pos=0
+for idx2=1,#grp_lyot do
+sum=grp_lyot[idx2]+sum
+if sum>=idx1 then
+fnl_pos=srtd_pos[idx2]
+break
+end
+end
+table.insert(keys,fnl_pos,ogrps[layer][idx1])
+table.insert(list,fnl_pos,ogrps[layer][idx1])
+end
+if layer<#ogrps then
+pPermGen(keys,list,ogrps,1+layer)
+else
+coroutine.yield(keys,list)
+end
+end
+end
+end
+end
+local thread=coroutine.create(function(felems,ogrps)
+for ks,lis in permutation_Generator(felems,{stateless=true})do
+if #ogrps>0 then
+pPermGen(ks,lis,ogrps)
+else
+coroutine.yield(ks,lis)
+end
+end
+end)
+return function(args)
+local status,key_yield,permutation_yield=coroutine.resume(args.thread,args.free_elements,args.ordered_groups)
+if status then
+return key_yield,permutation_yield
+end
+coroutine.close(args.thread)
+return nil
+end,{thread=thread,free_elements=free_elements,ordered_groups=ordered_groups}
+end
+
+
+local function gfind(string,pattern,init,upbound)
+init,upbound=upbound and init or nil,upbound or init or 5
+if type(string)~="string"or type(pattern)~="string"then
+error("Invalid Arguments!")
+end
+local progress,cache_progress,varying_pattern=0,1,{}
+repeat
+local found,stop,capt1,capt2
+::upward::
+found,stop,capt1=pattern:find(".-(%%-)<",progress)
+if found then
+progress=1+stop
+if #capt1%2==0 then
+varying_pattern[1+#varying_pattern]=pattern:sub(cache_progress,stop-1)
+cache_progress=stop
+else
+goto upward
+end
+elseif progress==0 or cache_progress==1 then
+return string:find(pattern,init)
+end
+::downward::
+found,stop,capt2=pattern:find(".-(%%-)>.",progress)
+if found then
+progress=1+stop
+if #capt2%2==0 then
+varying_pattern[1+#varying_pattern]=pattern:sub(cache_progress,stop-1)
+varying_pattern[1+#varying_pattern]=pattern:sub(stop,stop)
+cache_progress=1+stop
+else
+goto downward
+end
+elseif pattern:sub(cache_progress,cache_progress)=="<"then
+error("Imbalanced <>!")
+end
+until not found
+varying_pattern[1+#varying_pattern]=pattern:sub(cache_progress,-1)
+local positional_attributes1,args={},{}
+for idx=1,#varying_pattern//3 do
+if varying_pattern[3*idx-1]:find("<^.->$")==1 then
+local sequence,char_seq=varying_pattern[3*idx-1]:match("^<^(.-)>$"),{}
+for character in sequence:gmatch(".")do
+char_seq[1+#char_seq]=character
+end
+positional_attributes1[1+#positional_attributes1]={3*idx-1,char_seq}
+if varying_pattern[3*idx]=="-"then
+positional_attributes1[#positional_attributes1][1+#positional_attributes1[#positional_attributes1]]=".-"
+elseif varying_pattern[3*idx]=="?"then
+positional_attributes1[#positional_attributes1][1+#positional_attributes1[#positional_attributes1]]=""
+end
+args["bhconds"..math.tointeger(1+#args/2)]=function()return true end
+args["bhdo"..math.tointeger(1+#args/2)]=function(states,layer,ctrl)states.args[2*(1+layer)][1]=ctrl return states end
+args["bhbconds"..math.tointeger(2+#args/2)]=function(states,layer)if states.ctrls[layer-1]==0 then return true end return false end
+args["step"..math.tointeger(1+#args/2)]=-1
+args[1+#args]=#sequence
+args[1+#args]=0
+args["customgen"..math.tointeger(1+#args/2)]=grouped_Combination_Generator
+args[1+#args]=char_seq
+args[1+#args]={stateless=true}
+end
+end
+local positional_attributes2={}
+for idx=1,#varying_pattern//3 do
+if not varying_pattern[3*idx-1]:find("^<^.->$")and varying_pattern[3*idx]=="?"then
+positional_attributes2[1+#positional_attributes2]={3*idx-1,varying_pattern[3*idx-1]:match("^<(.-)>$")}
+args[1+#args]=0
+args[1+#args]=1
+end
+end
+local offset2=0
+if #positional_attributes2>0 then
+args["customgen"..1+math.tointeger(#args/2)]=permutation_Generator
+args[1+#args]=positional_attributes2
+args[1+#args]={#positional_attributes2}
+offset2=1
+end
+local positional_attributes3={}
+for idx=1,#varying_pattern//3 do
+if not varying_pattern[3*idx-1]:find("^<^.->$")and varying_pattern[3*idx]~="?"then
+positional_attributes3[1+#positional_attributes3]={3*idx-1,varying_pattern[3*idx-1]:match("^<(.-)>$"),varying_pattern[3*idx]}
+args[1+#args]=0
+args[1+#args]=upbound
+end
+end
+local offset3=offset2
+if #positional_attributes3>0 then
+args["customgen"..1+math.tointeger(#args/2)]=permutation_Generator
+args[1+#args]=positional_attributes3
+args[1+#args]={#positional_attributes3}
+offset3=1+offset3
+end
+args[1+#args]=function(states,layer)
+for idx1=1,#positional_attributes1 do
+if states.ctrls[2*idx1-1]>0 then
+local char_seq=replicate(positional_attributes1[idx1][2])
+for idx2=1,states.ctrls[2*idx1-1]do
+char_seq[states.ctrls[2*idx1][idx2]]="[^"..char_seq[states.ctrls[2*idx1][idx2]].."]"
+end
+varying_pattern[positional_attributes1[idx1][1]]=positional_attributes1[idx1][3]..table.concat(char_seq)..positional_attributes1[idx1][3]
+else
+varying_pattern[positional_attributes1[idx1][1]]=""
+end
+end
+for idx=1,#positional_attributes2 do
+varying_pattern[states.ctrls[offset2+#positional_attributes2+2*#positional_attributes1][idx][1]]=states.ctrls[offset2+#positional_attributes2+2*#positional_attributes1][idx][2]:rep(states.ctrls[idx+2*#positional_attributes1])
+end
+for idx=1,#positional_attributes3 do
+local progress,sign,repetition=states.ctrls[idx+offset2+#positional_attributes2+2*#positional_attributes1],states.ctrls[offset3+#positional_attributes3+#positional_attributes2+2*#positional_attributes1][idx][3]
+if sign=="+"then
+repetition=1+progress
+elseif sign=="*"then
+repetition=progress
+elseif sign=="-"then
+repetition=upbound-progress
+end
+varying_pattern[states.ctrls[offset3+#positional_attributes3+#positional_attributes2+2*#positional_attributes1][idx][1]]=states.ctrls[offset3+#positional_attributes3+#positional_attributes2+2*#positional_attributes1][idx][2]:rep(repetition)
+end
+local replica_varying_pattern=replicate(varying_pattern)
+for idx=#replica_varying_pattern//3,1,-1 do
+table.remove(replica_varying_pattern,3*idx)
+end
+local result=table.pack(string:find(table.concat(replica_varying_pattern),init))
+if result[1]then
+return result
+else
+return false
+end
+end
+local results=true_Iterator(args)
+if #results==1 then
+return table.unpack(results[1],1,results[1].n)
+elseif #results<1 then
+return false
+end
+local filter,filtered_result={},{}
+for i=1,#results do
+local k=1+i%#results
+if results[i].n~=results[k].n then
+error("System Error!")
+end
+filter[i]=results[i][1]
+end
+local analysis,inverse={},{}
+for j=1,#filter do
+analysis[filter[j]]=1+(analysis[filter[j]]or 0)
+inverse[filter[j]]=(inverse[filter[j]]or 0)<j and j or inverse[filter[j]]
+end
+table.sort(filter,function(l,r)if analysis[l]==analysis[r]then return inverse[l]>inverse[r]end return analysis[l]>analysis[r]end)
+filtered_result[1]=filter[1]
+for idx=1,results[1].n do
+filter={}
+for i=1,#results do
+filter[i]=results[i][idx]
+end
+local analysis,inverse={},{}
+for j=1,#filter do
+analysis[filter[j]]=1+(analysis[filter[j]]or 0)
+inverse[filter[j]]=(inverse[filter[j]]or 0)<j and j or inverse[filter[j]]
+end
+table.sort(filter,function(l,r)if analysis[l]==analysis[r]then return inverse[l]>inverse[r]end return analysis[l]>analysis[r]end)
+filtered_result[idx]=filter[1]
+end
+return table.unpack(filtered_result,1,results[1].n)
 end
 
 --range[8][15]
@@ -1496,39 +1755,6 @@ elseif type(extra_operands[1])=="table"and not debug.getmetatable(extra_operands
 end
 end
 return arithmetiCalc["__"..algorithm](self,...)
-end
-
-local function group_Generator(total,number_of_groups)
-total,groups=total or 1,number_of_groups or 1
-local function gGen(ttl,ngrps,grps,layer)
-layer,grps=layer or 1,grps or{}
-local sum=0
-for idx=1,layer-1 do
-sum=grps[idx]+sum
-end
-if layer<ngrps then
-for idx=0,ttl-sum do
-grps[layer]=idx
-gGen(ttl,ngrps,grps,1+layer)
-end
-else
-grps[layer]=ttl-sum
-coroutine.yield(grps)
-end
-end
-local thread=coroutine.create(gGen)
-local params={}
-params.thread=thread
-params.total=total
-params.number_of_groups=number_of_groups
-return function(args)
-local status,group_yield=coroutine.resume(args.thread,args.total,args.number_of_groups)
-if status then
-return group_yield
-end
-coroutine.close(args.thread)
-return nil
-end,params
 end
 
 local function vector_Addition(vectors)
@@ -2089,172 +2315,6 @@ end
 end
 
 
-local function gfind(string,pattern,init,upbound)
-init,upbound=upbound and init or nil,upbound or init or 5
-if type(string)~="string"or type(pattern)~="string"then
-error("Invalid Arguments!")
-end
-local progress,cache_progress,varying_pattern=0,1,{}
-repeat
-local found,stop,capt1,capt2
-::upward::
-found,stop,capt1=pattern:find(".-(%%-)<",progress)
-if found then
-progress=1+stop
-if #capt1%2==0 then
-varying_pattern[1+#varying_pattern]=pattern:sub(cache_progress,stop-1)
-cache_progress=stop
-else
-goto upward
-end
-elseif progress==0 or cache_progress==1 then
-return string:find(pattern,init)
-end
-::downward::
-found,stop,capt2=pattern:find(".-(%%-)>.",progress)
-if found then
-progress=1+stop
-if #capt2%2==0 then
-varying_pattern[1+#varying_pattern]=pattern:sub(cache_progress,stop-1)
-varying_pattern[1+#varying_pattern]=pattern:sub(stop,stop)
-cache_progress=1+stop
-else
-goto downward
-end
-elseif pattern:sub(cache_progress,cache_progress)=="<"then
-error("Imbalanced <>!")
-end
-until not found
-varying_pattern[1+#varying_pattern]=pattern:sub(cache_progress,-1)
-local positional_attributes1,args={},{}
-for idx=1,#varying_pattern//3 do
-if varying_pattern[3*idx-1]:find("<^.->$")==1 then
-local sequence,char_seq=varying_pattern[3*idx-1]:match("^<^(.-)>$"),{}
-for character in sequence:gmatch(".")do
-char_seq[1+#char_seq]=character
-end
-positional_attributes1[1+#positional_attributes1]={3*idx-1,char_seq}
-if varying_pattern[3*idx]=="-"then
-positional_attributes1[#positional_attributes1][1+#positional_attributes1[#positional_attributes1]]=".-"
-elseif varying_pattern[3*idx]=="?"then
-positional_attributes1[#positional_attributes1][1+#positional_attributes1[#positional_attributes1]]=""
-end
-args["bhconds"..math.tointeger(1+#args/2)]=function()return true end
-args["bhdo"..math.tointeger(1+#args/2)]=function(states,layer,ctrl)states.args[2*(1+layer)][1]=ctrl return states end
-args["bhbconds"..math.tointeger(2+#args/2)]=function(states,layer)if states.ctrls[layer-1]==0 then return true end return false end
-args["step"..math.tointeger(1+#args/2)]=-1
-args[1+#args]=#sequence
-args[1+#args]=0
-args["customgen"..math.tointeger(1+#args/2)]=grouped_Combination_Generator
-args[1+#args]=char_seq
-args[1+#args]={stateless=true}
-end
-end
-local positional_attributes2={}
-for idx=1,#varying_pattern//3 do
-if not varying_pattern[3*idx-1]:find("^<^.->$")and varying_pattern[3*idx]=="?"then
-positional_attributes2[1+#positional_attributes2]={3*idx-1,varying_pattern[3*idx-1]:match("^<(.-)>$")}
-args[1+#args]=0
-args[1+#args]=1
-end
-end
-local offset2=0
-if #positional_attributes2>0 then
-args["customgen"..1+math.tointeger(#args/2)]=permutation_Generator
-args[1+#args]=positional_attributes2
-args[1+#args]={#positional_attributes2}
-offset2=1
-end
-local positional_attributes3={}
-for idx=1,#varying_pattern//3 do
-if not varying_pattern[3*idx-1]:find("^<^.->$")and varying_pattern[3*idx]~="?"then
-positional_attributes3[1+#positional_attributes3]={3*idx-1,varying_pattern[3*idx-1]:match("^<(.-)>$"),varying_pattern[3*idx]}
-args[1+#args]=0
-args[1+#args]=upbound
-end
-end
-local offset3=offset2
-if #positional_attributes3>0 then
-args["customgen"..1+math.tointeger(#args/2)]=permutation_Generator
-args[1+#args]=positional_attributes3
-args[1+#args]={#positional_attributes3}
-offset3=1+offset3
-end
-args[1+#args]=function(states,layer)
-for idx1=1,#positional_attributes1 do
-if states.ctrls[2*idx1-1]>0 then
-local char_seq=replicate(positional_attributes1[idx1][2])
-for idx2=1,states.ctrls[2*idx1-1]do
-char_seq[states.ctrls[2*idx1][idx2]]="[^"..char_seq[states.ctrls[2*idx1][idx2]].."]"
-end
-varying_pattern[positional_attributes1[idx1][1]]=positional_attributes1[idx1][3]..table.concat(char_seq)..positional_attributes1[idx1][3]
-else
-varying_pattern[positional_attributes1[idx1][1]]=""
-end
-end
-for idx=1,#positional_attributes2 do
-varying_pattern[states.ctrls[offset2+#positional_attributes2+2*#positional_attributes1][idx][1]]=states.ctrls[offset2+#positional_attributes2+2*#positional_attributes1][idx][2]:rep(states.ctrls[idx+2*#positional_attributes1])
-end
-for idx=1,#positional_attributes3 do
-local progress,sign,repetition=states.ctrls[idx+offset2+#positional_attributes2+2*#positional_attributes1],states.ctrls[offset3+#positional_attributes3+#positional_attributes2+2*#positional_attributes1][idx][3]
-if sign=="+"then
-repetition=1+progress
-elseif sign=="*"then
-repetition=progress
-elseif sign=="-"then
-repetition=upbound-progress
-end
-varying_pattern[states.ctrls[offset3+#positional_attributes3+#positional_attributes2+2*#positional_attributes1][idx][1]]=states.ctrls[offset3+#positional_attributes3+#positional_attributes2+2*#positional_attributes1][idx][2]:rep(repetition)
-end
-local replica_varying_pattern=replicate(varying_pattern)
-for idx=#replica_varying_pattern//3,1,-1 do
-table.remove(replica_varying_pattern,3*idx)
-end
-local result=table.pack(string:find(table.concat(replica_varying_pattern),init))
-if result[1]then
-return result
-else
-return false
-end
-end
-local results=true_Iterator(args)
-if #results==1 then
-return table.unpack(results[1],1,results[1].n)
-elseif #results<1 then
-return false
-end
-local filter,filtered_result={},{}
-for i=1,#results do
-local k=1+i%#results
-if results[i].n~=results[k].n then
-error("System Error!")
-end
-filter[i]=results[i][1]
-end
-local analysis,inverse={},{}
-for j=1,#filter do
-analysis[filter[j]]=1+(analysis[filter[j]]or 0)
-inverse[filter[j]]=(inverse[filter[j]]or 0)<j and j or inverse[filter[j]]
-end
-table.sort(filter,function(l,r)if analysis[l]==analysis[r]then return inverse[l]>inverse[r]end return analysis[l]>analysis[r]end)
-filtered_result[1]=filter[1]
-for idx=1,results[1].n do
-filter={}
-for i=1,#results do
-filter[i]=results[i][idx]
-end
-local analysis,inverse={},{}
-for j=1,#filter do
-analysis[filter[j]]=1+(analysis[filter[j]]or 0)
-inverse[filter[j]]=(inverse[filter[j]]or 0)<j and j or inverse[filter[j]]
-end
-table.sort(filter,function(l,r)if analysis[l]==analysis[r]then return inverse[l]>inverse[r]end return analysis[l]>analysis[r]end)
-filtered_result[idx]=filter[1]
-end
-return table.unpack(filtered_result,1,results[1].n)
-end
-
-
 local function directory_Contrast(directory1,directory2,dof,rows,sieve,nc,xy,namecontent)
 dof=dof or 6
 rows=rows or 6
@@ -2450,8 +2510,8 @@ end
 --range[6][12]
 
 _ENV[...]={
-version=1.1328125,
-renewed=20260518,
+version=1.1640625,
+renewed=20260820,
 ["Pointers in Practice"]="Treating certain parameters as tables or pointing to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-call time.",
 ["Class Paradigm"]=[=[Each disparate metamethod along the hierarchy should share a function that explicitly indexes self of a particular, named field, which in turn shall be implemented at top-class nodes as one sees appropriate.
 In case of multiple inheritance, set a proxy for each parent wherein metatable of the mutual heir shall search for methods, where in particular:
@@ -2464,8 +2524,11 @@ binary_Search=binary_Search,
 table_Player=table_Player,
 true_Iterator=true_Iterator,
 arithmetiCalc=arithmetiCalc,
+group_Generator=group_Generator,
 permutation_Generator=permutation_Generator,
-grouped_Combination_Generator=grouped_Combination_Generator
+grouped_Combination_Generator=grouped_Combination_Generator,
+partially_Determined_Permutation_Generator=partially_Determined_Permutation_Generator,
+gfind=gfind
 --range[6][15]
 ,
 hash_Functions=hash_Functions,
@@ -2473,12 +2536,10 @@ uni_Inc_Rand=uni_Inc_Rand,
 kahan_Product=kahan_Product,
 kahan_Sum=kahan_Sum,
 algorithms=algorithms,
-group_Generator=group_Generator,
 vector_Addition=vector_Addition,
 vector_Length=vector_Length,
 dimensional_Animator=dimensional_Animator,
 plot_Pixels=plot_Pixels,
-gfind=gfind,
 directory_Contrast=directory_Contrast,
 sort_File=sort_File
 --range[4][12]
@@ -2488,7 +2549,7 @@ sort_File=sort_File
 --a few declarations:
 --range[4][15]
 local status="ready for run"
-local digest="-8090202618548112577"
+local digest="3412222349469105054"
 --range[2][12]
 --[===[
 ⚙
