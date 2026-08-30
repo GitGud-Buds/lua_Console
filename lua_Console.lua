@@ -1208,18 +1208,19 @@ return meta_class["_"..algorithm](result,...)
 end
 end
 
-local function group_Generator(total,incomplete,number_of_groups)
-number_of_groups=tonumber(number_of_groups)or tonumber(incomplete)or 2
-local function gGen(ttl,ngrps,grps,layer)
+local function group_Generator(specifications,incomplete)
+specifications=specifications or{}
+specifications[1],specifications[2]=tonumber(specifications[1])or math.random(5,15),tonumber(specifications[2])or 2
+local function gGen(ttl,comps,icmplt,grps,layer)
 layer,grps=layer or 1,grps or{}
 local sum=0
 for idx=1,layer-1 do
 sum=grps[idx]+sum
 end
-if layer<ngrps then
-for idx=incomplete and 1 or 0,incomplete and ttl-sum-ngrps+layer or ttl-sum do
+if layer<comps then
+for idx=icmplt and 1 or 0,icmplt and ttl-sum-comps+layer or ttl-sum do
 grps[layer]=idx
-gGen(ttl,ngrps,grps,1+layer)
+gGen(ttl,comps,icmplt,grps,1+layer)
 end
 else
 grps[layer]=ttl-sum
@@ -1227,18 +1228,30 @@ coroutine.yield(grps)
 end
 end
 local thread=coroutine.create(gGen)
+if specifications.stateless then
 local params={}
 params.thread=thread
-params.total=total
-params.number_of_groups=number_of_groups
+params.total=specifications[1]
+params.compartments=specifications[2]
+params.incomplete=incomplete
 return function(args)
-local status,group_yield=coroutine.resume(args.thread,args.total,args.number_of_groups)
+local status,group_yield=coroutine.resume(args.thread,args.total,args.compartments,args.incomplete)
 if status then
 return group_yield
 end
 coroutine.close(args.thread)
 return nil
 end,params
+end
+local replica_specifications=replicate(specifications)
+return function()
+local status,group_yield=coroutine.resume(thread,replica_specifications[1],replica_specifications[2],incomplete)
+if status then
+return group_yield
+end
+coroutine.close(thread)
+return nil
+end
 end
 
 local function permutation_Generator(input_table,groups)
@@ -1406,6 +1419,11 @@ coroutine.yield(ks,lis)
 end
 end
 end)
+if ordered_groups.stateless then
+local params={}
+params.thread=thread
+params.free_elements=free_elements
+params.ordered_groups=ordered_groups
 return function(args)
 local status,key_yield,permutation_yield=coroutine.resume(args.thread,args.free_elements,args.ordered_groups)
 if status then
@@ -1413,7 +1431,18 @@ return key_yield,permutation_yield
 end
 coroutine.close(args.thread)
 return nil
-end,{thread=thread,free_elements=free_elements,ordered_groups=ordered_groups}
+end,params
+end
+local replica_free_elements=replicate(free_elements)
+local replica_ordered_groups=replicate(ordered_groups)
+return function()
+local status,_,permutation_yield=coroutine.resume(thread,replica_free_elements,replica_ordered_groups)
+if status then
+return permutation_yield
+end
+coroutine.close(thread)
+return nil
+end
 end
 
 
@@ -1498,7 +1527,7 @@ for idx=1,#varying_pattern//3 do
 if not varying_pattern[3*idx-1]:find("^<^.->$")and varying_pattern[3*idx]~="?"then
 positional_attributes3[1+#positional_attributes3]={3*idx-1,varying_pattern[3*idx-1]:match("^<(.-)>$"),varying_pattern[3*idx]}
 args[1+#args]=0
-args[1+#args]=upbound
+args[1+#args]=type(upbound)=="table"and tonumber(upbound[idx])or tonumber(upbound)
 end
 end
 local offset3=offset2
@@ -1530,7 +1559,7 @@ repetition=1+progress
 elseif sign=="*"then
 repetition=progress
 elseif sign=="-"then
-repetition=upbound-progress
+repetition=(type(upbound)=="table"and tonumber(upbound[idx])or tonumber(upbound))-progress
 end
 varying_pattern[states.ctrls[offset3+#positional_attributes3+#positional_attributes2+2*#positional_attributes1][idx][1]]=states.ctrls[offset3+#positional_attributes3+#positional_attributes2+2*#positional_attributes1][idx][2]:rep(repetition)
 end
@@ -1579,7 +1608,8 @@ end
 table.sort(filter,function(l,r)if analysis[l]==analysis[r]then return inverse[l]>inverse[r]end return analysis[l]>analysis[r]end)
 filtered_result[idx]=filter[1]
 end
-return table.unpack(filtered_result,1,results[1].n)
+filtered_result[1+results[1].n]=results
+return table.unpack(filtered_result,1,1+results[1].n)
 end
 
 --range[8][15]
@@ -1798,8 +1828,8 @@ for idx1=1,initial_states.animation and 2 or 1 do
 local checked=idx1<2 and initial_states.dimenses or initial_states.animators
 for idx2=1,#checked do
 if rawequal(debug.getmetatable((type(initial_states.animators)~="function"or idx1<2)and checked[idx2].var or checked[idx2]),arithmetiCalc)then
-if rawget(getmetatable((type(initial_states.animators)~="function"or idx1<2)and checked[idx2].var or checked[idx2]),"__mode")then
-getmetatable((type(initial_states.animators)~="function"or idx1<2)and checked[idx2].var or checked[idx2]).__mode=nil
+if rawget(debug.getmetatable((type(initial_states.animators)~="function"or idx1<2)and checked[idx2].var or checked[idx2]),"__mode")then
+debug.getmetatable((type(initial_states.animators)~="function"or idx1<2)and checked[idx2].var or checked[idx2]).__mode=nil
 end
 else
 error("Invalid Variable Found!")
@@ -2310,7 +2340,14 @@ end
 end
 handle:close()
 else
-warn("Nothing Has Been Done due to Invalid Borders!")
+local collect={}
+for idx=1,6 do
+if not pixels.definition[idx]then
+collect[1+#collect]=(idx%2==1 and"lower"or"upper").." boundary of dimension #"
+collect[1+#collect]=math.ceil(idx/2)
+end
+end
+warn("Nothing has been done because ",table.concat(collect," and ")," were found missing!")
 end
 end
 
@@ -2471,47 +2508,696 @@ end
 return results
 end
 
-local function sort_File(directory,customise)
-customise=customise or{}
-customise.parse,customise.delimiter=customise.parse or"\t",customise.delimiter or"\t"
-local set={}
-assert(io.input(directory),"Invalid Input Directory!")
-for file_line in io.lines()do
-for elem in file_line:gmatch("%s*([^"..customise.parse.."]-)%s*"..customise.parse.."+")do
-if elem~=""then
-set[elem]=1+(set[elem]or 0)
+local consolidate_File={}
+
+consolidate_File.recycle_redundant={__mode="kv"}
+
+function consolidate_File:remove(rows,dispose,dest)
+do
+if self[debug.getmetatable(self)]~="excel"and self[debug.getmetatable(self)]=="text"then
+warn("Excel Function Not Applicable to Plain ",self[debug.getmetatable(self)]," Data!")
+goto not_applicable
+end
+dispose,dest=dest and dispose or nil,dest or dispose
+for idx=1,2 do
+rows[idx]=rows[idx]or rows[3-idx]
+rows[idx]=rows[idx]%#self>0 and rows[idx]%#self or #self
+end
+if rows[1]>rows[2]then
+rows[1],rows[2]=rows[2],rows[1]
+end
+if not rawequal(dest,self)then
+dest=table.move(self,1,rows[1]-1,1,dest)
+end
+dest=table.move(self,1+rows[2],#self,rows[1],dest)
+if rawequal(dest,self)then
+for idx=rows[1],rows[2]do
+table.remove(dest)
 end
 end
-local tail=file_line:match(customise.parse.."*%s*([^"..customise.parse.."]-)%s*$")
-if tail~=""then
-set[tail]=1+(set[tail]or 0)
+dest[debug.getmetatable(self)]=dest[debug.getmetatable(self)]or self[debug.getmetatable(self)]
+if not rawequal(dest,self)then
+if not rawequal(debug.getmetatable(dest),debug.getmetatable(self))then
+debug.setmetatable(dest,debug.getmetatable(self))
+end
+if dispose then
+debug.setmetatable(self,debug.getmetatable(self).recycle_redundant)
 end
 end
-io.input():close()
-local sorted={}
-for elem in next,set do
-sorted[1+#sorted]=elem
+return dest
 end
-if type(customise.comp_func)=="boolean"then
-coroutine.yield(set)
+::not_applicable::
 end
-table.sort(sorted,(customise.stats and type(customise.comp_func)~="function")and function(l,r)if set[l]==set[r]then return l<r end return set[l]>set[r]end or customise.comp_func)
-io.output(directory.." sorted")
-for k,v in table_Player(sorted,{stateless=true})do
-if k<#sorted then
-io.write(customise.stats and v.."\t"..set[v]or v,(customise.jagged and((customise.stats and set[v]~=set[sorted[1+k]])or(customise.similarity and v:match("^"..string.rep(".",customise.similarity))~=sorted[1+k]:match("^"..string.rep(".",customise.similarity)))))and"\n"or customise.delimiter)
+
+function consolidate_File:replace(rows,dispose,dest)
+do
+if self[debug.getmetatable(self)]~="excel"and self[debug.getmetatable(self)]=="text"then
+warn("Excel Function Not Applicable to Plain ",self[debug.getmetatable(self)]," Data!")
+goto not_applicable
+end
+dispose,dest=dest and dispose or nil,dest or dispose or self
+for idx=2,3 do
+rows[idx]=rows[idx]or rows[5-idx]
+rows[idx]=rows[idx]%#self>0 and rows[idx]%#self or #self
+end
+if rows[2]>rows[3]then
+rows[2],rows[3]=rows[3],rows[2]
+end
+local cache_with=table.move(self,rows[2],rows[3],1,{})
+if not rawequal(dest,self)then
+dest=table.move(self,1,rows[2]-1,1,dest)
+end
+dest=table.move(self,1+rows[3],#self,rows[2],dest)
+if rawequal(dest,self)then
+for idx=rows[2],rows[3]do
+table.remove(dest)
+end
+end
+if rows[1]>1+#dest then
+for idx=1+#dest,rows[1]-1 do
+dest[idx]={}
+end
+end
+dest=table.move(cache_with,1,#cache_with,rows[1],dest)
+dest[debug.getmetatable(self)]=dest[debug.getmetatable(self)]or self[debug.getmetatable(self)]
+if not rawequal(dest,self)then
+if not rawequal(debug.getmetatable(dest),debug.getmetatable(self))then
+debug.setmetatable(dest,debug.getmetatable(self))
+end
+if dispose then
+debug.setmetatable(self,debug.getmetatable(self).recycle_redundant)
+end
+end
+return dest
+end
+::not_applicable::
+end
+
+function consolidate_File:rotate(valve,dispose,dest)
+do
+if self[debug.getmetatable(self)]~="excel"and self[debug.getmetatable(self)]=="text"then
+warn("Excel Function Not Applicable to Plain ",self[debug.getmetatable(self)]," Data!")
+goto not_applicable
+end
+dispose,dest=dest and dispose or nil,dest or dispose
+valve[2]=valve[2]or valve[3]-1
+valve[3]=valve[3]or 1+valve[2]
+for idx=2,3 do
+valve[idx]=valve[idx]%#self>0 and valve[idx]%#self or #self
+end
+valve[1]=(valve[3]-valve[2])//math.abs(valve[3]-valve[2])*(math.abs(valve[1])%(1+math.max(valve[2],valve[3])-math.min(valve[2],valve[3])))
+if not rawequal(dest,self)then
+dest=table.move(self,1,valve[2]-1,1,dest)
+dest=table.move(self,1+valve[3],#self,1+valve[3],dest)
+end
+local cache_overflow=table.move(self,valve[1]<0 and valve[3]or 1+valve[3]-valve[1],valve[1]<0 and valve[3]-valve[1]-1 or valve[3],1,{})
+dest=table.move(self,valve[1]<0 and valve[3]-valve[1]or valve[2],valve[1]<0 and valve[2]or valve[3]-valve[1],valve[1]<0 and valve[3]or valve[1]+valve[2],dest)
+dest=table.move(cache_overflow,1,#cache_overflow,valve[1]<0 and 1+valve[1]+valve[2]or valve[2],dest)
+dest[debug.getmetatable(self)]=dest[debug.getmetatable(self)]or self[debug.getmetatable(self)]
+if not rawequal(dest,self)then
+if not rawequal(debug.getmetatable(dest),debug.getmetatable(self))then
+debug.setmetatable(dest,debug.getmetatable(self))
+end
+if dispose then
+debug.setmetatable(self,debug.getmetatable(self).recycle_redundant)
+end
+end
+return dest
+end
+::not_applicable::
+end
+
+function consolidate_File:move(coordinates,dispose,dest)
+do
+if self[debug.getmetatable(self)]~="excel"and self[debug.getmetatable(self)]=="text"then
+warn("Excel Function Not Applicable to Plain ",self[debug.getmetatable(self)]," Data!")
+goto not_applicable
+end
+dispose,dest=dest and dispose or nil,dest or dispose or self
+coordinates.vstrt,coordinates.hstrt=coordinates.vstrt or 1,coordinates.hstrt or 1
+for idx1=math.min(1+#dest,coordinates.vstrt),coordinates.vstrt+math.max(coordinates.u,coordinates.d)-math.min(coordinates.u,coordinates.d)do
+dest[idx1]=dest[idx1]or{}
+if idx1<coordinates.vstrt then
+goto blank_row
+end
+for idx2=1+#dest[idx1],coordinates.hstrt-1 do
+dest[idx1][idx2]=dest[idx1][idx2]or false
+end
+if coordinates.l<=coordinates.r then
+dest[idx1]=table.move(self[coordinates.u+(coordinates.u<=coordinates.d and idx1-coordinates.vstrt or coordinates.vstrt-idx1)]or{},coordinates.l,coordinates.r,coordinates.hstrt,dest[idx1])
 else
-io.write(customise.stats and v.."\t"..set[v]or v)
+for idx2,grid in table_Player(self[coordinates.u+(coordinates.u<=coordinates.d and idx1-coordinates.vstrt or coordinates.vstrt-idx1)]or{},{i=coordinates.l,j=coordinates.r,stateless=true})do
+dest[idx1][coordinates.hstrt+coordinates.l-idx2]=grid
 end
 end
-io.close()
+::blank_row::
 end
+dest[debug.getmetatable(self)]=dest[debug.getmetatable(self)]or self[debug.getmetatable(self)]
+if not rawequal(dest,self)then
+if not rawequal(debug.getmetatable(dest),debug.getmetatable(self))then
+debug.setmetatable(dest,debug.getmetatable(self))
+end
+if dispose then
+debug.setmetatable(self,debug.getmetatable(self).recycle_redundant)
+end
+end
+return dest
+end
+::not_applicable::
+end
+
+function consolidate_File:transpose(dispose,conveyed)
+do
+if self[debug.getmetatable(self)]~="excel"and self[debug.getmetatable(self)]=="text"then
+warn("Excel Function Not Applicable to Plain ",self[debug.getmetatable(self)]," Data!")
+goto not_applicable
+end
+dispose,conveyed=type(dispose)=="boolean"and dispose or false,conveyed or dispose
+if type(conveyed)=="table"then
+conveyed.stateless=nil
+else
+conveyed=nil
+end
+local transposed=debug.setmetatable({[debug.getmetatable(self)]=self[debug.getmetatable(self)],zip(self,conveyed)},debug.getmetatable(self))
+if dispose then
+debug.setmetatable(self,debug.getmetatable(self).recycle_redundant)
+end
+return transposed
+end
+::not_applicable::
+end
+
+function consolidate_File:enumerate(criteria,dispose,result)
+do
+dispose,result=result and dispose or nil,result or dispose or self
+local enumerator=_ENV[module_name].c_UpBinds.enumerator(table.unpack(criteria,1,2))
+if self[debug.getmetatable(self)]=="excel"then
+if not rawequal(result,self)then
+result=table.move(self,1,criteria[3],1,result)
+end
+table.insert(result,1+criteria[3],(true_Iterator{self[criteria[3]],function(states)return(criteria[2]or _ENV[module_name].meta_Hash)(table.unpack(states.yields1))end}))
+table.insert(result,2+criteria[3],(true_Iterator{self[criteria[3]],function(states)enumerator[table.unpack(states.yields1)]=true return enumerator[table.unpack(states.yields1)]end}))
+if not rawequal(result,self)then
+result=table.move(self,1+criteria[3],#self,3+criteria[3],result)
+end
+elseif self[debug.getmetatable(self)]=="text"then
+if criteria[3]and type(criteria[2])~="function"then
+warn("Applying hash function ",tostring(criteria[2])or(_ENV[module_name]..".meta_Hash")," to appearance count before enumeration - according to criterion 3 ",tostring(criteria[3])," - is pointless!")
+end
+for element,appearances in next,self do
+if not rawequal(element,debug.getmetatable(self))then
+if criteria[3]then
+enumerator[appearances]=true
+result[element]=enumerator[appearances]
+else
+enumerator[element]=true
+result[element]=enumerator[element]
+end
+end
+end
+else
+warn("Invalid Object: ",tostring(self),"!")
+goto invalid
+end
+result[debug.getmetatable(self)]=result[debug.getmetatable(self)]or self[debug.getmetatable(self)]
+if not rawequal(result,self)then
+if not rawequal(debug.getmetatable(result),debug.getmetatable(self))then
+debug.setmetatable(result,debug.getmetatable(self))
+end
+if dispose then
+debug.setmetatable(self,debug.getmetatable(self).recycle_redundant)
+end
+end
+return result
+end
+::invalid::
+end
+
+function consolidate_File:sort(compare_directive,dispose,result)
+do
+dispose,result=result and dispose or nil,result or dispose or self
+if self[debug.getmetatable(self)]=="excel"then
+if not rawequal(result,self)then
+result=table.move(self,1,#self,1,result)
+end
+if type(compare_directive)~="function"then
+if type(compare_directive)~="table"then
+compare_directive={}
+for idx=1,#self do
+compare_directive[idx]={idx,"<"}
+end
+end
+local function comp_func(l,r,layer)
+layer=layer or 1
+local left,right,direction=tostring(l[compare_directive[layer][1]]),tostring(r[compare_directive[layer][1]]),compare_directive[layer][2]
+if utf8.len(left)==#left and utf8.len(right)==#right then
+if #left==#right then
+if left==right then
+return layer<#compare_directive and comp_func(l,r,1+layer)or false
+else
+if direction=="<"then
+return left<right
+elseif direction==">"then
+return left>right
+end
+end
+else
+if direction=="<"then
+return #left<#right
+elseif direction==">"then
+return #left>#right
+end
+end
+elseif utf8.len(left)<#left and utf8.len(right)<#right then
+if utf8.len(left)==utf8.len(right)then
+for position,codepoint in utf8.codes(left)do
+if direction=="<"then
+return codepoint<utf8.codepoint(right,position,#right)
+elseif direction==">"then
+return codepoint>utf8.codepoint(right,position,#right)
+end
+end
+return layer<#compare_directive and comp_func(l,r,1+layer)or false
+else
+if direction=="<"then
+return utf8.len(left)<utf8.len(right)
+elseif direction==">"then
+return utf8.len(left)>utf8.len(right)
+end
+end
+else
+if direction=="<"then
+return utf8.len(left)==#left and utf8.len(right)<#right
+elseif direction==">"then
+return utf8.len(left)<#left and utf8.len(right)==#right
+end
+end
+end
+table.sort(result,comp_func)
+else
+table.sort(result,compare_directive)
+end
+elseif self[debug.getmetatable(self)]=="text"then
+if rawequal(result,self)then
+result={}
+end
+for elem in next,self do
+if not rawequal(elem,debug.getmetatable(self))then
+result[1+#result]=elem
+end
+end
+if type(compare_directive[1])=="function"then
+table.sort(result,compare_directive[1])
+else
+local function closure(count_appearances,direction)
+return function(l,r)
+if not count_appearances and true or self[l]==self[r]then
+if utf8.len(l)==#l and utf8.len(r)==#r then
+if #l==#r then
+if direction=="<"then
+return l<r
+elseif direction==">"then
+return l>r
+end
+else
+if direction=="<"then
+return #l<#r
+elseif direction==">"then
+return #l>#r
+end
+end
+elseif utf8.len(l)<#l and utf8.len(r)<#r then
+if utf8.len(l)==utf8.len(r)then
+for position,codepoint in utf8.codes(l)do
+if direction=="<"then
+return codepoint<utf8.codepoint(r,position,#r)
+elseif direction==">"then
+return codepoint>utf8.codepoint(r,position,#r)
+end
+end
+return false
+else
+if direction=="<"then
+return utf8.len(l)<utf8.len(r)
+elseif direction==">"then
+return utf8.len(l)>utf8.len(r)
+end
+end
+else
+if direction=="<"then
+return utf8.len(l)==#l and utf8.len(r)<#r
+elseif direction==">"then
+return utf8.len(l)<#l and utf8.len(r)==#r
+end
+end
+else
+if direction=="<"then
+return self[l]<self[r]
+elseif direction==">"then
+return self[l]>self[r]
+end
+end
+end
+end
+table.sort(result,closure(table.unpack(compare_directive,1,2)))
+if compare_directive[1]then
+result.stats=self
+dispose=false
+end
+end
+else
+warn("Invalid Object: ",tostring(self),"!")
+goto invalid
+end
+result[debug.getmetatable(self)]=result[debug.getmetatable(self)]or self[debug.getmetatable(self)]
+if not rawequal(result,self)then
+if not rawequal(debug.getmetatable(result),debug.getmetatable(self))then
+debug.setmetatable(result,debug.getmetatable(self))
+end
+if dispose then
+debug.setmetatable(self,debug.getmetatable(self).recycle_redundant)
+elseif dispose==false then
+debug.setmetatable(self,nil)
+end
+end
+return result
+end
+::invalid::
+end
+
+function consolidate_File:auxiliary_Import_Facility(directory,parse)
+do
+local skip
+if os.getenv("ANDROID_ROOT")=="/system"then
+skip=io.popen('find "'..directory..'" -type d 2>/dev/null'):read()
+elseif os.getenv("OS")=="Windows_NT"then
+skip=os.execute('dir "'..directory..'" /A:D /S /B')
+end
+if skip then
+goto nothing_done
+end
+local data,handle={},io.open(directory,"r")
+if parse then
+parse[1]=parse[1]or"%s"
+local utf8_involved
+for idx=1,#parse do
+if type(parse[idx])~="string"then
+warn(tostring(parse[idx])," at index #",idx," in parse table is no string!")
+goto nothing_done
+end
+if utf8.len(parse[idx])<#parse[idx]then
+utf8_involved=true
+break
+end
+end
+for file_line in handle:lines()do
+if utf8_involved then
+local monumental,cache_match_end,cache_utf8_length,location=0
+repeat
+local start,_,_,_,elem=gfind(file_line,"%s*(.-)%s*(<"..table.concat(parse,">?<")..">?)",1+monumental,parse.tandem or 3)
+cache_match_end,cache_utf8_length,location=-1,-1,nil
+for idx1=1,#elem do
+if elem[idx1][3]~=""then
+for idx2=1,#parse do
+if elem[idx1][3]:match(parse[idx2])then
+goto ineligible
+end
+end
+if elem[idx1][2]>cache_match_end or utf8.len(elem[idx1][3])>cache_utf8_length then
+cache_match_end=elem[idx1][2]
+cache_utf8_length=utf8.len(elem[idx1][3])
+location=idx1
+end
+elseif elem[idx1][2]>cache_match_end then
+cache_match_end=elem[idx1][2]
+end
+::ineligible::
+end
+monumental=cache_match_end
+if location then
+local affix
+if not parse.include or elem[location][4]=="“"or elem[location][4]=="”"or elem[location][4]=="‘"or elem[location][4]=="’"then
+affix=""
+else
+affix=elem[location][4]
+end
+data[elem[location][3]..affix]=1+(data[elem[location][3]..affix]or 0)
+end
+until start>monumental
+local _,_,_,tail=gfind(file_line,"<"..table.concat(parse,">?<")..">?%s*(.-)%s*$")
+cache_match_end,cache_utf8_length,location=-1,-1,nil
+for idx1=1,#tail do
+if tail[idx1][3]~=""then
+for idx2=1,#parse do
+if tail[idx1][3]:match(parse[idx2])then
+goto ineligible
+end
+end
+if tail[idx1][2]>cache_match_end or utf8.len(tail[idx1][3])>cache_utf8_length then
+cache_match_end=tail[idx1][2]
+cache_utf8_length=utf8.len(tail[idx1][3])
+location=idx1
+end
+end
+::ineligible::
+end
+if location then
+data[tail[location][3]]=1+(data[tail[location][3]]or 0)
+end
+else
+for elem in file_line:gmatch("%s*([^"..table.concat(parse).."]-)%s*["..table.concat(parse).."]+")do
+if elem~=""then
+data[elem]=1+(data[elem]or 0)
+end
+end
+local tail=file_line:match("["..table.concat(parse).."]?%s*([^"..table.concat(parse).."]-)%s*$")
+if tail~=""then
+data[tail]=1+(data[tail]or 0)
+end
+end
+end
+data[debug.getmetatable(self)or self]="text"
+elseif directory:match("%.([^%.]+)$")=="ar"then
+local max_width=-1
+for file_line in handle:lines()do
+local width=1
+for _ in file_line:gmatch("\t")do
+width=1+width
+end
+max_width=width>max_width and width or max_width
+end
+handle:seek("set")
+local counter,buffer=0
+for file_line in handle:lines()do
+if not buffer and counter==0 then
+data[1+#data]={}
+end
+for grid in file_line:gmatch("([^\t]-)\t")do
+if counter<max_width then
+if buffer then
+if 1+counter<max_width then
+counter=1+counter
+buffer=buffer.."\n"..grid
+end
+table.insert(data[#data],(buffer:match("\n")and'"'or"")..buffer..(buffer:match("\n")and'"'or""))
+buffer=nil
+if 1+counter==max_width then
+counter=1
+data[1+#data]={}
+table.insert(data[#data],grid)
+end
+else
+counter=1+counter
+table.insert(data[#data],grid)
+end
+else
+warn("Conversion Aborted: File - ",directory," - Is a Mess!")
+debug.setmetatable(data,debug.getmetatable(self).recycle_redundant)
+goto nothing_done
+end
+end
+local tail=file_line:match("\t?([^\t]-)$")
+if counter<max_width then
+if buffer then
+buffer=buffer.."\n"..tail
+else
+buffer=tail
+end
+else
+warn("Conversion Aborted: File - ",directory," - Is a Mess!")
+debug.setmetatable(data,debug.getmetatable(self).recycle_redundant)
+goto nothing_done
+end
+end
+table.insert(data[#data],(buffer:match("\n")and'"'or"")..buffer..(buffer:match("\n")and'"'or ""))
+data[debug.getmetatable(self)or self]="excel"
+else
+local buffer
+for file_line in handle:lines()do
+if not buffer then
+data[1+#data]={}
+end
+for grid in file_line:gmatch("([^\t]-)\t")do
+if buffer then
+buffer=buffer..grid
+if gfind(grid,'[^"]+<"">*"$',9)then
+table.insert(data[#data],buffer)
+buffer=nil
+end
+else
+if gfind(grid,'^"<"">*[^"]+',9)then
+buffer=(buffer or"")..grid
+else
+table.insert(data[#data],grid)
+end
+end
+end
+local tail=file_line:match("\t?([^\t]-)$")
+if buffer then
+buffer=buffer..tail
+if gfind(tail,'[^"]+<"">*"$',9)then
+table.insert(data[#data],buffer)
+buffer=nil
+else
+buffer=buffer.."\n"
+end
+else
+if gfind(tail,'^"<"">*[^"]+',9)then
+buffer=(buffer or"")..tail.."\n"
+else
+table.insert(data[#data],tail)
+end
+end
+end
+data[debug.getmetatable(self)or self]="excel"
+end
+handle:close()
+debug.setmetatable(data,consolidate_File)
+return data
+end
+::nothing_done::
+end
+
+local function call_Precursor(self,...)
+if rawequal(debug.getmetatable(self),self)then
+debug.setmetatable(self,nil)
+end
+local batch=table.pack(...)
+local as_text=type(batch[1])=="table"and true or false
+for idx1=as_text and 2 or 1,(batch.n==0 or(batch.n==1 and as_text))and 1+batch.n or batch.n do
+if idx1>1 and type(batch[idx1])=="table"then
+batch[idx1]={call_Precursor(self,table.unpack(batch[idx1]))}
+else
+local directory_handle,directory_path,directory_location=_ENV[module_name].directory_Match((batch.n>1 or(batch.n==1 and not as_text))and batch[idx1]or nil)
+if directory_path then
+if directory_location then
+batch[idx1]=self:auxiliary_Import_Facility(directory_path,as_text and batch[1])
+else
+local folder={}
+for subdir in directory_handle:lines()do
+folder[1+#folder]=self:auxiliary_Import_Facility(subdir,as_text and batch[1])
+end
+batch[idx1]=folder
+end
+else
+local collection,file={}
+for idx2=1,#directory_handle do
+if idx2%3==1 then
+if directory_handle[2+idx2]then
+file=true
+else
+collection[1+#collection]={}
+for subdir in directory_handle[idx2]:lines()do
+table.insert(collection[#collection],self:auxiliary_Import_Facility(subdir,as_text and batch[1]))
+end
+end
+elseif idx2%3==2 and file then
+collection[1+#collection]=self:auxiliary_Import_Facility(directory_handle[idx2],as_text and batch[1])
+file=false
+end
+end
+batch[idx1]=collection
+end
+end
+end
+if as_text then
+batch.n=batch.n-1
+table.remove(batch,1)
+end
+return table.unpack(batch,1,batch.n)
+end
+
+consolidate_File.__call=call_Precursor
+
+function consolidate_File:export(output)
+local handle
+if self[debug.getmetatable(self)]=="excel"then
+if type(output)~="string"then
+warn(tostring(output)," is a ",type(output),"!")
+output=false
+goto skipped_error
+else
+handle,output=io.open(output,"w")
+if not handle then
+warn("Error Opening Directory to Write: ",tostring(output),"!")
+output=handle
+goto skipped_error
+end
+end
+for idx1=1,#self do
+for idx2=1,#self[idx1]do
+if not self[idx1][idx2]then
+self[idx1][idx2]=""
+end
+end
+handle:write(table.concat(self[idx1],"\t"),"\n")
+end
+elseif self[debug.getmetatable(self)]=="text"then
+handle={}
+if type((type(output)=="table"and output or handle)[1])~="string"then
+warn(tostring((type(output)=="table"and output or handle)[1])," is a ",type((type(output)=="table"and output or handle)[1]),"!")
+output=false
+goto skipped_error
+else
+handle,output[1]=io.open(output[1],"w")
+if not handle then
+warn("Error Opening Directory to Write: ",tostring(output[1]),"!")
+output=handle
+goto skipped_error
+end
+end
+if self.stats then
+for idx=1,#self-1 do
+handle:write((output[2]and self.stats[self[idx]]~=self.stats[self[idx-1]])and self.stats[self[idx]]..":"..(output.delim or"\t")or"",self[idx],(output[2]and self.stats[self[idx]]~=self.stats[self[1+idx]])and"\n"or output.delim or "\t")
+end
+handle:write((output[2]and self.stats[self[#self]]~=self.stats[self[#self-1]])and self.stats[self[#self]]..":"..(output.delim or"\t")or"",self[#self])
+else
+for idx=1,#self-1 do
+handle:write(self[idx],(tonumber(output[2])and table.concat((true_Iterator{1,tonumber(output[2]),function(states)return self[idx][table.unpack(states.ctrls)]end}))~=table.concat((true_Iterator{1,tonumber(output[2]),function(states)return self[1+idx][table.unpack(states.ctrls)]end})))and"\n"or output.delim or"\t")
+end
+handle:write(self[#self])
+end
+else
+warn("Invalid Object: ",tostring(self),"!")
+goto invalid
+end
+handle:close()
+::skipped_error::
+if not output then
+return self
+end
+::invalid::
+end
+
+consolidate_File.__index=consolidate_File
+
+debug.setmetatable(consolidate_File,consolidate_File)
 
 --range[6][12]
 
 _ENV[...]={
-version=1.1640625,
-renewed=20260820,
+version=1.1953125,
+renewed=20260829,
 ["Pointers in Practice"]="Treating certain parameters as tables or pointing to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-call time.",
 ["Class Paradigm"]=[=[Each disparate metamethod along the hierarchy should share a function that explicitly indexes self of a particular, named field, which in turn shall be implemented at top-class nodes as one sees appropriate.
 In case of multiple inheritance, set a proxy for each parent wherein metatable of the mutual heir shall search for methods, where in particular:
@@ -2541,7 +3227,7 @@ vector_Length=vector_Length,
 dimensional_Animator=dimensional_Animator,
 plot_Pixels=plot_Pixels,
 directory_Contrast=directory_Contrast,
-sort_File=sort_File
+consolidate_File=consolidate_File
 --range[4][12]
 }
 
@@ -2549,7 +3235,7 @@ sort_File=sort_File
 --a few declarations:
 --range[4][15]
 local status="ready for run"
-local digest="3412222349469105054"
+local digest="-1904250761691425244"
 --range[2][12]
 --[===[
 ⚙
@@ -4036,7 +4722,7 @@ luaL_openlibs(L);
 lua_pushboolean(L,0);
 lua_setglobal(L,"c_thread");
 struct array_of_arrays *results=NULL;
-char script[]===]..3+script_len..']='..script1..[===[;
+char script[]===],3+script_len,']=',script1,[===[;
 pthread_mutex_lock(&lock);
 DOSTR_ERRH(script,premature_end)
 pthread_mutex_unlock(&lock);
@@ -4163,7 +4849,7 @@ char *key=NULL;
 if(first_assignment<strlen(args[states->progress])){
 states->associative++;
 if(first_assignment>0 && first_assignment<strlen(args[states->progress])){
-key=]===]..(os.getenv("ANDROID_ROOT")=="/system"and""or"_")..[===[alloca(3+first_assignment);
+key=]===],os.getenv("ANDROID_ROOT")=="/system"and""or"_",[===[alloca(3+first_assignment);
 memset(key,0,3+first_assignment);
 strncpy(key,args[states->progress],first_assignment);
 args[states->progress-1]=key;
@@ -4428,7 +5114,7 @@ return states;
 }
 
 int main(int n,char *args[]){
-struct proto_states *states=(struct proto_states*)]===]..(os.getenv("ANDROID_ROOT")=="/system"and""or"_")..[===[alloca(sizeof(struct proto_states));
+struct proto_states *states=(struct proto_states*)]===],os.getenv("ANDROID_ROOT")=="/system"and""or"_",[===[alloca(sizeof(struct proto_states));
 states->progress=0;
 states->associative=0;
 states->depth=3;
@@ -4436,11 +5122,11 @@ memset(states->tracks,0,1+3*states->depth);
 memset(states->traversal,0,2+3*states->depth);
 L=luaL_newstate();
 luaL_openlibs(L);
-char script[]===]..3+script_len..']='..script1..[===[;
+char script[]===],3+script_len,']=',script1,[===[;
 DOSTR_ERRH(script,premature_end)
 REG
 memset(script,0,sizeof script);
-strcpy(script,]===]..script2..[===[);
+strcpy(script,]===],script2,[===[);
 DOSTR_ERRH(script,premature_end)
 if(lua_isstring(L,-1)){
 luaL_loadfile(L,luaL_checkstring(L,-1));
