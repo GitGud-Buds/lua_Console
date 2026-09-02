@@ -1445,173 +1445,6 @@ return nil
 end
 end
 
-
-local function gfind(string,pattern,init,upbound)
-init,upbound=upbound and init or nil,upbound or init or 5
-if type(string)~="string"or type(pattern)~="string"then
-error("Invalid Arguments!")
-end
-local progress,cache_progress,varying_pattern=0,1,{}
-repeat
-local found,stop,capt1,capt2
-::upward::
-found,stop,capt1=pattern:find(".-(%%-)<",progress)
-if found then
-progress=1+stop
-if #capt1%2==0 then
-varying_pattern[1+#varying_pattern]=pattern:sub(cache_progress,stop-1)
-cache_progress=stop
-else
-goto upward
-end
-elseif progress==0 or cache_progress==1 then
-return string:find(pattern,init)
-end
-::downward::
-found,stop,capt2=pattern:find(".-(%%-)>.",progress)
-if found then
-progress=1+stop
-if #capt2%2==0 then
-varying_pattern[1+#varying_pattern]=pattern:sub(cache_progress,stop-1)
-varying_pattern[1+#varying_pattern]=pattern:sub(stop,stop)
-cache_progress=1+stop
-else
-goto downward
-end
-elseif pattern:sub(cache_progress,cache_progress)=="<"then
-error("Imbalanced <>!")
-end
-until not found
-varying_pattern[1+#varying_pattern]=pattern:sub(cache_progress,-1)
-local positional_attributes1,args={},{}
-for idx=1,#varying_pattern//3 do
-if varying_pattern[3*idx-1]:find("<^.->$")==1 then
-local sequence,char_seq=varying_pattern[3*idx-1]:match("^<^(.-)>$"),{}
-for character in sequence:gmatch(".")do
-char_seq[1+#char_seq]=character
-end
-positional_attributes1[1+#positional_attributes1]={3*idx-1,char_seq}
-if varying_pattern[3*idx]=="-"then
-positional_attributes1[#positional_attributes1][1+#positional_attributes1[#positional_attributes1]]=".-"
-elseif varying_pattern[3*idx]=="?"then
-positional_attributes1[#positional_attributes1][1+#positional_attributes1[#positional_attributes1]]=""
-end
-args["bhconds"..math.tointeger(1+#args/2)]=function()return true end
-args["bhdo"..math.tointeger(1+#args/2)]=function(states,layer,ctrl)states.args[2*(1+layer)][1]=ctrl return states end
-args["bhbconds"..math.tointeger(2+#args/2)]=function(states,layer)if states.ctrls[layer-1]==0 then return true end return false end
-args["step"..math.tointeger(1+#args/2)]=-1
-args[1+#args]=#sequence
-args[1+#args]=0
-args["customgen"..math.tointeger(1+#args/2)]=grouped_Combination_Generator
-args[1+#args]=char_seq
-args[1+#args]={stateless=true}
-end
-end
-local positional_attributes2={}
-for idx=1,#varying_pattern//3 do
-if not varying_pattern[3*idx-1]:find("^<^.->$")and varying_pattern[3*idx]=="?"then
-positional_attributes2[1+#positional_attributes2]={3*idx-1,varying_pattern[3*idx-1]:match("^<(.-)>$")}
-args[1+#args]=0
-args[1+#args]=1
-end
-end
-local offset2=0
-if #positional_attributes2>0 then
-args["customgen"..1+math.tointeger(#args/2)]=permutation_Generator
-args[1+#args]=positional_attributes2
-args[1+#args]={#positional_attributes2}
-offset2=1
-end
-local positional_attributes3={}
-for idx=1,#varying_pattern//3 do
-if not varying_pattern[3*idx-1]:find("^<^.->$")and varying_pattern[3*idx]~="?"then
-positional_attributes3[1+#positional_attributes3]={3*idx-1,varying_pattern[3*idx-1]:match("^<(.-)>$"),varying_pattern[3*idx]}
-args[1+#args]=0
-args[1+#args]=type(upbound)=="table"and tonumber(upbound[idx])or tonumber(upbound)
-end
-end
-local offset3=offset2
-if #positional_attributes3>0 then
-args["customgen"..1+math.tointeger(#args/2)]=permutation_Generator
-args[1+#args]=positional_attributes3
-args[1+#args]={#positional_attributes3}
-offset3=1+offset3
-end
-args[1+#args]=function(states,layer)
-for idx1=1,#positional_attributes1 do
-if states.ctrls[2*idx1-1]>0 then
-local char_seq=replicate(positional_attributes1[idx1][2])
-for idx2=1,states.ctrls[2*idx1-1]do
-char_seq[states.ctrls[2*idx1][idx2]]="[^"..char_seq[states.ctrls[2*idx1][idx2]].."]"
-end
-varying_pattern[positional_attributes1[idx1][1]]=positional_attributes1[idx1][3]..table.concat(char_seq)..positional_attributes1[idx1][3]
-else
-varying_pattern[positional_attributes1[idx1][1]]=""
-end
-end
-for idx=1,#positional_attributes2 do
-varying_pattern[states.ctrls[offset2+#positional_attributes2+2*#positional_attributes1][idx][1]]=states.ctrls[offset2+#positional_attributes2+2*#positional_attributes1][idx][2]:rep(states.ctrls[idx+2*#positional_attributes1])
-end
-for idx=1,#positional_attributes3 do
-local progress,sign,repetition=states.ctrls[idx+offset2+#positional_attributes2+2*#positional_attributes1],states.ctrls[offset3+#positional_attributes3+#positional_attributes2+2*#positional_attributes1][idx][3]
-if sign=="+"then
-repetition=1+progress
-elseif sign=="*"then
-repetition=progress
-elseif sign=="-"then
-repetition=(type(upbound)=="table"and tonumber(upbound[idx])or tonumber(upbound))-progress
-end
-varying_pattern[states.ctrls[offset3+#positional_attributes3+#positional_attributes2+2*#positional_attributes1][idx][1]]=states.ctrls[offset3+#positional_attributes3+#positional_attributes2+2*#positional_attributes1][idx][2]:rep(repetition)
-end
-local replica_varying_pattern=replicate(varying_pattern)
-for idx=#replica_varying_pattern//3,1,-1 do
-table.remove(replica_varying_pattern,3*idx)
-end
-local result=table.pack(string:find(table.concat(replica_varying_pattern),init))
-if result[1]then
-return result
-else
-return false
-end
-end
-local results=true_Iterator(args)
-if #results==1 then
-return table.unpack(results[1],1,results[1].n)
-elseif #results<1 then
-return false
-end
-local filter,filtered_result={},{}
-for i=1,#results do
-local k=1+i%#results
-if results[i].n~=results[k].n then
-error("System Error!")
-end
-filter[i]=results[i][1]
-end
-local analysis,inverse={},{}
-for j=1,#filter do
-analysis[filter[j]]=1+(analysis[filter[j]]or 0)
-inverse[filter[j]]=(inverse[filter[j]]or 0)<j and j or inverse[filter[j]]
-end
-table.sort(filter,function(l,r)if analysis[l]==analysis[r]then return inverse[l]>inverse[r]end return analysis[l]>analysis[r]end)
-filtered_result[1]=filter[1]
-for idx=1,results[1].n do
-filter={}
-for i=1,#results do
-filter[i]=results[i][idx]
-end
-local analysis,inverse={},{}
-for j=1,#filter do
-analysis[filter[j]]=1+(analysis[filter[j]]or 0)
-inverse[filter[j]]=(inverse[filter[j]]or 0)<j and j or inverse[filter[j]]
-end
-table.sort(filter,function(l,r)if analysis[l]==analysis[r]then return inverse[l]>inverse[r]end return analysis[l]>analysis[r]end)
-filtered_result[idx]=filter[1]
-end
-filtered_result[1+results[1].n]=results
-return table.unpack(filtered_result,1,1+results[1].n)
-end
-
 --range[8][15]
 
 local hash_Functions={}
@@ -2352,6 +2185,172 @@ end
 end
 
 
+local function gfind(string,pattern,init,upbound)
+init,upbound=upbound and init or nil,upbound or init or 5
+if type(string)~="string"or type(pattern)~="string"then
+error("Invalid Arguments!")
+end
+local progress,cache_progress,varying_pattern=0,1,{}
+repeat
+local found,stop,capt1,capt2
+::upward::
+found,stop,capt1=pattern:find(".-(%%-)<",progress)
+if found then
+progress=1+stop
+if #capt1%2==0 then
+varying_pattern[1+#varying_pattern]=pattern:sub(cache_progress,stop-1)
+cache_progress=stop
+else
+goto upward
+end
+elseif progress==0 or cache_progress==1 then
+return string:find(pattern,init)
+end
+::downward::
+found,stop,capt2=pattern:find(".-(%%-)>.",progress)
+if found then
+progress=1+stop
+if #capt2%2==0 then
+varying_pattern[1+#varying_pattern]=pattern:sub(cache_progress,stop-1)
+varying_pattern[1+#varying_pattern]=pattern:sub(stop,stop)
+cache_progress=1+stop
+else
+goto downward
+end
+elseif pattern:sub(cache_progress,cache_progress)=="<"then
+error("Imbalanced <>!")
+end
+until not found
+varying_pattern[1+#varying_pattern]=pattern:sub(cache_progress,-1)
+local positional_attributes1,args={},{}
+for idx=1,#varying_pattern//3 do
+if varying_pattern[3*idx-1]:find("<^.->$")==1 then
+local sequence,char_seq=varying_pattern[3*idx-1]:match("^<^(.-)>$"),{}
+for character in sequence:gmatch(".")do
+char_seq[1+#char_seq]=character
+end
+positional_attributes1[1+#positional_attributes1]={3*idx-1,char_seq}
+if varying_pattern[3*idx]=="-"then
+positional_attributes1[#positional_attributes1][1+#positional_attributes1[#positional_attributes1]]=".-"
+elseif varying_pattern[3*idx]=="?"then
+positional_attributes1[#positional_attributes1][1+#positional_attributes1[#positional_attributes1]]=""
+end
+args["bhconds"..math.tointeger(1+#args/2)]=function()return true end
+args["bhdo"..math.tointeger(1+#args/2)]=function(states,layer,ctrl)states.args[2*(1+layer)][1]=ctrl return states end
+args["bhbconds"..math.tointeger(2+#args/2)]=function(states,layer)if states.ctrls[layer-1]==0 then return true end return false end
+args["step"..math.tointeger(1+#args/2)]=-1
+args[1+#args]=#sequence
+args[1+#args]=0
+args["customgen"..math.tointeger(1+#args/2)]=grouped_Combination_Generator
+args[1+#args]=char_seq
+args[1+#args]={stateless=true}
+end
+end
+local positional_attributes2={}
+for idx=1,#varying_pattern//3 do
+if not varying_pattern[3*idx-1]:find("^<^.->$")and varying_pattern[3*idx]=="?"then
+positional_attributes2[1+#positional_attributes2]={3*idx-1,varying_pattern[3*idx-1]:match("^<(.-)>$")}
+args[1+#args]=0
+args[1+#args]=1
+end
+end
+local offset2=0
+if #positional_attributes2>0 then
+args["customgen"..1+math.tointeger(#args/2)]=permutation_Generator
+args[1+#args]=positional_attributes2
+args[1+#args]={#positional_attributes2}
+offset2=1
+end
+local positional_attributes3={}
+for idx=1,#varying_pattern//3 do
+if not varying_pattern[3*idx-1]:find("^<^.->$")and varying_pattern[3*idx]~="?"then
+positional_attributes3[1+#positional_attributes3]={3*idx-1,varying_pattern[3*idx-1]:match("^<(.-)>$"),varying_pattern[3*idx]}
+args[1+#args]=0
+args[1+#args]=type(upbound)=="table"and tonumber(upbound[idx])or tonumber(upbound)
+end
+end
+local offset3=offset2
+if #positional_attributes3>0 then
+args["customgen"..1+math.tointeger(#args/2)]=permutation_Generator
+args[1+#args]=positional_attributes3
+args[1+#args]={#positional_attributes3}
+offset3=1+offset3
+end
+args[1+#args]=function(states,layer)
+for idx1=1,#positional_attributes1 do
+if states.ctrls[2*idx1-1]>0 then
+local char_seq=replicate(positional_attributes1[idx1][2])
+for idx2=1,states.ctrls[2*idx1-1]do
+char_seq[states.ctrls[2*idx1][idx2]]="[^"..char_seq[states.ctrls[2*idx1][idx2]].."]"
+end
+varying_pattern[positional_attributes1[idx1][1]]=positional_attributes1[idx1][3]..table.concat(char_seq)..positional_attributes1[idx1][3]
+else
+varying_pattern[positional_attributes1[idx1][1]]=""
+end
+end
+for idx=1,#positional_attributes2 do
+varying_pattern[states.ctrls[offset2+#positional_attributes2+2*#positional_attributes1][idx][1]]=states.ctrls[offset2+#positional_attributes2+2*#positional_attributes1][idx][2]:rep(states.ctrls[idx+2*#positional_attributes1])
+end
+for idx=1,#positional_attributes3 do
+local progress,sign,repetition=states.ctrls[idx+offset2+#positional_attributes2+2*#positional_attributes1],states.ctrls[offset3+#positional_attributes3+#positional_attributes2+2*#positional_attributes1][idx][3]
+if sign=="+"then
+repetition=1+progress
+elseif sign=="*"then
+repetition=progress
+elseif sign=="-"then
+repetition=(type(upbound)=="table"and tonumber(upbound[idx])or tonumber(upbound))-progress
+end
+varying_pattern[states.ctrls[offset3+#positional_attributes3+#positional_attributes2+2*#positional_attributes1][idx][1]]=states.ctrls[offset3+#positional_attributes3+#positional_attributes2+2*#positional_attributes1][idx][2]:rep(repetition)
+end
+local replica_varying_pattern=replicate(varying_pattern)
+for idx=#replica_varying_pattern//3,1,-1 do
+table.remove(replica_varying_pattern,3*idx)
+end
+local result=table.pack(string:find(table.concat(replica_varying_pattern),init))
+if result[1]then
+return result
+else
+return false
+end
+end
+local results=true_Iterator(args)
+if #results==1 then
+return table.unpack(results[1],1,results[1].n)
+elseif #results<1 then
+return false
+end
+local filter,filtered_result={},{}
+for i=1,#results do
+local k=1+i%#results
+if results[i].n~=results[k].n then
+error("System Error!")
+end
+filter[i]=results[i][1]
+end
+local analysis,inverse={},{}
+for j=1,#filter do
+analysis[filter[j]]=1+(analysis[filter[j]]or 0)
+inverse[filter[j]]=(inverse[filter[j]]or 0)<j and j or inverse[filter[j]]
+end
+table.sort(filter,function(l,r)if analysis[l]==analysis[r]then return inverse[l]>inverse[r]end return analysis[l]>analysis[r]end)
+filtered_result[1]=filter[1]
+for idx=1,results[1].n do
+filter={}
+for i=1,#results do
+filter[i]=results[i][idx]
+end
+local analysis,inverse={},{}
+for j=1,#filter do
+analysis[filter[j]]=1+(analysis[filter[j]]or 0)
+inverse[filter[j]]=(inverse[filter[j]]or 0)<j and j or inverse[filter[j]]
+end
+table.sort(filter,function(l,r)if analysis[l]==analysis[r]then return inverse[l]>inverse[r]end return analysis[l]>analysis[r]end)
+filtered_result[idx]=filter[1]
+end
+filtered_result[1+results[1].n]=results
+return table.unpack(filtered_result,1,1+results[1].n)
+end
+
 local function directory_Contrast(directory1,directory2,dof,rows,sieve,nc,xy,namecontent)
 dof=dof or 6
 rows=rows or 6
@@ -3037,22 +3036,28 @@ for file_line in handle:lines()do
 if not buffer then
 data[1+#data]={}
 end
-for grid in file_line:gmatch("([^\t]-)\t")do
+for grid in file_line:gmatch(directory:match("%.([^%.]+)$")=="csv"and"([^,]-),"or"([^\t]-)\t")do
 if buffer then
 buffer=buffer..grid
 if gfind(grid,'[^"]+<"">*"$',9)then
 table.insert(data[#data],buffer)
 buffer=nil
+elseif directory:match("%.([^%.]+)$")=="csv"then
+buffer=buffer..","
 end
 else
 if gfind(grid,'^"<"">*[^"]+',9)then
-buffer=(buffer or"")..grid
+if gfind(grid,'[^"]+<"">*"$',9)then
+table.insert(data[#data],grid)
+else
+buffer=grid..","
+end
 else
 table.insert(data[#data],grid)
 end
 end
 end
-local tail=file_line:match("\t?([^\t]-)$")
+local tail=file_line:match(directory:match("%.([^%.]+)$")=="csv"and",?([^,]-)$"or"\t?([^\t]-)$")
 if buffer then
 buffer=buffer..tail
 if gfind(tail,'[^"]+<"">*"$',9)then
@@ -3063,7 +3068,11 @@ buffer=buffer.."\n"
 end
 else
 if gfind(tail,'^"<"">*[^"]+',9)then
-buffer=(buffer or"")..tail.."\n"
+if gfind(tail,'[^"]+<"">*"$',9)then
+table.insert(data[#data],tail)
+else
+buffer=tail.."\n"
+end
 else
 table.insert(data[#data],tail)
 end
@@ -3137,9 +3146,10 @@ warn(tostring(output)," is a ",type(output),"!")
 output=false
 goto skipped_error
 else
-handle,output=io.open(output,"w")
+local open_error_message
+handle,open_error_message=io.open(output,"w")
 if not handle then
-warn("Error Opening Directory to Write: ",tostring(output),"!")
+warn("Error Opening Directory to Write: ",tostring(open_error_message),"!")
 output=handle
 goto skipped_error
 end
@@ -3150,7 +3160,7 @@ if not self[idx1][idx2]then
 self[idx1][idx2]=""
 end
 end
-handle:write(table.concat(self[idx1],"\t"),"\n")
+handle:write(table.concat(self[idx1],output:match("%.([^%.]+)$")=="csv"and","or"\t"),"\n")
 end
 elseif self[debug.getmetatable(self)]=="text"then
 handle={}
@@ -3196,8 +3206,8 @@ debug.setmetatable(consolidate_File,consolidate_File)
 --range[6][12]
 
 _ENV[...]={
-version=1.1953125,
-renewed=20260829,
+version=1.2109375,
+renewed=20260901,
 ["Pointers in Practice"]="Treating certain parameters as tables or pointing to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-call time.",
 ["Class Paradigm"]=[=[Each disparate metamethod along the hierarchy should share a function that explicitly indexes self of a particular, named field, which in turn shall be implemented at top-class nodes as one sees appropriate.
 In case of multiple inheritance, set a proxy for each parent wherein metatable of the mutual heir shall search for methods, where in particular:
@@ -3213,8 +3223,7 @@ arithmetiCalc=arithmetiCalc,
 group_Generator=group_Generator,
 permutation_Generator=permutation_Generator,
 grouped_Combination_Generator=grouped_Combination_Generator,
-partially_Determined_Permutation_Generator=partially_Determined_Permutation_Generator,
-gfind=gfind
+partially_Determined_Permutation_Generator=partially_Determined_Permutation_Generator
 --range[6][15]
 ,
 hash_Functions=hash_Functions,
@@ -3226,6 +3235,7 @@ vector_Addition=vector_Addition,
 vector_Length=vector_Length,
 dimensional_Animator=dimensional_Animator,
 plot_Pixels=plot_Pixels,
+gfind=gfind,
 directory_Contrast=directory_Contrast,
 consolidate_File=consolidate_File
 --range[4][12]
@@ -3235,7 +3245,7 @@ consolidate_File=consolidate_File
 --a few declarations:
 --range[4][15]
 local status="ready for run"
-local digest="-1904250761691425244"
+local digest="-340680452527882724"
 --range[2][12]
 --[===[
 ⚙
@@ -3565,14 +3575,15 @@ print([===[Process finished - here you are:
 return sum,compare
 end
 local function init_Dbg(object,dbgd,layer)
-layer,dbgd=layer or 1,dbgd or{}
 if type(object)=="table"then
+layer,dbgd=layer or 1,dbgd or{}
 if dbgd[object]and dbgd[object]<layer then
 return tostring(object).."-loophole patch"
 else
 dbgd[object]=layer
 end
 local function msg_Hdlr(errobj)
+debug.sethook()
 return debug.traceback([===[栈回溯：
 ]===]..errobj)
 end
@@ -3584,7 +3595,10 @@ local call_stacks={}
 return function(...)
 debug.sethook(function(event,line_number)
 if event~="tail call"then
-table.insert(call_stacks,debug.getinfo(2,"S"))
+local stack=debug.getinfo(2,"S")
+if stack.short_src==find_self then
+call_stacks[stack.linedefined..":"..stack.lastlinedefined]=stack
+end
 end
 end,"c")
 local call_results=table.pack(xpcall(got or debug.getmetatable(self)[key],msg_Hdlr,...))
@@ -3592,19 +3606,19 @@ if call_results[1]then
 debug.sethook()
 return table.unpack(call_results,2,call_results.n)
 else
-debug.sethook()
 print(call_results[2])
-table.insert(call_stacks,debug.getinfo(debug.getmetatable(self)[key],"S"))
+for _,v in next,call_stacks do
+call_stacks[1+#call_stacks]=v
+end
+call_stacks[1+#call_stacks]=debug.getinfo(got or debug.getmetatable(self)[key],"S")
 io.output(where..keystone(_ENV[required_name].version,_ENV[required_name].renewed)..keystone(_ENV[required_name].renewed,_ENV[required_name].version)..keystone(status,_ENV[required_name].renewed)..keystone(status,_ENV[required_name].version))
 local line_number=0
 for debugged_line in io.input(find_self):lines("L")do
 line_number=1+line_number
 local bool
-for stack in table_Player(call_stacks)do
-if stack.short_src==find_self then
-if line_number>=stack.linedefined and line_number<=stack.lastlinedefined then
+for idx=1,#call_stacks do
+if line_number>=call_stacks[idx].linedefined and line_number<=call_stacks[idx].lastlinedefined then
 bool=true
-end
 end
 end
 if bool==true then
@@ -3616,7 +3630,7 @@ io.input(find_self):close()
 end
 end
 else
-return debug.getmetatable(self)[key]
+return got or debug.getmetatable(self)[key]
 end
 end)
 if type(rawget(object,"__call"))=="function"then
@@ -3625,7 +3639,10 @@ rawset(object,"__call",function(self,...)
 local call_stacks={}
 debug.sethook(function(event,line_number)
 if event~="tail call"then
-table.insert(call_stacks,debug.getinfo(2,"S"))
+local stack=debug.getinfo(2,"S")
+if stack.short_src==find_self then
+call_stacks[stack.linedefined..":"..stack.lastlinedefined]=stack
+end
 end
 end,"c")
 local call_results=table.pack(xpcall(cache__call,msg_Hdlr,debug.getmetatable(self),...))
@@ -3633,19 +3650,19 @@ if call_results[1]then
 debug.sethook()
 return table.unpack(call_results,2,call_results.n)
 else
-debug.sethook()
 print(call_results[2])
-table.insert(call_stacks,debug.getinfo(2,"S"))
+for _,v in next,call_stacks do
+call_stacks[1+#call_stacks]=v
+end
+call_stacks[1+#call_stacks]=debug.getinfo(cache__call,"S")
 io.output(where..keystone(_ENV[required_name].version,_ENV[required_name].renewed)..keystone(_ENV[required_name].renewed,_ENV[required_name].version)..keystone(status,_ENV[required_name].renewed)..keystone(status,_ENV[required_name].version))
 local line_number=0
 for debugged_line in io.input(find_self):lines("L")do
 line_number=1+line_number
 local bool
-for stack in table_Player(call_stacks)do
-if stack.short_src==find_self then
-if line_number>=stack.linedefined and line_number<=stack.lastlinedefined then
+for idx=1,#call_stacks do
+if line_number>=call_stacks[idx].linedefined and line_number<=call_stacks[idx].lastlinedefined then
 bool=true
-end
 end
 end
 if bool==true then
@@ -3675,9 +3692,8 @@ for idx=1,#collect do
 rawset(object,collect[idx],nil)
 end
 return debug.setmetatable(proxy,object)
-else
-return object
 end
+return object
 end
 local cstatus=status
 
@@ -4652,10 +4668,10 @@ if(lua_isinteger(L,-2)){
 lua_insert(L,-2);
 UTF8_OFFSETS
 lua_pushlstring(L,string_itself,luaL_checkinteger(L,-2)-1);
-lua_geti(L,2,2);
+lua_geti(L,2,1);
 lua_pushlstring(L,luaL_checkinteger(L,-3)+string_itself,string_length-luaL_checkinteger(L,-3));
 lua_concat(L,3);
-lua_seti(L,2,1);
+lua_seti(L,2,2);
 }else
 luaL_error(L,"Invalid Subscript!");
 return 0;
@@ -5155,12 +5171,12 @@ os.execute("mkdir -v -m=rwx $PREFIX/local/c_M")
 if os.execute('clang -x c "'..where..keystone(_ENV[...].version,_ENV[...].renewed)..keystone(_ENV[...].renewed,_ENV[...].version)..keystone(status,_ENV[...].renewed)..keystone(status,_ENV[...].version)..'" -fPIC -ggdb -O0 -ffp-contract=fast -Wall -o $PREFIX/local/c_M/lua_Console -L$PREFIX/local/lib -llua -L. -lm -pthread')then
 os.execute([===[export "PATH=$PREFIX/bin"
 unset LUA_INIT
-unset LUA_INIT_]===]..select(3,gfind(_VERSION,"(<%d-%s-%.%s->*%d*)")):gsub("%.","_").."\n"..[===[cat > ~/.bashrc << EOF
+unset LUA_INIT_]===].._VERSION:match("%f[%s%.%d][%s%.%w]*"):gsub("%s",""):gsub("%.","_").."\n"..[===[cat > ~/.bashrc << EOF
 $(luarocks path)
 EOF
 source ~/.bashrc
 echo 'export "PATH=$PREFIX/local/bin:$PREFIX/local/c_M:$PATH"' >> ~/.bashrc
-echo 'export "LUA_INIT_]===]..select(3,gfind(_VERSION,"(<%d-%s-%.%s->*%d*)")):gsub("%.","_")..[===[=@/sdcard/Download/Codes/lua_StandAlone"' >> ~/.bashrc
+echo 'export "LUA_INIT_]===].._VERSION:match("%f[%s%.%d][%s%.%w]*"):gsub("%s",""):gsub("%.","_")..[===[=@/sdcard/Download/Codes/lua_StandAlone"' >> ~/.bashrc
 source ~/.bashrc]===])
 print("Main Program Ready for Run!")
 end
