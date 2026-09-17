@@ -1,46 +1,4 @@
 --range[8][12]
-local function serialise(self,compact,indent_char,serialised,layer,assembler)
-indent_char,serialised,layer,assembler=indent_char or compact,serialised or indent_char or compact,layer or 1,assembler or{}
-compact,indent_char,serialised=type(compact)=="boolean"and compact or false,type(indent_char)=="string"and indent_char or"",type(serialised)=="table"and serialised or{}
-if type(self)=="string"then
-table.insert(assembler,string.format("%q",self))
-elseif type(self)=="table"then
-if serialised[self]and serialised[self]<layer then
-table.insert(assembler,tostring(self).."-loophole patch")
-goto skip
-else
-serialised[self]=layer
-end
-table.insert(assembler,[===[{
-]===])
-for k,v in next,self do
-table.insert(assembler,indent_char:rep(layer))
-table.insert(assembler,"[")
-assembler=serialise(k,compact,indent_char,serialised,1+layer,assembler)
-table.insert(assembler,"]=")
-assembler=serialise(v,compact,indent_char,serialised,1+layer,assembler)
-table.insert(assembler,[===[,
-]===])
-end
-table.insert(assembler,indent_char:rep(layer-1).."}")
-::skip::
-else
-table.insert(assembler,tostring(self))
-end
-if layer>1 then
-return assembler
-else
-if compact and indent_char==""then
-return(table.concat(assembler):gsub("%s+",""):gsub(",}","}"))
-else
-return(table.concat(assembler):gsub([===[=[^
-]-{]===],"={"):gsub([===[,(
-[^
-]-})]===],"%1"))
-end
-end
-end
-
 local function replicate(object,touched,layer)
 touched,layer=touched or{},layer or 1
 if type(object)~="table"then
@@ -139,35 +97,91 @@ return element
 end
 end
 
-local function binary_Search(sequence,sought,rule,range)
-if type(sequence)~="table" or #sequence<1 then
-error("Sequence Expected!")
+local function comp_Factory(invoke_left_with_value,ref_collection)
+invoke_left_with_value,ref_collection=type(invoke_left_with_value)=="boolean"and invoke_left_with_value or false,type(ref_collection)=="table"and ref_collection or(type(invoke_left_with_value)=="table"and invoke_left_with_value or nil)
+return function(l,r)
+if ref_collection then
+if not invoke_left_with_value then
+l=ref_collection[l]
 end
-if type(rule)~="function"then
-rule=function(l,r)
+r=ref_collection[r]
+end
 if type(l)~=type(r)then
 return type(l)<type(r)
-elseif type(l)=="number"or type(l)=="string"then
+elseif tonumber(l)and tonumber(r)and tonumber(l)~=tonumber(r)then
+return tonumber(l)<tonumber(r)
+elseif type(l)=="string"then
+if utf8.len(l)==#l and utf8.len(r)==#r and l~=r then
 return l<r
+elseif utf8.len(l)<utf8.len(r)then
+for position,codepoint in utf8.codes(l)do
+if codepoint~=utf8.codepoint(r,position,#r)then
+return codepoint<utf8.codepoint(r,position,#r)
+end
+end
+return true
+else
+for position,codepoint in utf8.codes(r)do
+if codepoint~=utf8.codepoint(l,position,#l)then
+return codepoint>utf8.codepoint(l,position,#l)
+end
+end
+return false
+end
 end
 return tostring(l)<tostring(r)
 end
-table.sort(sequence,rule)
 end
-range=range or{1,#sequence}
-range[1]=range[1]or 1
-range[2]=range[2]or #sequence
-repeat
-local middle=(range[1]+range[2])//2
-if sought==sequence[middle]then
-return middle
-elseif rule(sought,sequence[middle])then
+
+local function binary_Search(raw_table,sought,sorted_array,accommodate,rule,range)
+accommodate,rule,range=type(accommodate)=="boolean"and accommodate or(type(sorted_array)=="boolean"and sorted_array or false),type(rule)=="function"and rule or(type(accommodate)=="function"and accommodate or(type(sorted_array)=="function"and sorted_array or comp_Factory)),type(range)=="table"and range or(type(rule)=="table"and rule or(type(accommodate)=="table"and accommodate or(type(raw_table)=="table"or type(sorted_array)~="table"and true or sorted_array)))
+local established
+if type(raw_table)~="table"and type(sought)=="table"then
+raw_table,sought,sorted_array=nil,raw_table,sought
+elseif type(sorted_array)~="table"then
+sorted_array,established={},true
+for key in next,raw_table do
+sorted_array[1+#sorted_array]=key
+end
+table.sort(sorted_array,rule(raw_table))
+end
+if #sorted_array>0 then
+if range==true then
+range={1,#sorted_array}
+end
+range[1]=tonumber(range[1])and(tonumber(range[1])%#sorted_array>0 and tonumber(range[1])%#sorted_array or #sorted_array)or 1
+range[2]=tonumber(range[2])and(tonumber(range[2])%#sorted_array>0 and tonumber(range[2])%#sorted_array or #sorted_array)or #sorted_array
+if range[1]>range[2]then
+range[1],range[2]=range[2],range[1]
+end
+else
+range={1,#sorted_array}
+end
+while range[1]<=range[2]do
+local middle,candidate,direction=(range[1]+range[2])//2
+if raw_table then
+candidate=raw_table[sorted_array[middle]]
+direction=rule(true,raw_table)(sought,sorted_array[middle])
+else
+candidate=sorted_array[middle]
+direction=rule(true,sorted_array)(sought,middle)
+end
+if sought==candidate then
+if accommodate then
+range[2]=middle-1
+else
+return not raw_table or not established and middle or sorted_array[middle]
+end
+elseif direction then
 range[2]=middle-1
 else
 range[1]=1+middle
 end
-until range[1]>range[2]
-return false
+end
+if accommodate then
+return not raw_table or not established and range[1]or sorted_array[range[1]]
+end
+return nil
 end
 
 local function index_Body(input_table,start,stop,stateless)
@@ -269,49 +283,27 @@ end
 
 local function table_Player(input_table,params)
 params=params or{}
-local keys={}
+local keys
 if type(params.key_word)=="boolean"then
+keys={}
 for key in next,input_table,#input_table>0 and #input_table or nil do
 keys[1+#keys]=key
 end
-if params.key_word==true then
-if type(params.comp_func)~="function"then
-params.comp_func=function(l,r)
-if type(l)~=type(r)then
-return type(l)<type(r)
-elseif type(l)=="number"or type(l)=="string"then
-return l<r
+if params.key_word then
+table.sort(keys,type(params.comp_func)=="function"and params.comp_func or comp_Factory())
 end
-return tostring(l)<tostring(r)
+if params.i~=nil and(math.type(params.i)~="integer"or params.i>#input_table)then
+params.i=type(params.i)~="table"and binary_Search(not params.key_word and keys or params.i,params.key_word and keys or params.i,type(params.comp_func)=="function"and params.comp_func)or params.i
 end
-end
-table.sort(keys,params.comp_func)
-end
-if params.i and(type(params.i)~="number"or math.type(params.i)~="integer")or params.j and(type(params.j)~="number"or math.type(params.j)~="integer")then
-if not params.key_word then
-for idx,vlu in ipairs(keys)do
-if params.i and(type(params.i)~="number"or math.type(params.i)~="integer")and vlu==params.i then
-params.i=idx
-end
-if params.j and(type(params.j)~="number"or math.type(params.j)~="integer")and vlu==params.j then
-params.j=idx
-end
-end
-else
-if params.i and(type(params.i)~="number"or math.type(params.i)~="integer")then
-params.i=binary_Search(keys,params.i,params.comp_func)
-end
-if params.j and(type(params.j)~="number"or math.type(params.j)~="integer")then
-params.j=binary_Search(keys,params.j,params.comp_func)
-end
-end
+if params.j~=nil and(math.type(params.j)~="integer"or params.j>#input_table)then
+params.j=type(params.j)~="table"and binary_Search(not params.key_word and keys or params.j,params.key_word and keys or params.j,type(params.comp_func)=="function"and params.comp_func)or params.j
 end
 local unfound_keys={}
-if params.i and(type(params.i)~="number"or math.type(params.i)~="integer")then
-unfound_keys[1+unfound_keys]=tostring(params.i)
+if params.i~=nil and math.type(params.i)~="integer"then
+unfound_keys[1+#unfound_keys]=tostring(params.i)
 end
-if params.j and(type(params.j)~="number"or math.type(params.j)~="integer")then
-unfound_keys[1+unfound_keys]=tostring(params.j)
+if params.j~=nil and math.type(params.j)~="integer"then
+unfound_keys[1+#unfound_keys]=tostring(params.j)
 end
 if #unfound_keys>0 then
 error(table.concat(unfound_keys,", ")..": Key"..(#unfound_keys>1 and"s"or"").." Unfound in Input Table!")
@@ -530,7 +522,7 @@ states,cache_layer,cache_ctrl,cache_yield1,cache_yield2=(states[args or"args"]["
 end
 else
 local comprehend=states[args or"args"][1+2*layer](states,layer,ctrl)
-if comprehend then
+if comprehend~=nil then
 states[results or"results"][1+#states[results or"results"]]=comprehend
 end
 end
@@ -587,7 +579,7 @@ states,cache_layer,cache_ctrl,cache_yield1,cache_yield2=(states[args or"args"]["
 end
 else
 local comprehend=states[args or"args"][1+2*layer](states,layer,ctrl,yield1,yield2)
-if comprehend then
+if comprehend~=nil then
 states[results or"results"][1+#states[results or"results"]]=comprehend
 end
 end
@@ -1447,9 +1439,6 @@ end
 
 --range[8][15]
 
-local hash_Functions={}
-
-
 local function uni_Inc_Rand(a, b, precision)
 precision = precision or 1e6
 local range = b-a
@@ -2099,7 +2088,7 @@ initial_states.colours[4]=initial_states.colours[4]or{255,0,0}
 initial_states.colours[5]=initial_states.colours[5]or{0,255,255}
 initial_states.colours[6]=initial_states.colours[6]or{0,0,255}
 initial_states.colour_Blend=colour_Blend
-initial_states.meta_Hash=_ENV[module_name].meta_Hash
+initial_states.meta_Hash=require(module_name).meta_Hash
 initial_states.hashed={sizes=initial_states.sizes,axes=initial_states.axes}
 initial_states.hash=initial_states.meta_Hash(initial_states.hashed)
 pixels=pixels or{}
@@ -2185,172 +2174,6 @@ end
 end
 
 
-local function gfind(string,pattern,init,upbound)
-init,upbound=upbound and init or nil,upbound or init or 5
-if type(string)~="string"or type(pattern)~="string"then
-error("Invalid Arguments!")
-end
-local progress,cache_progress,varying_pattern=0,1,{}
-repeat
-local found,stop,capt1,capt2
-::upward::
-found,stop,capt1=pattern:find(".-(%%-)<",progress)
-if found then
-progress=1+stop
-if #capt1%2==0 then
-varying_pattern[1+#varying_pattern]=pattern:sub(cache_progress,stop-1)
-cache_progress=stop
-else
-goto upward
-end
-elseif progress==0 or cache_progress==1 then
-return string:find(pattern,init)
-end
-::downward::
-found,stop,capt2=pattern:find(".-(%%-)>.",progress)
-if found then
-progress=1+stop
-if #capt2%2==0 then
-varying_pattern[1+#varying_pattern]=pattern:sub(cache_progress,stop-1)
-varying_pattern[1+#varying_pattern]=pattern:sub(stop,stop)
-cache_progress=1+stop
-else
-goto downward
-end
-elseif pattern:sub(cache_progress,cache_progress)=="<"then
-error("Imbalanced <>!")
-end
-until not found
-varying_pattern[1+#varying_pattern]=pattern:sub(cache_progress,-1)
-local positional_attributes1,args={},{}
-for idx=1,#varying_pattern//3 do
-if varying_pattern[3*idx-1]:find("<^.->$")==1 then
-local sequence,char_seq=varying_pattern[3*idx-1]:match("^<^(.-)>$"),{}
-for character in sequence:gmatch(".")do
-char_seq[1+#char_seq]=character
-end
-positional_attributes1[1+#positional_attributes1]={3*idx-1,char_seq}
-if varying_pattern[3*idx]=="-"then
-positional_attributes1[#positional_attributes1][1+#positional_attributes1[#positional_attributes1]]=".-"
-elseif varying_pattern[3*idx]=="?"then
-positional_attributes1[#positional_attributes1][1+#positional_attributes1[#positional_attributes1]]=""
-end
-args["bhconds"..math.tointeger(1+#args/2)]=function()return true end
-args["bhdo"..math.tointeger(1+#args/2)]=function(states,layer,ctrl)states.args[2*(1+layer)][1]=ctrl return states end
-args["bhbconds"..math.tointeger(2+#args/2)]=function(states,layer)if states.ctrls[layer-1]==0 then return true end return false end
-args["step"..math.tointeger(1+#args/2)]=-1
-args[1+#args]=#sequence
-args[1+#args]=0
-args["customgen"..math.tointeger(1+#args/2)]=grouped_Combination_Generator
-args[1+#args]=char_seq
-args[1+#args]={stateless=true}
-end
-end
-local positional_attributes2={}
-for idx=1,#varying_pattern//3 do
-if not varying_pattern[3*idx-1]:find("^<^.->$")and varying_pattern[3*idx]=="?"then
-positional_attributes2[1+#positional_attributes2]={3*idx-1,varying_pattern[3*idx-1]:match("^<(.-)>$")}
-args[1+#args]=0
-args[1+#args]=1
-end
-end
-local offset2=0
-if #positional_attributes2>0 then
-args["customgen"..1+math.tointeger(#args/2)]=permutation_Generator
-args[1+#args]=positional_attributes2
-args[1+#args]={#positional_attributes2}
-offset2=1
-end
-local positional_attributes3={}
-for idx=1,#varying_pattern//3 do
-if not varying_pattern[3*idx-1]:find("^<^.->$")and varying_pattern[3*idx]~="?"then
-positional_attributes3[1+#positional_attributes3]={3*idx-1,varying_pattern[3*idx-1]:match("^<(.-)>$"),varying_pattern[3*idx]}
-args[1+#args]=0
-args[1+#args]=type(upbound)=="table"and tonumber(upbound[idx])or tonumber(upbound)
-end
-end
-local offset3=offset2
-if #positional_attributes3>0 then
-args["customgen"..1+math.tointeger(#args/2)]=permutation_Generator
-args[1+#args]=positional_attributes3
-args[1+#args]={#positional_attributes3}
-offset3=1+offset3
-end
-args[1+#args]=function(states,layer)
-for idx1=1,#positional_attributes1 do
-if states.ctrls[2*idx1-1]>0 then
-local char_seq=replicate(positional_attributes1[idx1][2])
-for idx2=1,states.ctrls[2*idx1-1]do
-char_seq[states.ctrls[2*idx1][idx2]]="[^"..char_seq[states.ctrls[2*idx1][idx2]].."]"
-end
-varying_pattern[positional_attributes1[idx1][1]]=positional_attributes1[idx1][3]..table.concat(char_seq)..positional_attributes1[idx1][3]
-else
-varying_pattern[positional_attributes1[idx1][1]]=""
-end
-end
-for idx=1,#positional_attributes2 do
-varying_pattern[states.ctrls[offset2+#positional_attributes2+2*#positional_attributes1][idx][1]]=states.ctrls[offset2+#positional_attributes2+2*#positional_attributes1][idx][2]:rep(states.ctrls[idx+2*#positional_attributes1])
-end
-for idx=1,#positional_attributes3 do
-local progress,sign,repetition=states.ctrls[idx+offset2+#positional_attributes2+2*#positional_attributes1],states.ctrls[offset3+#positional_attributes3+#positional_attributes2+2*#positional_attributes1][idx][3]
-if sign=="+"then
-repetition=1+progress
-elseif sign=="*"then
-repetition=progress
-elseif sign=="-"then
-repetition=(type(upbound)=="table"and tonumber(upbound[idx])or tonumber(upbound))-progress
-end
-varying_pattern[states.ctrls[offset3+#positional_attributes3+#positional_attributes2+2*#positional_attributes1][idx][1]]=states.ctrls[offset3+#positional_attributes3+#positional_attributes2+2*#positional_attributes1][idx][2]:rep(repetition)
-end
-local replica_varying_pattern=replicate(varying_pattern)
-for idx=#replica_varying_pattern//3,1,-1 do
-table.remove(replica_varying_pattern,3*idx)
-end
-local result=table.pack(string:find(table.concat(replica_varying_pattern),init))
-if result[1]then
-return result
-else
-return false
-end
-end
-local results=true_Iterator(args)
-if #results==1 then
-return table.unpack(results[1],1,results[1].n)
-elseif #results<1 then
-return false
-end
-local filter,filtered_result={},{}
-for i=1,#results do
-local k=1+i%#results
-if results[i].n~=results[k].n then
-error("System Error!")
-end
-filter[i]=results[i][1]
-end
-local analysis,inverse={},{}
-for j=1,#filter do
-analysis[filter[j]]=1+(analysis[filter[j]]or 0)
-inverse[filter[j]]=(inverse[filter[j]]or 0)<j and j or inverse[filter[j]]
-end
-table.sort(filter,function(l,r)if analysis[l]==analysis[r]then return inverse[l]>inverse[r]end return analysis[l]>analysis[r]end)
-filtered_result[1]=filter[1]
-for idx=1,results[1].n do
-filter={}
-for i=1,#results do
-filter[i]=results[i][idx]
-end
-local analysis,inverse={},{}
-for j=1,#filter do
-analysis[filter[j]]=1+(analysis[filter[j]]or 0)
-inverse[filter[j]]=(inverse[filter[j]]or 0)<j and j or inverse[filter[j]]
-end
-table.sort(filter,function(l,r)if analysis[l]==analysis[r]then return inverse[l]>inverse[r]end return analysis[l]>analysis[r]end)
-filtered_result[idx]=filter[1]
-end
-filtered_result[1+results[1].n]=results
-return table.unpack(filtered_result,1,1+results[1].n)
-end
-
 local function directory_Contrast(directory1,directory2,dof,rows,sieve,nc,xy,namecontent)
 dof=dof or 6
 rows=rows or 6
@@ -2385,12 +2208,12 @@ end
 until thresh >= cap
 return outcomes
 end
-local directory_handle1,directory_path1,directory_location1=_ENV[module_name].directory_Match(directory1)
+local directory_handle1,directory_path1,directory_location1=require(module_name).directory_Match(directory1)
 local directory_handle2,directory_path2,directory_location2,sum1,sum2,compare1,compare2
 if directory_path1 then
-sum1,compare1=_ENV[module_name].directory_CheckSum(directory_location1 and directory1 and directory_path1 or directory_handle1,directory_location1 or directory_path1,nc,xy,namecontent)
+sum1,compare1=require(module_name).directory_CheckSum(directory_location1 and directory1 and directory_path1 or directory_handle1,directory_location1 or directory_path1,nc,xy,namecontent)
 else
-sum1,compare1=_ENV[module_name].directory_CheckSum(directory_handle1[3]and directory1 and directory_handle1[2]or directory_handle1[1],directory_handle1[3]or directory_handle1[2],nc,xy,namecontent)
+sum1,compare1=require(module_name).directory_CheckSum(directory_handle1[3]and directory1 and directory_handle1[2]or directory_handle1[1],directory_handle1[3]or directory_handle1[2],nc,xy,namecontent)
 if directory2 then
 for idx=2,#directory_handle1,3 do
 if directory_handle1[idx]:find(directory2)==1 then
@@ -2403,12 +2226,12 @@ directory_handle2,directory_path2,directory_location2=directory_handle1[4],direc
 end
 end
 if not directory_handle2 and not directory_path2 then
-directory_handle2,directory_path2,directory_location2=_ENV[module_name].directory_Match(directory2)
+directory_handle2,directory_path2,directory_location2=require(module_name).directory_Match(directory2)
 end
 if directory_path2 then
-sum2,compare2=_ENV[module_name].directory_CheckSum(directory_location2 and directory2 and directory_path2 or directory_handle2,directory_location2 or directory_path2,nc,xy,namecontent)
+sum2,compare2=require(module_name).directory_CheckSum(directory_location2 and directory2 and directory_path2 or directory_handle2,directory_location2 or directory_path2,nc,xy,namecontent)
 else
-sum2,compare2=_ENV[module_name].directory_CheckSum(directory_handle2[3]and directory2 and directory_handle2[2]or directory_handle2[1],directory_handle2[3]or directory_handle2[2],nc,xy,namecontent)
+sum2,compare2=require(module_name).directory_CheckSum(directory_handle2[3]and directory2 and directory_handle2[2]or directory_handle2[1],directory_handle2[3]or directory_handle2[2],nc,xy,namecontent)
 end
 local loop,presence,results,captures,result,identical = 0,0, {}, {}
 if sum1 == sum2 then
@@ -2686,32 +2509,122 @@ end
 ::not_applicable::
 end
 
-function consolidate_File:enumerate(criteria,dispose,result)
+function consolidate_File:process(processor,dispose,result)
 do
 dispose,result=result and dispose or nil,result or dispose or self
-local enumerator=_ENV[module_name].c_UpBinds.enumerator(table.unpack(criteria,1,2))
 if self[debug.getmetatable(self)]=="excel"then
-if not rawequal(result,self)then
-result=table.move(self,1,criteria[3],1,result)
+local sequential,procedure,insertion
+if math.type(processor)=="integer"then
+processor=processor%#self>0 and processor%#self or #self
+sequential,procedure=processor,require(module_name).meta_Hash
+elseif type(processor)=="function"then
+procedure=processor
+elseif type(processor)=="table"then
+if #processor>1 then
+sequential={}
+for idx1=1,#processor do
+if type(processor[idx1])=="table"then
+local start,stop
+for idx2=1,#processor[idx1]do
+if math.type(processor[idx1][idx2])=="integer"then
+if not start then
+start=processor[idx1][idx2]
+elseif not stop then
+stop=processor[idx1][idx2]
+break
 end
-table.insert(result,1+criteria[3],(true_Iterator{self[criteria[3]],function(states)return(criteria[2]or _ENV[module_name].meta_Hash)(table.unpack(states.yields1))end}))
-table.insert(result,2+criteria[3],(true_Iterator{self[criteria[3]],function(states)enumerator[table.unpack(states.yields1)]=true return enumerator[table.unpack(states.yields1)]end}))
-if not rawequal(result,self)then
-result=table.move(self,1+criteria[3],#self,3+criteria[3],result)
 end
-elseif self[debug.getmetatable(self)]=="text"then
-if criteria[3]and type(criteria[2])~="function"then
-warn("Applying hash function ",tostring(criteria[2])or(_ENV[module_name]..".meta_Hash")," to appearance count before enumeration - according to criterion 3 ",tostring(criteria[3])," - is pointless!")
 end
-for element,appearances in next,self do
-if not rawequal(element,debug.getmetatable(self))then
-if criteria[3]then
-enumerator[appearances]=true
-result[element]=enumerator[appearances]
+if start then
+if stop then
+if start>stop then
+start,stop=stop,start
+end
 else
-enumerator[element]=true
-result[element]=enumerator[element]
+stop=start
 end
+end
+start=start%#self>0 and start%#self or #self
+stop=stop%#self>0 and stop%#self or #self
+for idx2=start,stop do
+sequential[idx2]=1+(sequential[idx2]or 0)
+end
+elseif math.type(processor[idx1])=="integer"then
+local row_num=processor[idx1]%#self>0 and processor[idx1]or #self
+sequential[row_num]=1+(sequential[row_num]or 0)
+end
+end
+local cache_sequential=sequential
+sequential={}
+for k,v in next,cache_sequential do
+if v<=1 then
+sequential[1+#sequential]=k
+end
+end
+table.sort(sequential)
+else
+sequential=tonumber(processor[1])%#self>0 and tonumber(processor[1])%#self or #self
+end
+procedure=type(processor.proc)=="function"and processor.proc or require(module_name).meta_Hash
+end
+if type(sequential)=="table"and #sequential<=0 then
+sequential=nil
+end
+insertion=1+(type(sequential)=="table"and math.max(table.unpack(sequential))or sequential or #self)
+local range
+if not sequential then
+range=math.max(table.unpack((true_Iterator{self,function(states)return #table.unpack(states.yields1)end})))
+elseif type(sequential)=="table"then
+range=math.max(table.unpack((true_Iterator{sequential,function(states)return #self[table.unpack(states.yields1)]end})))
+else
+range=#self[sequential]
+end
+if not rawequal(result,self)then
+result=table.move(self,1,insertion-1,1,result)
+end
+local block={}
+for idx1=1,range do
+local outcome
+if not sequential then
+outcome=table.pack(procedure((true_Iterator{self,function(states)return table.unpack(states.yields1)[idx1]or false end})))
+elseif type(sequential)=="table"then
+outcome=table.pack(procedure((true_Iterator{sequential,function(states)return self[table.unpack(states.yields1)][idx1]or false end})))
+else
+outcome=table.pack(procedure(self[sequential][idx1]or false))
+end
+if outcome.n>1 then
+for idx2=1,outcome.n do
+if not outcome[idx2]then
+outcome[idx2]=false
+end
+end
+block[1+#block]=outcome
+elseif type(outcome[1])=="table"then
+block[1+#block]=outcome[1]
+else
+block[1+#block]={outcome[1]or false}
+end
+end
+block=table.pack(zip(block))
+table.move(self,insertion,#self,block.n+insertion,result)
+table.move(block,1,block.n,insertion,result)
+elseif self[debug.getmetatable(self)]=="text"then
+for token,metadata in next,self do
+if math.type(token)=="integer"and token>0 and token<=#self then
+result[token]=result[token]or{}
+for section_token,section_token_metadata in next,metadata do
+if type(section_token_metadata)=="table"then
+local new_metadata=replicate(section_token_metadata)
+table.insert(new_metadata,1,section_token)
+result[token][section_token]=(type(processor)=="function"and processor or require(module_name).meta_Hash)(new_metadata)
+else
+result[token][section_token]=section_token_metadata
+end
+end
+elseif not rawequal(token,debug.getmetatable(self))then
+local new_metadata=replicate(metadata)
+table.insert(new_metadata,1,token)
+result[token]=(type(processor)=="function"and processor or require(module_name).meta_Hash)(new_metadata)
 end
 end
 else
@@ -2743,54 +2656,66 @@ if type(compare_directive)~="function"then
 if type(compare_directive)~="table"then
 compare_directive={}
 for idx=1,#self do
-compare_directive[idx]={idx,"<"}
+compare_directive[idx]={idx}
 end
 end
 local function comp_func(l,r,layer)
 layer=layer or 1
 local left,right,direction=tostring(l[compare_directive[layer][1]]),tostring(r[compare_directive[layer][1]]),compare_directive[layer][2]
-if utf8.len(left)==#left and utf8.len(right)==#right then
-if #left==#right then
-if left==right then
-return layer<#compare_directive and comp_func(l,r,1+layer)or false
+if type(left)~=type(right)then
+if direction then
+return type(left)>type(right)
 else
-if direction=="<"then
-return left<right
-elseif direction==">"then
+return type(left)<type(right)
+end
+elseif tonumber(left)and tonumber(right)and tonumber(left)~=tonumber(right)then
+if direction then
+return tonumber(left)>tonumber(right)
+else
+return tonumber(left)<tonumber(right)
+end
+elseif type(left)=="string"then
+if utf8.len(left)==#left and utf8.len(right)==#right and left~=right then
+if direction then
 return left>right
+else
+return left<right
 end
+elseif utf8.len(left)<utf8.len(right)then
+for position,codepoint in utf8.codes(left)do
+if codepoint~=utf8.codepoint(right,position,#right)then
+if direction then
+return codepoint>utf8.codepoint(right,position,#right)
+else
+return codepoint<utf8.codepoint(right,position,#right)
+end
+end
+end
+if direction then
+return false
+else
+return true
 end
 else
-if direction=="<"then
-return #left<#right
-elseif direction==">"then
-return #left>#right
+for position,codepoint in utf8.codes(right)do
+if codepoint~=utf8.codepoint(left,position,#left)then
+if direction then
+return codepoint<utf8.codepoint(left,position,#left)
+else
+return codepoint>utf8.codepoint(left,position,#left)
 end
 end
-elseif utf8.len(left)<#left and utf8.len(right)<#right then
-if utf8.len(left)==utf8.len(right)then
-for position,codepoint in utf8.codes(left)do
-if direction=="<"then
-return codepoint<utf8.codepoint(right,position,#right)
-elseif direction==">"then
-return codepoint>utf8.codepoint(right,position,#right)
+end
+if utf8.len(left)~=utf8.len(right)then
+if direction then
+return true
+else
+return false
+end
+end
 end
 end
 return layer<#compare_directive and comp_func(l,r,1+layer)or false
-else
-if direction=="<"then
-return utf8.len(left)<utf8.len(right)
-elseif direction==">"then
-return utf8.len(left)>utf8.len(right)
-end
-end
-else
-if direction=="<"then
-return utf8.len(left)==#left and utf8.len(right)<#right
-elseif direction==">"then
-return utf8.len(left)<#left and utf8.len(right)==#right
-end
-end
 end
 table.sort(result,comp_func)
 else
@@ -2798,72 +2723,160 @@ table.sort(result,compare_directive)
 end
 elseif self[debug.getmetatable(self)]=="text"then
 if rawequal(result,self)then
-result={}
+result=true_Iterator{1,#self,function(states)return false end}
 end
-for elem in next,self do
-if not rawequal(elem,debug.getmetatable(self))then
-result[1+#result]=elem
+local function closure(direction,ref_collection)
+direction,ref_collection=type(direction)=="boolean"and direction or false,type(ref_collection)=="table"and ref_collection or(type(direction)=="table"and direction or nil)
+local function comp_func(l,r,layer)
+layer=layer or 1
+local left,right
+local types,table_found={}
+types[1],types[2]=type(ref_collection[l]),type(ref_collection[r])
+for idx=1,#types do
+if types[idx]=="table"then
+table_found=idx
 end
 end
-if type(compare_directive[1])=="function"then
-table.sort(result,compare_directive[1])
+if table_found then
+if types[1]~=types[2]then
+error("If in "..tostring(ref_collection).." value associated with "..({l,r})[table_found].." is a "..types[table_found]..", then that associated with the other (namely "..({l,r})[3-table_found].."), which is a "..types[3-table_found]..", shouldn't have been different!")
+elseif #ref_collection[l]~=#ref_collection[r]then
+error("Length of table (which is "..#ref_collection[l]..") associated with "..l.." doesn't equal that (which is "..#ref_collection[r]..") associated with the other "..r.."!")
+end
+end
+if table_found then
+left=ref_collection[l][layer]
+right=ref_collection[r][layer]
 else
-local function closure(count_appearances,direction)
-return function(l,r)
-if not count_appearances and true or self[l]==self[r]then
-if utf8.len(l)==#l and utf8.len(r)==#r then
-if #l==#r then
-if direction=="<"then
-return l<r
-elseif direction==">"then
+left=ref_collection[l]
+right=ref_collection[r]
+end
+if type(left)~=type(right)then
+if direction then
+return type(left)>type(right)
+else
+return type(left)<type(right)
+end
+elseif tonumber(left)and tonumber(right)and tonumber(left)~=tonumber(right)then
+if direction then
+return tonumber(left)>tonumber(right)
+else
+return tonumber(left)<tonumber(right)
+end
+elseif type(left)=="string"then
+if utf8.len(left)==#left and utf8.len(right)==#right and left~=right then
+if direction then
+return left>right
+else
+return left<right
+end
+elseif utf8.len(left)<utf8.len(right)then
+for position,codepoint in utf8.codes(left)do
+if codepoint~=utf8.codepoint(right,position,#right)then
+if direction then
+return codepoint>utf8.codepoint(right,position,#right)
+else
+return codepoint<utf8.codepoint(right,position,#right)
+end
+end
+end
+if direction then
+return false
+else
+return true
+end
+else
+for position,codepoint in utf8.codes(right)do
+if codepoint~=utf8.codepoint(left,position,#left)then
+if direction then
+return codepoint<utf8.codepoint(left,position,#left)
+else
+return codepoint>utf8.codepoint(left,position,#left)
+end
+end
+end
+if utf8.len(left)~=utf8.len(right)then
+if direction then
+return true
+else
+return false
+end
+end
+end
+elseif table_found and layer<#ref_collection[l]then
+return comp_func(l,r,1+layer)
+elseif tonumber(l)and tonumber(r)and tonumber(l)~=tonumber(r)then
+if direction then
+return tonumber(l)>tonumber(r)
+else
+return tonumber(l)<tonumber(r)
+end
+elseif utf8.len(l)==#l and utf8.len(r)==#r and l~=r then
+if direction then
 return l>r
+else
+return l<r
+end
+elseif utf8.len(l)<utf8.len(r)then
+for position,codepoint in utf8.codes(l)do
+if codepoint~=utf8.codepoint(r,position,#r)then
+if direction then
+return codepoint>utf8.codepoint(r,position,#r)
+else
+return codepoint<utf8.codepoint(r,position,#r)
+end
+end
+end
+if direction then
+return false
+else
+return true
 end
 else
-if direction=="<"then
-return #l<#r
-elseif direction==">"then
-return #l>#r
+for position,codepoint in utf8.codes(r)do
+if codepoint~=utf8.codepoint(l,position,#l)then
+if direction then
+return codepoint<utf8.codepoint(l,position,#l)
+else
+return codepoint>utf8.codepoint(l,position,#l)
 end
 end
-elseif utf8.len(l)<#l and utf8.len(r)<#r then
-if utf8.len(l)==utf8.len(r)then
-for position,codepoint in utf8.codes(l)do
-if direction=="<"then
-return codepoint<utf8.codepoint(r,position,#r)
-elseif direction==">"then
-return codepoint>utf8.codepoint(r,position,#r)
+end
+if utf8.len(l)~=utf8.len(r)then
+if direction then
+return true
+else
+return false
+end
 end
 end
 return false
+end
+return comp_func
+end
+for token,metadata in next,self do
+if math.type(token)=="integer"and token>0 and token<=#self then
+result[token]=result[token]or{}
+for section_token,section_token_metadata in next,metadata do
+if section_token~="header"then
+table.insert(result[token],section_token)
 else
-if direction=="<"then
-return utf8.len(l)<utf8.len(r)
-elseif direction==">"then
-return utf8.len(l)>utf8.len(r)
+result[token][section_token]=section_token_metadata
 end
 end
-else
-if direction=="<"then
-return utf8.len(l)==#l and utf8.len(r)<#r
-elseif direction==">"then
-return utf8.len(l)<#l and utf8.len(r)==#r
+table.sort(result[token],(type(compare_directive)=="function"and compare_directive or closure)(type(compare_directive)=="function"and self[token]or compare_directive,type(compare_directive)~="function"and self[token]or nil))
+elseif not rawequal(token,debug.getmetatable(self))then
+result[1+#result]=token
 end
 end
-else
-if direction=="<"then
-return self[l]<self[r]
-elseif direction==">"then
-return self[l]>self[r]
-end
-end
-end
-end
-table.sort(result,closure(table.unpack(compare_directive,1,2)))
-if compare_directive[1]then
+local cache_sections=table.move(result,1,#self,1,{})
+table.move(result,1+#self,#result,1)
+table.move({},1,#self,1+#result-#self,result)
+table.sort(result,(type(compare_directive)=="function"and compare_directive or closure)(type(compare_directive)=="function"and self or compare_directive,type(compare_directive)~="function"and self or nil))
+table.move(result,1,#result,1+#self)
+table.move(cache_sections,1,#self,1,result)
 result.stats=self
 dispose=false
-end
-end
 else
 warn("Invalid Object: ",tostring(self),"!")
 goto invalid
@@ -2897,83 +2910,147 @@ goto nothing_done
 end
 local data,handle={},io.open(directory,"r")
 if parse then
-parse[1]=parse[1]or"%s"
-local utf8_involved
+parse=type(parse)=="table"and parse or{}
+parse[1]=#parse>0 and parse[1]or"%s"
+local sections={}
 for idx=1,#parse do
+if type(parse[idx])=="table"then
+sections[1+#sections]=idx
+local header
+if #sections>1 then
+header=parse[sections[#sections-1]].header
+else
+header=parse.header
+end
+if not header then
+warn("Onset Undefined of Section #",(1+#sections),"!")
+goto nothing_done
+end
+end
+end
+local line_number,cache_parse,current_section,split_buffer=0,parse,-1
+while current_section<#sections do
+current_section=1+current_section
+if current_section>0 then
+parse=cache_parse[sections[current_section]]
+end
+local threshold
+for idx=1,#parse do
+if current_section>0 or not binary_Search(sections,idx)then
 if type(parse[idx])~="string"then
 warn(tostring(parse[idx])," at index #",idx," in parse table is no string!")
 goto nothing_done
 end
-if utf8.len(parse[idx])<#parse[idx]then
-utf8_involved=true
+local _,count_linebreak=parse[idx]:gsub("\n","")
+if count_linebreak>(threshold or 0)then
+threshold=count_linebreak
+end
+end
+end
+local _,count_linebreak_within_header
+if type(parse.header)=="string"then
+_,count_linebreak_within_header=parse.header:gsub("\n","")
+if count_linebreak_within_header>(threshold or 0)then
+threshold=count_linebreak_within_header
+end
+end
+local buffer,accumulate,streamline
+repeat
+local file_line=handle:read()
+if not buffer then
+buffer=split_buffer or""
+end
+if file_line then
+line_number=1+line_number
+buffer=buffer..(line_number>1 and"\n"or"")..file_line
+if threshold then
+accumulate=accumulate and 1+accumulate or select(2,buffer:gsub("\n",""))
+if accumulate<threshold then
+goto not_yet
+end
+end
+streamline=nil
+end
+do
+local next_section
+if current_section<#sections then
+if type(parse.header)=="number"and line_number>=parse.header then
+split_buffer=nil
+next_section=true
+elseif type(parse.header)=="string"and buffer:match(parse.header)then
+local header
+buffer,header,split_buffer=buffer:match("^(.-)("..parse.header..")(.-)$")
+data[1+current_section]={header=header}
+next_section=true
+end
+end
+repeat
+streamline=1+(streamline or 0)
+local token,length,separator,separator_length,progress
+for idx=1,#parse do
+if type(parse[idx])=="string"then
+local found,candidate_progress,candidate,candidate_separator=buffer:find("^(.-)("..parse[idx]..")")
+if found then
+if not length or #candidate<length then
+token,length=candidate,#candidate
+separator,separator_length=candidate_separator,#candidate_separator
+progress=candidate_progress
+elseif #candidate==length and #candidate_separator>separator_length then
+separator,separator_length=candidate_separator,#candidate_separator
+progress=candidate_progress
+end
+end
+end
+end
+if progress then
+if token~=""then
+local affix
+if not parse.include or separator=="“"or separator=="”"or separator=="‘"or separator=="’"then
+affix=""
+else
+affix=separator
+end
+if current_section>0 then
+data[current_section][token..affix]=data[current_section][token..affix]or{}
+data[current_section][token..affix][1]=1+(data[current_section][token..affix][1]or 0)
+data[current_section][token..affix][2]=parse.last and line_number or data[current_section][token..affix][2]or line_number
+data[current_section][token..affix][3]=streamline
+else
+data[token..affix]=data[token..affix]or{}
+data[token..affix][1]=1+(data[token..affix][1]or 0)
+data[token..affix][2]=parse.last and line_number or data[token..affix][2]or line_number
+data[token..affix][3]=streamline
+end
+end
+buffer=buffer:sub(1+progress)
+end
+if file_line and not next_section and threshold and separator and separator:match("\n")then
+accumulate=nil
+break
+end
+until not token and not length and not separator and not separator_length and not progress
+if not file_line or next_section then
+if buffer~=""then
+streamline=1+(streamline or 0)
+if current_section>0 then
+data[current_section][buffer]=data[current_section][buffer]or{}
+data[current_section][buffer][1]=1+(data[current_section][buffer][1]or 0)
+data[current_section][buffer][2]=parse.last and line_number or data[current_section][buffer][2]or line_number
+data[current_section][buffer][3]=streamline
+else
+data[buffer]=data[buffer]or{}
+data[buffer][1]=1+(data[buffer][1]or 0)
+data[buffer][2]=parse.last and line_number or data[buffer][2]or line_number
+data[buffer][3]=streamline
+end
+end
+if next_section then
 break
 end
 end
-for file_line in handle:lines()do
-if utf8_involved then
-local monumental,cache_match_end,cache_utf8_length,location=0
-repeat
-local start,_,_,_,elem=gfind(file_line,"%s*(.-)%s*(<"..table.concat(parse,">?<")..">?)",1+monumental,parse.tandem or 3)
-cache_match_end,cache_utf8_length,location=-1,-1,nil
-for idx1=1,#elem do
-if elem[idx1][3]~=""then
-for idx2=1,#parse do
-if elem[idx1][3]:match(parse[idx2])then
-goto ineligible
 end
-end
-if elem[idx1][2]>cache_match_end or utf8.len(elem[idx1][3])>cache_utf8_length then
-cache_match_end=elem[idx1][2]
-cache_utf8_length=utf8.len(elem[idx1][3])
-location=idx1
-end
-elseif elem[idx1][2]>cache_match_end then
-cache_match_end=elem[idx1][2]
-end
-::ineligible::
-end
-monumental=cache_match_end
-if location then
-local affix
-if not parse.include or elem[location][4]=="“"or elem[location][4]=="”"or elem[location][4]=="‘"or elem[location][4]=="’"then
-affix=""
-else
-affix=elem[location][4]
-end
-data[elem[location][3]..affix]=1+(data[elem[location][3]..affix]or 0)
-end
-until start>monumental
-local _,_,_,tail=gfind(file_line,"<"..table.concat(parse,">?<")..">?%s*(.-)%s*$")
-cache_match_end,cache_utf8_length,location=-1,-1,nil
-for idx1=1,#tail do
-if tail[idx1][3]~=""then
-for idx2=1,#parse do
-if tail[idx1][3]:match(parse[idx2])then
-goto ineligible
-end
-end
-if tail[idx1][2]>cache_match_end or utf8.len(tail[idx1][3])>cache_utf8_length then
-cache_match_end=tail[idx1][2]
-cache_utf8_length=utf8.len(tail[idx1][3])
-location=idx1
-end
-end
-::ineligible::
-end
-if location then
-data[tail[location][3]]=1+(data[tail[location][3]]or 0)
-end
-else
-for elem in file_line:gmatch("%s*([^"..table.concat(parse).."]-)%s*["..table.concat(parse).."]+")do
-if elem~=""then
-data[elem]=1+(data[elem]or 0)
-end
-end
-local tail=file_line:match("["..table.concat(parse).."]?%s*([^"..table.concat(parse).."]-)%s*$")
-if tail~=""then
-data[tail]=1+(data[tail]or 0)
-end
-end
+::not_yet::
+until not file_line
 end
 data[debug.getmetatable(self)or self]="text"
 elseif directory:match("%.([^%.]+)$")=="ar"then
@@ -3037,17 +3114,29 @@ if not buffer then
 data[1+#data]={}
 end
 for grid in file_line:gmatch(directory:match("%.([^%.]+)$")=="csv"and"([^,]-),"or"([^\t]-)\t")do
+local forward_found,backward_found
+for idx=0,9 do
+if not forward_found then
+forward_found=grid:match('^"'..('""'):rep(idx)..'[^"]+')
+end
+if not backward_found then
+backward_found=grid:match('[^"]+'..('""'):rep(idx)..'"$')
+end
+if forward_found and backward_found then
+break
+end
+end
 if buffer then
 buffer=buffer..grid
-if gfind(grid,'[^"]+<"">*"$',9)then
+if backward_found then
 table.insert(data[#data],buffer)
 buffer=nil
 elseif directory:match("%.([^%.]+)$")=="csv"then
 buffer=buffer..","
 end
 else
-if gfind(grid,'^"<"">*[^"]+',9)then
-if gfind(grid,'[^"]+<"">*"$',9)then
+if forward_found then
+if backward_found then
 table.insert(data[#data],grid)
 else
 buffer=grid..","
@@ -3058,17 +3147,29 @@ end
 end
 end
 local tail=file_line:match(directory:match("%.([^%.]+)$")=="csv"and",?([^,]-)$"or"\t?([^\t]-)$")
+local forward_found,backward_found
+for idx=0,9 do
+if not forward_found then
+forward_found=tail:match('^"'..('""'):rep(idx)..'[^"]+')
+end
+if not backward_found then
+backward_found=tail:match('[^"]+'..('""'):rep(idx)..'"$')
+end
+if forward_found and backward_found then
+break
+end
+end
 if buffer then
 buffer=buffer..tail
-if gfind(tail,'[^"]+<"">*"$',9)then
+if backward_found then
 table.insert(data[#data],buffer)
 buffer=nil
 else
 buffer=buffer.."\n"
 end
 else
-if gfind(tail,'^"<"">*[^"]+',9)then
-if gfind(tail,'[^"]+<"">*"$',9)then
+if forward_found then
+if backward_found then
 table.insert(data[#data],tail)
 else
 buffer=tail.."\n"
@@ -3097,7 +3198,7 @@ for idx1=as_text and 2 or 1,(batch.n==0 or(batch.n==1 and as_text))and 1+batch.n
 if idx1>1 and type(batch[idx1])=="table"then
 batch[idx1]={call_Precursor(self,table.unpack(batch[idx1]))}
 else
-local directory_handle,directory_path,directory_location=_ENV[module_name].directory_Match((batch.n>1 or(batch.n==1 and not as_text))and batch[idx1]or nil)
+local directory_handle,directory_path,directory_location=require(module_name).directory_Match((batch.n>1 or(batch.n==1 and not as_text))and batch[idx1]or nil)
 if directory_path then
 if directory_location then
 batch[idx1]=self:auxiliary_Import_Facility(directory_path,as_text and batch[1])
@@ -3158,34 +3259,74 @@ for idx1=1,#self do
 for idx2=1,#self[idx1]do
 if not self[idx1][idx2]then
 self[idx1][idx2]=""
+elseif type(self[idx1][idx2])~="string"then
+self[idx1][idx2]=tostring(self[idx1][idx2])
 end
 end
 handle:write(table.concat(self[idx1],output:match("%.([^%.]+)$")=="csv"and","or"\t"),"\n")
 end
 elseif self[debug.getmetatable(self)]=="text"then
-handle={}
-if type((type(output)=="table"and output or handle)[1])~="string"then
-warn(tostring((type(output)=="table"and output or handle)[1])," is a ",type((type(output)=="table"and output or handle)[1]),"!")
+local derived
+if type(output)=="table"then
+derived=output[1]
+else
+derived=output
+end
+if type(derived)~="string"then
+warn(tostring(derived)," is a ",type(derived)," instead of a string!")
 output=false
 goto skipped_error
 else
-handle,output[1]=io.open(output[1],"w")
+handle,derived=io.open(derived,"w")
 if not handle then
-warn("Error Opening Directory to Write: ",tostring(output[1]),"!")
+warn("Error Opening Directory to Write: ",tostring(derived),"!")
 output=handle
 goto skipped_error
 end
 end
-if self.stats then
-for idx=1,#self-1 do
-handle:write((output[2]and self.stats[self[idx]]~=self.stats[self[idx-1]])and self.stats[self[idx]]..":"..(output.delim or"\t")or"",self[idx],(output[2]and self.stats[self[idx]]~=self.stats[self[1+idx]])and"\n"or output.delim or "\t")
+derived={}
+local merge,merge_similar,conjunction,delimiter=(type(output)=="table"and output or derived)[2],tonumber((type(output)=="table"and output or derived)[3]),(type(output)=="table"and output or derived).conj or"\t",(type(output)=="table"and output or derived).delim or"\n"
+for idx1=0,#self.stats do
+local section,stats=idx1>0 and self[idx1]or self,idx1>0 and self.stats[idx1]or self.stats
+if idx1>0 and section.header then
+handle:write((section.header:gsub("^%s*",""):gsub("%s-$",conjunction)))
 end
-handle:write((output[2]and self.stats[self[#self]]~=self.stats[self[#self-1]])and self.stats[self[#self]]..":"..(output.delim or"\t")or"",self[#self])
-else
-for idx=1,#self-1 do
-handle:write(self[idx],(tonumber(output[2])and table.concat((true_Iterator{1,tonumber(output[2]),function(states)return self[idx][table.unpack(states.ctrls)]end}))~=table.concat((true_Iterator{1,tonumber(output[2]),function(states)return self[1+idx][table.unpack(states.ctrls)]end})))and"\n"or output.delim or"\t")
+for idx2=idx1>0 and 1 or 1+#self.stats,#section do
+local prepend,split,prefix
+if merge then
+if idx2<=(idx1>0 and 1 or 1+#self.stats)then
+prepend=true
 end
-handle:write(self[#self])
+for idx3=1,#stats[section[idx2]]do
+if not prepend and(stats[section[idx2]][idx3]~=stats[section[idx2-1]][idx3])then
+prepend=true
+end
+if not split and(stats[section[idx2]][idx3]~=(stats[section[1+idx2]]or derived)[idx3])then
+split=true
+end
+if math.type(merge)=="integer"and idx3>=merge or(prepend and split)then
+break
+end
+end
+if merge_similar then
+if not prepend and(table.concat((true_Iterator{1,math.min(merge_similar,utf8.len(section[idx2])),function(states)return section[idx2][table.unpack(states.ctrls)]end}))~=table.concat((true_Iterator{1,math.min(merge_similar,utf8.len(section[idx2-1])),function(states)return section[idx2-1][table.unpack(states.ctrls)]end})))then
+prepend=true
+end
+end
+if prepend then
+prefix=prefix or{}
+for idx3=1,math.type(merge)=="integer"and merge or #stats[section[idx2]]do
+prefix[idx3]=tostring(stats[section[idx2]][idx3])
+end
+end
+end
+if merge_similar then
+if not split and(table.concat((true_Iterator{1,math.min(merge_similar,utf8.len(section[idx2])),function(states)return section[idx2][table.unpack(states.ctrls)]end}))~=table.concat((true_Iterator{1,math.min(merge_similar,utf8.len(section[1+idx2]or"")),function(states)return(section[1+idx2]or derived)[table.unpack(states.ctrls)]or""end})))then
+split=true
+end
+end
+handle:write(not prepend and""or(table.concat(prefix,conjunction)..":"..conjunction),section[idx2],idx2>=#section and(idx1>=#self.stats and"\n"or delimiter)or(split and delimiter or conjunction))
+end
 end
 else
 warn("Invalid Object: ",tostring(self),"!")
@@ -3205,17 +3346,13 @@ debug.setmetatable(consolidate_File,consolidate_File)
 
 --range[6][12]
 
-_ENV[...]={
-version=1.2109375,
-renewed=20260901,
+local interface={
+version=1.2578125,
+renewed=20260917,
 ["Pointers in Practice"]="Treating certain parameters as tables or pointing to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-call time.",
-["Class Paradigm"]=[=[Each disparate metamethod along the hierarchy should share a function that explicitly indexes self of a particular, named field, which in turn shall be implemented at top-class nodes as one sees appropriate.
-In case of multiple inheritance, set a proxy for each parent wherein metatable of the mutual heir shall search for methods, where in particular:
-__index should be a function that indexes proxies of parents one by one;
-Other metamethod fields should be functions that explicitly index self of respective named fields.]=],
-serialise=serialise,
 replicate=replicate,
 zip=zip,
+comp_Factory=comp_Factory,
 binary_Search=binary_Search,
 table_Player=table_Player,
 true_Iterator=true_Iterator,
@@ -3226,7 +3363,6 @@ grouped_Combination_Generator=grouped_Combination_Generator,
 partially_Determined_Permutation_Generator=partially_Determined_Permutation_Generator
 --range[6][15]
 ,
-hash_Functions=hash_Functions,
 uni_Inc_Rand=uni_Inc_Rand,
 kahan_Product=kahan_Product,
 kahan_Sum=kahan_Sum,
@@ -3235,7 +3371,6 @@ vector_Addition=vector_Addition,
 vector_Length=vector_Length,
 dimensional_Animator=dimensional_Animator,
 plot_Pixels=plot_Pixels,
-gfind=gfind,
 directory_Contrast=directory_Contrast,
 consolidate_File=consolidate_File
 --range[4][12]
@@ -3243,26 +3378,27 @@ consolidate_File=consolidate_File
 
 
 --a few declarations:
+do
 --range[4][15]
-local status="ready for run"
-local digest="-340680452527882724"
+local status="ready for run";
+local digest=5842197601901823664;
 --range[2][12]
 --[===[
 ⚙
 --]===]
 local required_name,find_self,where=...
 if os.getenv("ANDROID_ROOT")=="/system"then
-where=find_self:match("^(.*/)[^/]+$")
+where=find_self:match("^(.-/)[^/]+$")
 elseif os.getenv("OS")=="Windows_NT"then
-local necessary_handle=io.popen('cd /D "'..find_self..'\\.." && cd')
-where=necessary_handle:read().."\\"
-necessary_handle:close()
+where=io.popen('cd /D "'..find_self..'\\.." && cd'):read()
+if where:match(".$")~="\\"then
+where=where.."\\"
 end
-local ranges={}
+end
 local function keystone(x,y)
 if type(x)=="number"then
 if math.tointeger(x)and math.tointeger(y)then
-return y%6==0 and _ENV[required_name].renewed-x or _ENV[required_name].renewed+x
+return y%6==0 and interface.renewed-x or interface.renewed+x
 elseif not math.tointeger(x)and math.tointeger(y)then
 return math.floor((x*y/13)*1e3)/1e3
 elseif math.tointeger(x)and not math.tointeger(y)then
@@ -3270,74 +3406,65 @@ return math.floor((x*y)^(-4/7)*1e6)/1e6
 end
 elseif type(x)=="string"then
 if math.tointeger(y)then
-return table.concat(table.pack(string.unpack("bbbbbbbb",x)))//y
+return table.concat(table.pack(("bbbbbbbb"):unpack(x)))//y
 elseif not math.tointeger(y)then
-return table.concat(table.pack(string.unpack("bbbbbbbb",x)))..y
+return table.concat(table.pack(("bbbbbbbb"):unpack(x)))..y
 end
 end
 end
-local dir_mat=[===[local mini_handle,handle,absolute_path,where_in
+local dir_mat=[===[local handle,absolute_path,where_in
 if os.getenv("ANDROID_ROOT")=="/system"then
 local bootstrap
 ::rematch::
 if directory then
-mini_handle=io.popen('find '..directory..' 2>/dev/null')
-local try=mini_handle:read()
-mini_handle:close()
-if not try then
-error("No Such File or Directory!")
+if not io.popen('find '..directory..' 2>/dev/null'):read()then
+error(tostring(directory)..": No Such File or Directory!",2)
 end
 elseif directory==nil then
-mini_handle=io.popen('find -type f 2>/dev/null')
-local try=mini_handle:read()
-mini_handle:close()
-if not try then
-error("No File Existent as BootStrap!")
+if not io.popen('find -type f 2>/dev/null'):read()then
+error("No File Existent as BootStrap!",2)
 end
-mini_handle=io.popen('find -type f 2>/dev/null')
 bootstrap={}
-for item in mini_handle:lines()do
-bootstrap[item:match("^.*/([^/]+)$")]=true
+for item in io.popen('find -type f 2>/dev/null'):lines()do
+bootstrap[item:match("^.-/([^/]+)$")]=true
 end
-mini_handle:close()
 if io.popen("pwd"):read()=="/data/data/com.termux/files/home/downloads"then
 os.execute("rm ./* -rvf")
 end
 else
 goto work
 end
-mini_handle=directory and io.popen('find '..directory..' 2>/dev/null')or io.popen('find /sdcard/ -type f 2>/dev/null')
-for item in mini_handle:lines()do
+for item in(directory and io.popen('find '..directory..' 2>/dev/null')or io.popen('find /sdcard/ -type f 2>/dev/null')):lines()do
 local temp,relative_path
 if directory then
-local necessary_handle=io.popen('find "'..item..'" -type d 2>/dev/null')
 absolute_path=item
-if not necessary_handle:read()then
-temp=item:match("^(.*/)[^/]+$")
+if not io.popen('find "'..item..'" -type d 2>/dev/null'):read()then
+temp=item:match("^(.-/)[^/]+$")
 elseif item:match(".$")~="/"then
 absolute_path=item.."/"
 end
-necessary_handle:close()
 else
-absolute_path,relative_path=item:match("^(.*/)([^/]+)$")
+absolute_path,relative_path=item:match("^(.-/)([^/]+)$")
 end
-if directory and true or bootstrap[relative_path]then
+if directory or bootstrap[relative_path]then
 if handle then
 if type(handle)~="table"then
-if directory and true or item~=handle then
+if directory or item~=handle then
 handle={where_in and io.popen('find "'..where_in..'" 2>/dev/null')or io.popen('find "'..handle..'" 2>/dev/null'),handle,where_in,[handle]=not directory and true or nil}
+handle[where_in or handle[2]]=handle[1]
 if where_in then
 where_in=nil
 end
 end
 end
-if directory and true or not handle[item]then
-handle[1+#handle]=temp and io.popen('find "'..temp..'" 2>/dev/null')or io.popen('find "'..absolute_path..'" 2>/dev/null')
+if directory or not handle[item]then
+handle[1+#handle]=(temp and handle[temp]or handle[absolute_path])or(temp and io.popen('find "'..temp..'" 2>/dev/null')or io.popen('find "'..absolute_path..'" 2>/dev/null'))
 handle[1+#handle]=directory and absolute_path or item
 handle[1+#handle]=not directory and absolute_path or temp or false
 if not directory then
 handle[item]=true
 end
+handle[temp or absolute_path]=handle[#handle-2]
 end
 else
 handle=directory and absolute_path or item
@@ -3345,10 +3472,8 @@ where_in=not directory and absolute_path or temp or false
 end
 end
 end
-mini_handle:close()
-mini_handle=nil
 ::work::
-if not handle and not where_in then
+if not handle and not where_in and directory~=io.popen("pwd"):read()then
 directory=io.popen("pwd"):read()
 goto rematch
 elseif type(handle)~="table"then
@@ -3357,7 +3482,7 @@ absolute_path=handle
 end
 handle=where_in and io.popen('find "'..where_in..'" 2>/dev/null')or io.popen('find "'..handle..'" 2>/dev/null')
 elseif not directory then
-for idx=2,#handle,2 do
+for idx=2,#handle,3 do
 handle[handle[idx]]=nil
 end
 end
@@ -3372,13 +3497,15 @@ end
 if handle then
 if type(handle)~="table"then
 handle={where_in and io.popen('dir "'..where_in..'" /S /B')or io.popen('dir "'..handle..'" /S /B'),handle,where_in}
+handle[where_in or handle[2]]=handle[1]
 if where_in then
 where_in=nil
 end
 end
-handle[1+#handle]=temp and io.popen('dir "'..temp..'" /S /B')or io.popen('dir "'..absolute_path..'" /S /B')
+handle[1+#handle]=(temp and handle[temp]or handle[absolute_path])or(temp and io.popen('dir "'..temp..'" /S /B')or io.popen('dir "'..absolute_path..'" /S /B'))
 handle[1+#handle]=absolute_path
 handle[1+#handle]=temp or false
+handle[temp or absolute_path]=handle[#handle-2]
 else
 handle=absolute_path
 where_in=temp or false
@@ -3387,41 +3514,36 @@ end
 ::rematch::
 if directory then
 if not os.execute('dir '..directory..' /S /B')then
-error("No Such File or Directory!")
+error(tostring(directory)..": No Such File or Directory!",2)
 end
 if os.execute('dir '..directory..' /A:D /S /B')then
-mini_handle=io.popen('dir '..directory..' /A:D /S /B')
 local cache_directory=directory
-if directory:match('^".*"$')then
-cache_directory=directory:match('^"(.*)"$')
+if directory:find('".-"$')==1 then
+cache_directory=directory:match('^"(.-)"$')
 end
-absolute_path=mini_handle:read()or cache_directory
+absolute_path=io.popen('dir '..directory..' /A:D /S /B'):read()or cache_directory
 if absolute_path:find(cache_directory)==1 then
 absolute_path=cache_directory
 necessary_func()
 end
-mini_handle:close()
 end
-mini_handle=io.popen('dir '..directory..' /S /B')
-for item in mini_handle:lines()do
+for item in io.popen('dir '..directory..' /S /B'):lines()do
 absolute_path=item
 necessary_func()
 end
-mini_handle:close()
-mini_handle=nil
 elseif directory==nil then
 for idx=1,math.huge do
 absolute_path=os.getenv("directory"..idx)
 if not absolute_path or absolute_path==""then
 break
 end
-if absolute_path:match('^".*"$')then
-absolute_path=absolute_path:match('^"(.*)"$')
+if absolute_path:find('".-"$')==1 then
+absolute_path=absolute_path:match('^"(.-)"$')
 end
 necessary_func()
 end
 end
-if not handle and not where_in then
+if not handle and not where_in and directory~=io.popen("cd"):read()then
 directory=io.popen("cd"):read()
 goto rematch
 elseif type(handle)~="table"then
@@ -3433,6 +3555,47 @@ if type(handle)~="table"then
 return handle,absolute_path,where_in
 end
 return handle]===]
+local function serialise(self,compact,indent_char,serialised,layer,assembler)
+indent_char,serialised,layer,assembler=indent_char or compact,serialised or indent_char or compact,layer or 1,assembler or{}
+compact,indent_char,serialised=type(compact)=="boolean"and compact or false,type(indent_char)=="string"and indent_char or"",type(serialised)=="table"and serialised or{}
+if type(self)=="string"then
+table.insert(assembler,("%q"):format(self))
+elseif type(self)=="table"then
+if serialised[self]and serialised[self]<layer then
+table.insert(assembler,tostring(self).."-loophole patch")
+goto skip
+else
+serialised[self]=layer
+end
+table.insert(assembler,[===[{
+]===])
+for k,v in next,self do
+table.insert(assembler,indent_char:rep(layer))
+table.insert(assembler,"[")
+assembler=serialise(k,compact,indent_char,serialised,1+layer,assembler)
+table.insert(assembler,"]=")
+assembler=serialise(v,compact,indent_char,serialised,1+layer,assembler)
+table.insert(assembler,[===[,
+]===])
+end
+table.insert(assembler,indent_char:rep(layer-1).."}")
+::skip::
+else
+table.insert(assembler,tostring(self))
+end
+if layer>1 then
+return assembler
+else
+if compact and indent_char==""then
+return(table.concat(assembler):gsub("%s+",""):gsub(",}","}"))
+else
+return(table.concat(assembler):gsub([===[=[^
+]-{]===],"={"):gsub([===[,(
+[^
+]-})]===],"%1"))
+end
+end
+end
 local function meta_Hash(self,hashed,layer,sum,nb,xy,imba)
 hashed,layer,sum=hashed or{},layer or 1,sum or 0
 nb=nb or function(n,byte)return byte+n*(n+byte-1)end --before Hornor optimisation: n^2-n+n*byte+byte
@@ -3454,7 +3617,7 @@ if type(self)=="function"then
 type_of_function=debug.getinfo(self,"S").what
 end
 if type(self)=="userdata"then
-ishandle,first_line=pcall(function(userdata,format)return userdata:read(format)end,self,"L")
+ishandle,first_line=pcall(function(userdata)return userdata:read()end,self)
 end
 if type(self)=="boolean"then
 if self==true then
@@ -3475,7 +3638,7 @@ end
 end
 return sum
 elseif type(self)=="function"and type_of_function~="C"then
-return meta_Hash(string.dump(self),hashed,1+layer,sum,nb,xy,imba)
+return meta_Hash(self:dump(),hashed,1+layer,sum,nb,xy,imba)
 elseif type(self)=="userdata"and ishandle then
 local x,y=0,1
 while x<#first_line do
@@ -3485,7 +3648,7 @@ hashed[layer][y]=math.tointeger(nb(x,first_line:byte(x)))+(hashed[layer][y]or 0)
 end
 sum=math.tointeger(nb(math.tointeger(xy(x,y)),first_line:byte(x)))+sum
 end
-for file_line in self:lines("L")do
+for file_line in self:lines()do
 x,y=0,1+y
 local linesum=0
 while x<#file_line do
@@ -3574,181 +3737,216 @@ print([===[Process finished - here you are:
 ]===]..sum)
 return sum,compare
 end
-local function init_Dbg(object,dbgd,layer)
-if type(object)=="table"then
-layer,dbgd=layer or 1,dbgd or{}
-if dbgd[object]and dbgd[object]<layer then
+local function init_Dbg(object,inverse_map_key,traversed,path_track,uniform_metatable)
+traversed,path_track,uniform_metatable=traversed or{[debug]=true,[io]=true,[package]=true,[table]=true},path_track or{},uniform_metatable or{}
+if type(object)=="function"and not rawequal(object,next)and not rawequal(object,print)and not rawequal(object,xpcall)and not rawequal(object,init_Dbg)then
+local isclass,snapshot=path_track[#path_track]=='["__index"]'or path_track[#path_track]=='["__newindex"]',table.concat(path_track)
+if isclass or not uniform_metatable.cache__call then
+uniform_metatable.__call=function(self,...)
+local call_stacks
+if not uniform_metatable.stack_delve_depth then
+call_stacks={}
+debug.sethook(function(event,line_number)
+if event~="tail call"then
+local stack=debug.getinfo(2,"S")
+if stack.short_src==find_self then
+call_stacks[stack.linedefined..":"..stack.lastlinedefined]=stack
+end
+end
+end,"c")
+end
+uniform_metatable.stack_delve_depth=1+(uniform_metatable.stack_delve_depth or 0)
+print("About to Call Function: ",isclass and snapshot or self.name)
+local packed_args=isclass and table.pack(self,...)or table.pack(...)
+local call_results=table.pack(xpcall(isclass and object or self.func,function(errobj)
+return serialise(errobj,"\t").."\n"..debug.traceback(uniform_metatable.stack_delve_depth.."\t"..(isclass and snapshot or self.name),3)
+end,table.unpack(packed_args,1,packed_args.n)))
+print("Exited from Function: ",isclass and snapshot or self.name)
+uniform_metatable.stack_delve_depth=uniform_metatable.stack_delve_depth-1
+if call_results[1]then
+if call_stacks and uniform_metatable.stack_delve_depth<=0 then
+debug.sethook()
+uniform_metatable.stack_delve_depth=nil
+end
+return table.unpack(call_results,2,call_results.n)
+else
+if call_stacks and uniform_metatable.stack_delve_depth<=0 then
+debug.sethook()
+local new_stacks={}
+for _,v in next,call_stacks do
+new_stacks[1+#new_stacks]=v
+end
+call_stacks,new_stacks=new_stacks,nil
+call_stacks[1+#call_stacks]=debug.getinfo(isclass and object or self.func,"S")
+local line_number=0
+io.output(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
+for code_line in io.input(find_self):lines()do
+line_number=1+line_number
+for idx=1,#call_stacks do
+if line_number>=call_stacks[idx].linedefined and line_number<=call_stacks[idx].lastlinedefined then
+io.write(code_line,"\n")
+break
+end
+end
+end
+io.input(find_self):close()
+io.close()
+uniform_metatable.stack_delve_depth=nil
+end
+error(call_results[2],0)
+end
+end
+if not isclass then
+uniform_metatable.cache__call=uniform_metatable.__call
+end
+else
+uniform_metatable.__call=uniform_metatable.cache__call
+end
+if isclass then
+return uniform_metatable.__call
+end
+return debug.setmetatable({name=snapshot,func=object},uniform_metatable)
+elseif type(object)=="table"then
+if traversed[object]then
 return tostring(object).."-loophole patch"
 else
-dbgd[object]=layer
+traversed[object]=true
 end
-local function msg_Hdlr(errobj)
-debug.sethook()
-return debug.traceback([===[栈回溯：
-]===]..errobj)
-end
-local cache__index=rawget(object,"__index")
-rawset(object,"__index",function(self,key)
-local got=type(cache__index)=="function"and cache__index(self,key)or nil
-if type(got or debug.getmetatable(self)[key])=="function"then
-local call_stacks={}
-return function(...)
-debug.sethook(function(event,line_number)
-if event~="tail call"then
-local stack=debug.getinfo(2,"S")
-if stack.short_src==find_self then
-call_stacks[stack.linedefined..":"..stack.lastlinedefined]=stack
-end
-end
-end,"c")
-local call_results=table.pack(xpcall(got or debug.getmetatable(self)[key],msg_Hdlr,...))
-if call_results[1]then
-debug.sethook()
-return table.unpack(call_results,2,call_results.n)
-else
-print(call_results[2])
-for _,v in next,call_stacks do
-call_stacks[1+#call_stacks]=v
-end
-call_stacks[1+#call_stacks]=debug.getinfo(got or debug.getmetatable(self)[key],"S")
-io.output(where..keystone(_ENV[required_name].version,_ENV[required_name].renewed)..keystone(_ENV[required_name].renewed,_ENV[required_name].version)..keystone(status,_ENV[required_name].renewed)..keystone(status,_ENV[required_name].version))
-local line_number=0
-for debugged_line in io.input(find_self):lines("L")do
-line_number=1+line_number
-local bool
-for idx=1,#call_stacks do
-if line_number>=call_stacks[idx].linedefined and line_number<=call_stacks[idx].lastlinedefined then
-bool=true
-end
-end
-if bool==true then
-io.write(debugged_line)
-end
-end
-io.close()
-io.input(find_self):close()
-end
-end
-else
-return got or debug.getmetatable(self)[key]
-end
-end)
-if type(rawget(object,"__call"))=="function"then
-local cache__call=rawget(object,"__call")
-rawset(object,"__call",function(self,...)
-local call_stacks={}
-debug.sethook(function(event,line_number)
-if event~="tail call"then
-local stack=debug.getinfo(2,"S")
-if stack.short_src==find_self then
-call_stacks[stack.linedefined..":"..stack.lastlinedefined]=stack
-end
-end
-end,"c")
-local call_results=table.pack(xpcall(cache__call,msg_Hdlr,debug.getmetatable(self),...))
-if call_results[1]then
-debug.sethook()
-return table.unpack(call_results,2,call_results.n)
-else
-print(call_results[2])
-for _,v in next,call_stacks do
-call_stacks[1+#call_stacks]=v
-end
-call_stacks[1+#call_stacks]=debug.getinfo(cache__call,"S")
-io.output(where..keystone(_ENV[required_name].version,_ENV[required_name].renewed)..keystone(_ENV[required_name].renewed,_ENV[required_name].version)..keystone(status,_ENV[required_name].renewed)..keystone(status,_ENV[required_name].version))
-local line_number=0
-for debugged_line in io.input(find_self):lines("L")do
-line_number=1+line_number
-local bool
-for idx=1,#call_stacks do
-if line_number>=call_stacks[idx].linedefined and line_number<=call_stacks[idx].lastlinedefined then
-bool=true
-end
-end
-if bool==true then
-io.write(debugged_line)
-end
-end
-io.close()
-io.input(find_self):close()
-end
-end)
-end
-local collect,proxy={},{}
 for k,v in next,object do
 if type(k)=="table"then
-rawset(object,init_Dbg(k,dbgd,1+layer),init_Dbg(v,dbgd,1+layer))
-collect[1+#collect]=k
-else
-if type(v)=="table"then
-rawset(object,k,init_Dbg(v,dbgd,1+layer))
+path_track[1+#path_track]=type(object[inverse_map_key])=="table"and"["..(type(inverse_map_key)=="string"and("%q"):format(inverse_map_key)or tostring(inverse_map_key)).."].merged["..(type(object[inverse_map_key].inverse[k])=="string"and("%q"):format(object[inverse_map_key].inverse[k])or tostring(object[inverse_map_key].inverse[k])).."]"or"["..tostring(k).."]"
+init_Dbg(k,inverse_map_key,traversed,path_track,uniform_metatable)
+path_track[#path_track]=nil
 end
-if type(k)=="string"and k:match("^__%w+")then
-proxy[k]=v
+if type(v)=="function"then
+path_track[1+#path_track]="["..(type(k)=="string"and("%q"):format(k)or tostring(k)).."]"
+local decorated=init_Dbg(v,inverse_map_key,traversed,path_track,uniform_metatable)
+if decorated then
+rawset(object,k,decorated)
+end
+path_track[#path_track]=nil
+elseif type(v)=="table"then
+path_track[1+#path_track]="["..(type(k)=="string"and("%q"):format(k)or tostring(k)).."]"
+init_Dbg(v,inverse_map_key,traversed,path_track,uniform_metatable)
+path_track[#path_track]=nil
 end
 end
 end
-for idx=1,#collect do
-rawset(object,collect[idx],nil)
 end
-return debug.setmetatable(proxy,object)
-end
-return object
-end
-local cstatus=status
-
-
+local directory_Match=load("local directory=...\n"..dir_mat)
+interface.directory_Match=directory_Match
+interface.serialise=serialise
+interface.meta_Hash=meta_Hash
+interface.directory_CheckSum=directory_CheckSum
+interface.init_Dbg=init_Dbg
 if c_thread==false then
 goto lower_overhead
 end
+local cstatus=status
 
 
 --autorun part 1:
 if status=="off maintenance"then
 status="mained by c"
-local script1,script2=string.format("%q",[===[local cache_package_path=package.path
-package.path=]===]..string.format("%q",find_self)..[===[..';'..package.path
-local success=pcall(require,']===]..required_name..[===[')
-if success then
+local script1,script2=("%q"):format([===[local cache_package_path=package.path
+package.path=]===]..("%q"):format(find_self).."\nlocal success1=pcall(require,'"..required_name..[===[')
+if success1 then
 module_name=']===]..required_name..[===['
 else
 function directory_Match(directory)
-]===]..dir_mat.."\nend\nlocal module_finder,module_path,module_location=directory_Match("..string.format("%q",'"'..(os.getenv("ANDROID_ROOT")=="/system"and where:match("^(.*/)[^/]+/$")or io.popen('cd /D "'..where..'.." && cd'):read().."\\")..'"')..[===[)
-local iter_func,invar_state,ctrl_var
+]===]..dir_mat.."\nend\nlocal success2,module_finder,module_path,module_location=pcall(directory_Match,"..("%q"):format('"'..(os.getenv("ANDROID_ROOT")=="/system"and where:match("^(.-/)[^/]+/$")or io.popen('cd /D "'..where..'.." && cd'):read().."\\")..'"')..[===[)
+if success2 then
+local iter_func,invar_state,ctrl_var_init
 if not module_path then
-iter_func,invar_state,ctrl_var=ipairs(module_finder)
+iter_func,invar_state,ctrl_var_init=ipairs(module_finder)
 end
-for i,v in module_path and module_finder:lines()or iter_func,not module_path and invar_state or nil,not module_path and ctrl_var or nil do
-if(module_path and true or(i%3==2 and module_finder[1+i]))and(module_path and i or v):match(]===].._ENV[...].version..[===[)then
-package.path=(module_path and i or v)..';'..package.path
+for i,v in module_path and module_finder:lines()or iter_func,not module_path and invar_state or nil,not module_path and ctrl_var_init or nil do
+if(module_path and module_location or(i%3==2 and module_finder[1+i]))and(module_path and i or v):match('%-'..]===]..interface.version..[===[)then
+package.path=module_path and i or v
 if os.getenv('ANDROID_ROOT')=='/system'then
-module_name=(module_path and i or v):match('/([^/]-)%-'..]===].._ENV[...].version..[===[)
+module_name=(module_path and i or v):match('/([^/]-)%-'..]===]..interface.version..[===[)
 elseif os.getenv('OS')=='Windows_NT'then
-module_name=(module_path and i or v):match('\\([^\\]-)%-'..]===].._ENV[...].version..[===[)
+module_name=(module_path and i or v):match('\\([^\\]-)%-'..]===]..interface.version..[===[)
 end
 break
 end
 end
+if module_name then
 require(module_name)
+else
+module_finder,module_path,module_location=directory_Match(false)
+if not module_path then
+iter_func,invar_state,ctrl_var_init=ipairs(module_finder)
 end
-package.path=cache_package_path]===]):gsub("\n","n\\\n"),string.format("%q",[===[local script_path
+for i,v in module_path and module_finder:lines()or iter_func,not module_path and invar_state or nil,not module_path and ctrl_var_init or nil do
+if(module_path and module_location or(i%3==2 and module_finder[1+i]))and(module_path and i or v):match('%-'..]===]..interface.version..[===[)then
+package.path=module_path and i or v
 if os.getenv('ANDROID_ROOT')=='/system'then
-local success,script_finder,script_location
-success,script_finder,script_path,script_location=pcall(directory_Match or _ENV[module_name].directory_Match,nil)
+module_name=(module_path and i or v):match('/([^/]-)%-'..]===]..interface.version..[===[)
+elseif os.getenv('OS')=='Windows_NT'then
+module_name=(module_path and i or v):match('\\([^\\]-)%-'..]===]..interface.version..[===[)
+end
+break
+end
+end
+if module_name then
+require(module_name)
+else
+error('Unable to Find Module Corresponding to Version: '..]===]..interface.version..[===[ ..'!')
+end
+package.path=false
+end
+end
+end
+cache_package_path,package.path=package.path,cache_package_path
+if c_thread~=false and not cache_package_path then
+return io.input(io.stdin):read()
+end]===]):gsub("\n","n\\\n"),("%q"):format([===[if os.getenv('ANDROID_ROOT')=='/system'then
+local success,script_finder,script_path,script_location=pcall(directory_Match or require(module_name).directory_Match,nil)
 if not success then
 return false
 elseif not script_path then
-error('More than 1 Script Files!')
-end
-elseif os.getenv('OS')=='Windows_NT'then
-script_path=os.getenv('script_path')
+if not script_finder then
+script_finder,script_path,script_location=(directory_Match or require(module_name).directory_Match)(false)
+local iter_func,invar_state,ctrl_var_init
 if not script_path then
+iter_func,invar_state,ctrl_var_init=ipairs(script_finder)
+end
+for i,v in script_path and script_finder:lines()or iter_func,not script_path and invar_state or nil,not script_path and ctrl_var_init or nil do
+if script_path and script_location or(i%3==2 and script_finder[1+i])then
+if(script_path and i or v):match('/script%.?[^/%.]-$')then
+return loadfile(script_path)
+end
+end
+end
+return false
+else
+error('More than 1 File Existent as BootStrap to Script!')
+end
+end
+return loadfile(script_path)
+elseif os.getenv('OS')=='Windows_NT'then
+local script_path=os.getenv('script_path')
+if not script_path then
+local script_finder,script_location
+script_finder,script_path,script_location=(directory_Match or require(module_name).directory_Match)(false)
+local iter_func,invar_state,ctrl_var_init
+if not script_path then
+iter_func,invar_state,ctrl_var_init=ipairs(script_finder)
+end
+for i,v in script_path and script_finder:lines()or iter_func,not script_path and invar_state or nil,not script_path and ctrl_var_init or nil do
+if script_path and script_location or(i%3==2 and script_finder[1+i])then
+if(script_path and i or v):match('\\script%.?[^\\%.]-$')then
+return loadfile(script_path)
+end
+end
+end
 return false
 end
-end
-return script_path]===]):gsub("\n","n\\\n")
+return loadfile(script_path)
+end]===]):gsub("\n","n\\\n")
 local script_len=math.max(#script1,#script2)
-io.output(where..keystone(_ENV[...].version,_ENV[...].renewed)..keystone(_ENV[...].renewed,_ENV[...].version)..keystone(status,_ENV[...].renewed)..keystone(status,_ENV[...].version)):write([===[
+io.output(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version)):write([===[
 #include<stdlib.h>
 #include<string.h>
 #include<unistd.h>
@@ -3759,11 +3957,28 @@ io.output(where..keystone(_ENV[...].version,_ENV[...].renewed)..keystone(_ENV[..
 #include<lualib.h>
 #include<lauxlib.h>
 
-#define PCALL_ERRH(NARGS,NRESULTS,ERR_MSG) if(lua_pcall(L,NARGS,NRESULTS,0)!=LUA_OK){\
-printf("%s",lua_isstring(L,-1)?luaL_checkstring(L,-1):"Non-String Error Object!");\
+#define CUSTOM_GOTO(LABEL) do{\
 lua_pop(L,1);\
-luaL_error(L,ERR_MSG);\
-}
+goto LABEL;\
+}while(0)
+#define RAISE_APPROPRIATE_LUA_ERROR(OPTIONAL_FSTR) do{\
+if(lua_isstring(L,-1))\
+luaL_error(L,OPTIONAL_FSTR,luaL_checkstring(L,-1));\
+else \
+lua_error(L);\
+}while(0)
+#define PCALL_ERRH(NARGS,NRESULTS,ERRH,PREPEND_FSTR,ON_ERR,DICTATION) do{\
+if(lua_pcall(L,NARGS,NRESULTS,ERRH)!=LUA_OK){\
+printf(PREPEND_FSTR,lua_isstring(L,-1)?luaL_checkstring(L,-1):luaL_typename(L,-1));\
+ON_ERR(DICTATION);\
+}\
+}while(0)
+#define DOSTR_ERRH(SCRIPT,PREPEND_FSTR,ON_ERR,DICTATION) do{\
+if(luaL_dostring(L,SCRIPT)!=LUA_OK){\
+printf(PREPEND_FSTR,lua_isstring(L,-1)?luaL_checkstring(L,-1):luaL_typename(L,-1));\
+ON_ERR(DICTATION);\
+}\
+}while(0)
 
 int unique_Key(lua_State *L){
 return 0;
@@ -3797,7 +4012,7 @@ lua_gettable(L,-2);
 if(lua_isnil(L,-1)){
 lua_pushvalue(L,lua_upvalueindex(6));
 lua_pushvalue(L,2);
-PCALL_ERRH(1,1,"Error Applying Hash Function to Key!")
+PCALL_ERRH(1,1,0,"Error Applying Hash Function to Key: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Applying Hash Function to Key: %s!");
 lua_gettable(L,lua_upvalueindex(3));
 }
 }
@@ -3894,7 +4109,7 @@ lua_pop(L,2);
 }else if(lua_toboolean(L,3)){
 lua_copy(L,lua_upvalueindex(6),-1);
 lua_pushvalue(L,2);
-PCALL_ERRH(1,1,"Error Applying Hash Function to Key!")
+PCALL_ERRH(1,1,0,"Error Applying Hash Function to Key: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Applying Hash Function to Key: %s!");
 lua_pushvalue(L,-1);
 if(lua_gettable(L,lua_upvalueindex(5))!=LUA_TNIL){
 lua_getfield(L,-1,"list");
@@ -3910,7 +4125,7 @@ if(lua_isfunction(L,-1)){
 lua_pushvalue(L,-1);
 lua_geti(L,-4,idx);
 lua_pushvalue(L,2);
-PCALL_ERRH(2,1,"Error Invoking Compare Meta-Method!")
+PCALL_ERRH(2,1,0,"Error Invoking Compare Meta-Method: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Invoking Compare Meta-Method: %s!");
 if(lua_toboolean(L,-1)){
 lua_pop(L,1);
 lua_geti(L,-3,idx);
@@ -3927,7 +4142,7 @@ if(lua_getmetatable(L,-1)){
 if(lua_getfield(L,-1,"__eq")!=LUA_TNIL){
 lua_pushvalue(L,-3);
 lua_pushvalue(L,2);
-PCALL_ERRH(2,1,"Error Invoking Compare Meta-Method!")
+PCALL_ERRH(2,1,0,"Error Invoking Compare Meta-Method: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Invoking Compare Meta-Method: %s!");
 if(lua_toboolean(L,-1)){
 lua_pop(L,2);
 lua_seti(L,-3,1+luaL_len(L,-3));
@@ -4086,7 +4301,7 @@ lua_pop(L,2);
 }else if(!lua_isnil(L,3)){
 lua_copy(L,lua_upvalueindex(6),-1);
 lua_pushvalue(L,2);
-PCALL_ERRH(1,1,"Error Applying Hash Function to Key!")
+PCALL_ERRH(1,1,0,"Error Applying Hash Function to Key: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Applying Hash Function to Key: %s!");
 lua_pushvalue(L,-1);
 int vtype=lua_gettable(L,lua_upvalueindex(3));
 lua_copy(L,-2,-1);
@@ -4105,7 +4320,7 @@ if(lua_isfunction(L,-1)){
 lua_pushvalue(L,-1);
 lua_geti(L,-4,idx);
 lua_pushvalue(L,2);
-PCALL_ERRH(2,1,"Error Invoking Compare Meta-Method!")
+PCALL_ERRH(2,1,0,"Error Invoking Compare Meta-Method: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Invoking Compare Meta-Method: %s!");
 if(lua_toboolean(L,-1)){
 lua_pop(L,1);
 lua_geti(L,-3,idx);
@@ -4122,7 +4337,7 @@ if(lua_getmetatable(L,-1)){
 if(lua_getfield(L,-1,"__eq")!=LUA_TNIL){
 lua_pushvalue(L,-3);
 lua_pushvalue(L,2);
-PCALL_ERRH(2,1,"Error Invoking Compare Meta-Method!")
+PCALL_ERRH(2,1,0,"Error Invoking Compare Meta-Method: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Invoking Compare Meta-Method: %s!");
 if(lua_toboolean(L,-1)){
 lua_pop(L,2);
 lua_seti(L,-3,1+luaL_len(L,-3));
@@ -4310,7 +4525,7 @@ lua_pushvalue(L,lua_upvalueindex(idx));
 lua_pushvalue(L,-3);
 }
 for(int idx=1;idx<=4;idx++){
-PCALL_ERRH(2,1,NULL)
+PCALL_ERRH(2,1,0,"Error Serialising Result: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Serialising Result: %s!");
 lua_insert(L,3);
 }
 return 4;
@@ -4467,7 +4682,7 @@ lua_setfield(L,-2,"_ref");
 lua_setmetatable(L,-2);
 lua_getfield(L,-1,"auxiliary_Import_Facility");
 lua_pushvalue(L,-2);
-PCALL_ERRH(1,0,"Error Importing Enumeration Criteria!")
+PCALL_ERRH(1,0,0,"Error Importing Enumeration Criteria: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Importing Enumeration Criteria: %s!");
 return 1;
 }
 
@@ -4586,14 +4801,13 @@ lua_Integer from=luaL_checkinteger(L,2);
 while(from<till){
 ++from;
 _Bool boolean=1;
-for(lua_Integer divider=(lua_Integer)2;divider<=from/divider;divider++){
+for(lua_Integer divider=(lua_Integer)2;divider*divider<=from;divider++){
 if(from%divider==(lua_Integer)0){
 boolean=0;
 break;
 }
 }
 if(boolean){
-printf("%lld passed primality test!\n",from);
 lua_pushinteger(L,from);
 return 1;
 }
@@ -4630,7 +4844,7 @@ lua_remove(L,-3);\
 lua_pushvalue(L,1);\
 lua_pushinteger(L,1);\
 lua_pushinteger(L,string_length);\
-PCALL_ERRH(3,1,"Error Obtaining UTF-8 String Length!")\
+PCALL_ERRH(3,1,0,"Error Obtaining UTF-8 String Length: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Obtaining UTF-8 String Length: %s!");\
 lua_rotate(L,-3,-1);\
 lua_insert(L,-2);\
 lua_arith(L,LUA_OPMOD);\
@@ -4638,7 +4852,7 @@ lua_pushinteger(L,1);\
 lua_arith(L,LUA_OPADD);\
 lua_pushvalue(L,1);\
 lua_insert(L,-2);\
-PCALL_ERRH(2,2,"Error Obtaining UTF-8 Character Offsets!")
+PCALL_ERRH(2,2,0,"Error Obtaining UTF-8 Character Offsets: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Obtaining UTF-8 Character Offsets: %s!");
 
 int string_Subscription(lua_State *L){
 lua_settop(L,2);
@@ -4677,12 +4891,6 @@ luaL_error(L,"Invalid Subscript!");
 return 0;
 }
 
-#define DOSTR_ERRH(SCRIPT,LABEL) if(luaL_dostring(L,SCRIPT)!=LUA_OK){\
-printf("%s",lua_isstring(L,-1)?luaL_checkstring(L,-1):"Non-String Error Object!");\
-lua_pop(L,1);\
-goto LABEL;\
-}
-
 #define REG lua_pushstring(L,"");\
 lua_getmetatable(L,-1);\
 lua_replace(L,-2);\
@@ -4698,7 +4906,7 @@ lua_pushcfunction(L,string_Modification);\
 lua_rawset(L,-3);\
 lua_getglobal(L,"module_name");\
 lua_replace(L,-2);\
-lua_getglobal(L,luaL_checkstring(L,-1));\
+luaL_requiref(L,luaL_checkstring(L,-1),NULL,0);\
 if(luaL_getsubtable(L,-1,"c_UpBinds"))\
 luaL_error(L,"Field Already Exists!");\
 lua_remove(L,-2);\
@@ -4740,14 +4948,14 @@ lua_setglobal(L,"c_thread");
 struct array_of_arrays *results=NULL;
 char script[]===],3+script_len,']=',script1,[===[;
 pthread_mutex_lock(&lock);
-DOSTR_ERRH(script,premature_end)
+DOSTR_ERRH(script,"Error within Module-Search Script: %s!",CUSTOM_GOTO,premature_end);
 pthread_mutex_unlock(&lock);
 REG
 int ctop=lua_gettop(L);
-PCALL_ERRH(0,LUA_MULTRET,"Error Executing Task Script!")
+PCALL_ERRH(0,LUA_MULTRET,0,"Error Executing Task Script: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Executing Task Script: %s!");
 luaL_checkstack(L,3,"Unable to Allocate Memory for the Extra Stack Space!");
 lua_getglobal(L,"module_name");
-lua_getglobal(L,luaL_checkstring(L,-1));
+luaL_requiref(L,luaL_checkstring(L,-1),NULL,0);
 lua_getfield(L,-1,"serialise");
 lua_insert(L,ctop);
 lua_pop(L,2);
@@ -4759,7 +4967,7 @@ luaL_checkstack(L,3,"Unable to Allocate Memory for the Extra Stack Space!");
 lua_pushvalue(L,ctop);
 lua_pushvalue(L,idx-1);
 lua_pushstring(L,"\t");
-PCALL_ERRH(2,1,"Error Serialising Result!")
+PCALL_ERRH(2,1,0,"Error Serialising Result: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Serialising Result: %s!");
 size_t len;
 const char *cache_result=lua_tolstring(L,-1,&len);
 results->array[++count_up].array=malloc(len);
@@ -5054,7 +5262,7 @@ if(args[states->progress][0]=='<'){
 if(args[states->progress][strlen(args[states->progress])-1]=='>'){
 const char *script=lua_pushlstring(L,1+args[states->progress],strlen(args[states->progress])-2);
 int ctop=lua_gettop(L);
-DOSTR_ERRH(script,premature)
+DOSTR_ERRH(script,"Error within Command-Line Script: %s!",CUSTOM_GOTO,premature);
 if(!states->associative && states->tracks[strlen(states->tracks)-1]==3){
 for(int idx=ctop-lua_gettop(L);idx<-1;idx++){
 lua_pushnil(L);
@@ -5072,7 +5280,7 @@ else{
 lua_concat(L,lua_gettop(L)-ctop);
 const char *script=lua_tostring(L,-1);
 ctop=lua_gettop(L);
-DOSTR_ERRH(script,premature)
+DOSTR_ERRH(script,"Error within Command-Line Script: %s!",CUSTOM_GOTO,premature);
 if(!states->associative && states->tracks[strlen(states->tracks)-2]==3){
 for(int idx=ctop-lua_gettop(L);idx<-1;idx++){
 lua_pushnil(L);
@@ -5139,21 +5347,20 @@ memset(states->traversal,0,2+3*states->depth);
 L=luaL_newstate();
 luaL_openlibs(L);
 char script[]===],3+script_len,']=',script1,[===[;
-DOSTR_ERRH(script,premature_end)
+DOSTR_ERRH(script,"Error within Module-Search Script: %s!",CUSTOM_GOTO,premature_end);
 REG
+if(lua_gettop(L)>0 && lua_isstring(L,-1)){
+chdir(luaL_checkstring(L,-1));
+lua_pop(L,1);
+}
 memset(script,0,sizeof script);
 strcpy(script,]===],script2,[===[);
-DOSTR_ERRH(script,premature_end)
-if(lua_isstring(L,-1)){
-luaL_loadfile(L,luaL_checkstring(L,-1));
-lua_remove(L,-2);
+DOSTR_ERRH(script,"Error Finding Script File: %s!",CUSTOM_GOTO,premature_end);
+if(lua_isfunction(L,-1)){
 int ctop=lua_gettop(L);
 if(parse_console_command_options(n,args,states)->traversal[0]==-1)
 goto premature_end;
-if(lua_pcall(L,lua_gettop(L)-ctop,LUA_MULTRET,0)!=LUA_OK){
-printf("%s",lua_isstring(L,-1)?luaL_checkstring(L,-1):"Non-String Error Object!");
-lua_pop(L,1);
-}
+PCALL_ERRH(lua_gettop(L)-ctop,LUA_MULTRET,0,"Error within Script File: %s!",CUSTOM_GOTO,premature_end);
 }else if(lua_isboolean(L,-1)&& !lua_toboolean(L,-1)){
 lua_pop(L,1);
 parse_console_command_options(n,args,states);
@@ -5168,7 +5375,7 @@ goto not_bother
 end
 os.execute("rm -rvf $PREFIX/local/c_M")
 os.execute("mkdir -v -m=rwx $PREFIX/local/c_M")
-if os.execute('clang -x c "'..where..keystone(_ENV[...].version,_ENV[...].renewed)..keystone(_ENV[...].renewed,_ENV[...].version)..keystone(status,_ENV[...].renewed)..keystone(status,_ENV[...].version)..'" -fPIC -ggdb -O0 -ffp-contract=fast -Wall -o $PREFIX/local/c_M/lua_Console -L$PREFIX/local/lib -llua -L. -lm -pthread')then
+if os.execute('clang -x c "'..where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version)..'" -fPIC -ggdb -O0 -ffp-contract=fast -Wall -o $PREFIX/local/c_M/lua_Console -L$PREFIX/local/lib -llua -L. -lm -pthread')then
 os.execute([===[export "PATH=$PREFIX/bin"
 unset LUA_INIT
 unset LUA_INIT_]===].._VERSION:match("%f[%s%.%d][%s%.%w]*"):gsub("%s",""):gsub("%.","_").."\n"..[===[cat > ~/.bashrc << EOF
@@ -5180,109 +5387,123 @@ echo 'export "LUA_INIT_]===].._VERSION:match("%f[%s%.%d][%s%.%w]*"):gsub("%s",""
 source ~/.bashrc]===])
 print("Main Program Ready for Run!")
 end
-os.remove(where..keystone(_ENV[...].version,_ENV[...].renewed)..keystone(_ENV[...].renewed,_ENV[...].version)..keystone(status,_ENV[...].renewed)..keystone(status,_ENV[...].version))
+os.remove(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
 ::not_bother::
 status=cstatus
 end
 
 --autorun part 2:
+local ranges
 if status~="under maintenance"then
-local line_number,num_of_delimiters=0,0
-local function closet()
-for code_line in io.input(find_self):lines("L")do
+ranges={}
+local line_number,bracket_number=0,0
+for code_line in io.input(find_self):lines()do
 line_number=1+line_number
-local i,_,cap1,cap2=code_line:find("%s-%-%-%s-range%s-%[(%d+)%]%s-%[(%d+)%]%s*$")
-if i and i==1 then
-num_of_delimiters=tonumber(cap1)>num_of_delimiters and tonumber(cap1)or num_of_delimiters
-ranges[tonumber(cap1)]=ranges[tonumber(cap1)]or{}
-ranges[tonumber(cap1)][keystone(tonumber(cap1),tonumber(cap2))]=line_number
+local found,_,capture1,capture2=code_line:find("%s-%-%-%s-range%s-%[%s-(%d+)%s-%]%s-%[%s-(%d+)%s-%]%s-$")
+if found and found<=1 then
+bracket_number=tonumber(capture1)>bracket_number and tonumber(capture1)or bracket_number
+ranges[tonumber(capture1)]=ranges[tonumber(capture1)]or{}
+ranges[tonumber(capture1)][keystone(tonumber(capture1),tonumber(capture2))]=line_number
 end
 end
-end
-closet()
-status="checksum"
-io.output(where..keystone(_ENV[...].version,_ENV[...].renewed)..keystone(_ENV[...].renewed,_ENV[...].version)..keystone(status,_ENV[...].renewed)..keystone(status,_ENV[...].version))
+line_number,status=0,"checksum"
+io.output(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
 io.write("--range[6][6]\n")
-for range,bracket in table_Player(ranges,{i=num_of_delimiters,j=1,dist="-",key_word=6,stateless=true})do
 io.input(find_self):seek("set")
-line_number=0
-for household_line in io.input(find_self):lines("L")do
+for code_line in io.input(find_self):lines()do
 line_number=1+line_number
-if not household_line:match("^%s-%-%-")then
-if line_number>=math.min(bracket[keystone(range,6)],bracket[keystone(range,5)])and line_number<=math.max(bracket[keystone(range,6)],bracket[keystone(range,5)])then
-if household_line:find("%s-⚙%s*$")==1 then
-io.write('--range[6][5]\nlocal status="off maintenance"\nlocal digest=""\n',[===[--range[5][6]
+if line_number>math.max(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])then
+bracket_number=bracket_number-1
+while not ranges[bracket_number]do
+bracket_number=bracket_number-1
+end
+end
+if code_line:find("%s-%-%-")~=1 then
+if line_number>=math.min(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])and line_number<=math.max(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])then
+if code_line:find("%s-⚙%s-$")==1 then
+io.write('--range[6][5]\nlocal status="off maintenance";\nlocal digest=;\n',[===[--range[5][6]
 ]===])
 else
-io.write(household_line)
-end
+io.write(code_line,"\n")
 end
 end
 end
 end
 io.write("--range[5][5]")
 io.close()
-local household_sum=directory_CheckSum(where..keystone(_ENV[...].version,_ENV[...].renewed)..keystone(_ENV[...].renewed,_ENV[...].version)..keystone(status,_ENV[...].renewed)..keystone(status,_ENV[...].version),where)
-if household_sum==tonumber(digest)then
-os.remove(where..keystone(_ENV[...].version,_ENV[...].renewed)..keystone(_ENV[...].renewed,_ENV[...].version)..keystone(status,_ENV[...].renewed)..keystone(status,_ENV[...].version))
+local household_sum=directory_CheckSum(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version),where)
+if household_sum==digest then
+os.remove(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
 else
 status=cstatus
 if status=="ready for run"then
 warn("⚠️Crucial chunks of the library have been tampered - deploy, run or whatever at your own risk!")
 elseif status=="off maintenance"then
 status="checksum"
-os.remove(where..keystone(_ENV[...].version,_ENV[...].renewed)..keystone(_ENV[...].renewed,_ENV[...].version)..keystone(status,_ENV[...].renewed)..keystone(status,_ENV[...].version))
-line_number,num_of_delimiters,ranges,_ENV[...].version,_ENV[...].renewed=0,0,{},2^(-6)+_ENV[...].version,tonumber(os.date("%Y%m%d"))
+os.remove(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
+line_number,bracket_number,ranges,interface.version,interface.renewed=0,0,{},2^(-6)+interface.version,tonumber(os.date("%Y%m%d"))
 io.input(find_self):seek("set")
-closet()
-io.output(where..keystone(_ENV[...].version,_ENV[...].renewed)..keystone(_ENV[...].renewed,_ENV[...].version)..keystone(status,_ENV[...].renewed)..keystone(status,_ENV[...].version))
-io.write("--range[6][6]\n")
-for range,bracket in table_Player(ranges,{i=num_of_delimiters,j=1,dist="-",key_word=6,stateless=true})do
-io.input(find_self):seek("set")
-line_number=0
-for household_line in io.input(find_self):lines("L")do
+for code_line in io.input(find_self):lines()do
 line_number=1+line_number
-if not household_line:match("^%s-%-%-")then
-if line_number>=math.min(bracket[keystone(range,6)],bracket[keystone(range,5)])and line_number<=math.max(bracket[keystone(range,6)],bracket[keystone(range,5)])then
-if household_line:find("%s-version%s-=%s*.-,%s*$")==1 then
-io.write((household_line:gsub("%s-(version)%s-(=)%s*.-(,)%s*","%1%2".._ENV[...].version..[===[%3
+local found,_,capture1,capture2=code_line:find("%s-%-%-%s-range%s-%[%s-(%d+)%s-%]%s-%[%s-(%d+)%s-%]%s-$")
+if found and found<=1 then
+bracket_number=tonumber(capture1)>bracket_number and tonumber(capture1)or bracket_number
+ranges[tonumber(capture1)]=ranges[tonumber(capture1)]or{}
+ranges[tonumber(capture1)][keystone(tonumber(capture1),tonumber(capture2))]=line_number
+end
+end
+line_number=0
+io.output(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
+io.write("--range[6][6]\n")
+io.input(find_self):seek("set")
+for code_line in io.input(find_self):lines()do
+line_number=1+line_number
+if line_number>math.max(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])then
+bracket_number=bracket_number-1
+while not ranges[bracket_number]do
+bracket_number=bracket_number-1
+end
+end
+if code_line:find("%s-%-%-")~=1 then
+if line_number>=math.min(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])and line_number<=math.max(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])then
+if code_line:find("%s-version%s-=%s-.-%s-,%s-$")==1 then
+io.write((code_line:gsub("%s-(version)%s-(=)%s-.-%s-(,)%s-$","%1%2"..interface.version..[===[%3
 ]===])))
-elseif household_line:find("%s-renewed%s-=%s*.-,%s*$")==1 then
-io.write((household_line:gsub("%s-(renewed)%s-(=)%s*.-(,)%s*","%1%2".._ENV[...].renewed..[===[%3
+elseif code_line:find("%s-renewed%s-=%s-.-%s-,%s-$")==1 then
+io.write((code_line:gsub("%s-(renewed)%s-(=)%s-.-%s-(,)%s-$","%1%2"..interface.renewed..[===[%3
 ]===])))
-elseif household_line:find("%s-⚙%s*$")==1 then
-io.write('--range[6][5]\nlocal status="off maintenance"\nlocal digest=""\n',[===[--range[5][6]
+elseif code_line:find("%s-⚙%s-$")==1 then
+io.write('--range[6][5]\nlocal status="off maintenance";\nlocal digest=;\n',[===[--range[5][6]
 ]===])
 else
-io.write(household_line)
-end
+io.write(code_line,"\n")
 end
 end
 end
 end
 io.write("--range[5][5]")
 io.close()
-household_sum=directory_CheckSum(where..keystone(_ENV[...].version,_ENV[...].renewed)..keystone(_ENV[...].renewed,_ENV[...].version)..keystone(status,_ENV[...].renewed)..keystone(status,_ENV[...].version),where)
+household_sum,status=directory_CheckSum(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version),where),"ready for run"
+io.output(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
 io.input(find_self):seek("set")
-status="ready for run"
-io.output(where..keystone(_ENV[...].version,_ENV[...].renewed)..keystone(_ENV[...].renewed,_ENV[...].version)..keystone(status,_ENV[...].renewed)..keystone(status,_ENV[...].version))
-for code_line in io.input(find_self):lines("L")do
-if code_line:find("%s-version%s-=%s*.-,%s*$")==1 then
-io.write((code_line:gsub("%s-(version)%s-(=)%s*.-(,)%s*","%1%2".._ENV[...].version..[===[%3
-]===])))
-elseif code_line:find("%s-renewed%s-=%s*.-,%s*$")==1 then
-io.write((code_line:gsub("%s-(renewed)%s-(=)%s*.-(,)%s*","%1%2".._ENV[...].renewed..[===[%3
-]===])))
-elseif code_line:find("%s-local%s-status%s-=%s-\".-\"%s*$")==1 then
-io.write((code_line:gsub("%s-(local)%s-(status)%s-(=)%s-(\").-(\")%s*","%1 %2%3%4"..status..[===[%5
-]===])))
-elseif code_line:find("%s-local%s-digest%s-=%s-\".-\"%s*$")==1 then
-io.write((code_line:gsub("%s-(local)%s-(digest)%s-(=)%s-(\").-(\")%s*","%1 %2%3%4"..household_sum..[===[%5
-]===])))
+local code_line
+repeat
+local next_line=io.input():read()
+if code_line then
+if code_line:find("%s-version%s-=%s-.-%s-,%s-$")==1 then
+io.write(code_line:gsub("%s-(version)%s-(=)%s-.-%s-(,)%s-$","%1%2"..interface.version.."%3"),next_line and"\n"or"")
+elseif code_line:find("%s-renewed%s-=%s-.-%s-,%s-$")==1 then
+io.write(code_line:gsub("%s-(renewed)%s-(=)%s-.-%s-(,)%s-$","%1%2"..interface.renewed.."%3"),next_line and"\n"or"")
+elseif code_line:find("%s-local%s-status%s-=%s-\"%s-.-%s-\"%s-;%s-$")==1 then
+io.write(code_line:gsub("%s-(local)%s-(status)%s-(=)%s-(\")%s-.-%s-(\")%s-(;)%s-$","%1 %2%3%4"..status.."%5%6"),next_line and"\n"or"")
+elseif code_line:find("%s-local%s-digest%s-=%s-.-%s-;%s-$")==1 then
+io.write(code_line:gsub("%s-(local)%s-(digest)%s-(=)%s-.-%s-(;)%s-$","%1 %2%3"..household_sum.."%4"),next_line and"\n"or"")
 else
-io.write(code_line)
+io.write(code_line,next_line and"\n"or"")
 end
 end
+code_line=next_line
+until not next_line
 io.close()
 end
 end
@@ -5291,9 +5512,8 @@ status=cstatus
 end
 
 --final autorun:
-do
 local satchel={}
-for idx,serial,piece in table_Player(_ENV[...],{key_word=false,stateless=true})do
+for serial,piece in next,interface do
 if type(piece)=="number"or type(piece)=="string"then
 print(serial,piece)
 satchel.constant=1+(satchel.constant or 0)
@@ -5304,30 +5524,26 @@ satchel[type(piece)]=1+(satchel[type(piece)]or 0)
 end
 end
 print("A total of")
-for idx,category,count in table_Player(satchel,{j=2,dist="-",key_word=false,stateless=true})do
-print(count.." "..category..(count>1 and"s"or"")..",")
+local category,count,cache_category,cache_count=next(satchel)
+while category do
+cache_category,cache_count=category,count
+category,count=next(satchel,category)
+if category then
+print(cache_count.." "..cache_category..(cache_count>1 and"s"or"")..",")
 end
-local tail_category,tail_count=next(satchel)
-print(tail_count.." "..tail_category..(tail_count>1 and"s"or"")..' loaded - as module name "'..required_name..'",')
+end
+print(cache_count.." "..cache_category..(cache_count>1 and"s"or"")..' loaded - as module named "'..required_name..'",')
 print("Ready to Roll!")
 if status=="under maintenance"then
 status="debugging"
-_ENV[...]=init_Dbg(_ENV[...])
+init_Dbg(interface)
 status=cstatus
-end
 end
 
 
 ::lower_overhead::
+end
 
 
-local directory_Match=load("local directory=...\n"..dir_mat)
-_ENV[...].directory_Match=directory_Match
-_ENV[...].meta_Hash=meta_Hash;
-(hash_Functions or{}).meta_Hash=meta_Hash
-_ENV[...].directory_CheckSum=directory_CheckSum
-_ENV[...].init_Dbg=init_Dbg
-
-
-return _ENV[...]
+return interface
 --range[2][15]
