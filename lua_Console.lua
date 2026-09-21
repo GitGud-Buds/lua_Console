@@ -3347,8 +3347,8 @@ debug.setmetatable(consolidate_File,consolidate_File)
 --range[6][12]
 
 local interface={
-version=1.2578125,
-renewed=20260917,
+version=1.2734375,
+renewed=20260919,
 ["Pointers in Practice"]="Treating certain parameters as tables or pointing to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-call time.",
 replicate=replicate,
 zip=zip,
@@ -3381,7 +3381,7 @@ consolidate_File=consolidate_File
 do
 --range[4][15]
 local status="ready for run";
-local digest=5842197601901823664;
+local digest=447777989764290570;
 --range[2][12]
 --[===[
 ⚙
@@ -3421,14 +3421,16 @@ if not io.popen('find '..directory..' 2>/dev/null'):read()then
 error(tostring(directory)..": No Such File or Directory!",2)
 end
 elseif directory==nil then
-if not io.popen('find -type f 2>/dev/null'):read()then
-error("No File Existent as BootStrap!",2)
+local boot_sector=io.popen("echo ~"):read().."/downloads"
+if not io.popen('find "'..boot_sector..'" -type f 2>/dev/null'):read()then
+warn("No File Existent as BootStrap! Turning to Search within Current Working Directory: ",io.popen("pwd"):read(),"!")
+goto work
 end
 bootstrap={}
-for item in io.popen('find -type f 2>/dev/null'):lines()do
+for item in io.popen('find "'..boot_sector..'" -type f 2>/dev/null'):lines()do
 bootstrap[item:match("^.-/([^/]+)$")]=true
 end
-if io.popen("pwd"):read()=="/data/data/com.termux/files/home/downloads"then
+if io.popen("pwd"):read()==boot_sector then
 os.execute("rm ./* -rvf")
 end
 else
@@ -3894,19 +3896,42 @@ require(module_name)
 else
 error('Unable to Find Module Corresponding to Version: '..]===]..interface.version..[===[ ..'!')
 end
-package.path=false
 end
 end
 end
-cache_package_path,package.path=package.path,cache_package_path
-if c_thread~=false and not cache_package_path then
-return io.input(io.stdin):read()
-end]===]):gsub("\n","n\\\n"),("%q"):format([===[if os.getenv('ANDROID_ROOT')=='/system'then
+package.path=cache_package_path]===]):gsub("\n","n\\\n"),("%q"):format([===[if type(stack_dump)=='table'then
+print('Please Enter Global to Serialise, Either to Proceed UnDisrupted or QUIT to Opt Out...')
+local directives,quit,handle=io.input(io.stdin):read()
+if directives=='QUIT'then
+quit=true
+goto cut_short
+end
+for token in directives:gmatch('%S+')do
+if token=='QUIT'then
+quit=true
+elseif load('return '..token)()~=nil then
+if not handle then
+handle=io.output('/sdcard/Download/Codes/Memory Dump')
+end
+handle:write(require(module_name).serialise(load('return '..token)(),'\t'),'\n')
+end
+end
+if handle then
+handle:close()
+end
+::cut_short::
+if quit then
+error('Quiting Main Loop...')
+end
+end
+if os.getenv('ANDROID_ROOT')=='/system'then
 local success,script_finder,script_path,script_location=pcall(directory_Match or require(module_name).directory_Match,nil)
 if not success then
 return false
 elseif not script_path then
-if not script_finder then
+if script_finder then
+warn('More than 1 File Existent as BootStrap to Script! Turning to Search within Current Working Directory: ',io.popen('pwd'):read(),'!')
+end
 script_finder,script_path,script_location=(directory_Match or require(module_name).directory_Match)(false)
 local iter_func,invar_state,ctrl_var_init
 if not script_path then
@@ -3920,11 +3945,10 @@ end
 end
 end
 return false
-else
-error('More than 1 File Existent as BootStrap to Script!')
-end
-end
+elseif script_location then
 return loadfile(script_path)
+end
+return false
 elseif os.getenv('OS')=='Windows_NT'then
 local script_path=os.getenv('script_path')
 if not script_path then
@@ -3953,6 +3977,8 @@ io.output(where..keystone(interface.version,interface.renewed)..keystone(interfa
 #include<time.h>
 #include<errno.h>
 #include<pthread.h>
+#include<setjmp.h>
+#include<signal.h>
 #include<lua.h>
 #include<lualib.h>
 #include<lauxlib.h>
@@ -3966,6 +3992,10 @@ if(lua_isstring(L,-1))\
 luaL_error(L,OPTIONAL_FSTR,luaL_checkstring(L,-1));\
 else \
 lua_error(L);\
+}while(0)
+#define CLEAR_STACK(HIND_TOP) do{\
+lua_settop(L,HIND_TOP);\
+continue;\
 }while(0)
 #define PCALL_ERRH(NARGS,NRESULTS,ERRH,PREPEND_FSTR,ON_ERR,DICTATION) do{\
 if(lua_pcall(L,NARGS,NRESULTS,ERRH)!=LUA_OK){\
@@ -4946,7 +4976,7 @@ luaL_openlibs(L);
 lua_pushboolean(L,0);
 lua_setglobal(L,"c_thread");
 struct array_of_arrays *results=NULL;
-char script[]===],3+script_len,']=',script1,[===[;
+char script[]===],3+script_len,"]=",script1,[===[;
 pthread_mutex_lock(&lock);
 DOSTR_ERRH(script,"Error within Module-Search Script: %s!",CUSTOM_GOTO,premature_end);
 pthread_mutex_unlock(&lock);
@@ -5035,7 +5065,7 @@ while(++states->progress,states->progress<nargs){
 if(strlen(args[states->progress])==10 && !strcmp(args[states->progress],"DUMP STACK")){
 printf("------\n");
 for(int idx=lua_gettop(L);idx>0;idx--)
-printf("%d %s\n",idx,lua_typename(L,lua_type(L,idx)));
+printf("%d %s\n",idx,luaL_typename(L,idx));
 printf("------\n");
 goto do_nothing;
 }else if(strlen(args[states->progress])>10 && !strncmp(args[states->progress],"DUP FRAME ",10)){
@@ -5337,34 +5367,98 @@ states->traversal[strlen(states->tracks)]=-1;
 return states;
 }
 
+sigjmp_buf context_for_jump;
+
+void interrupt_SigHandler(int signum){
+if(signum==SIGINT)
+siglongjmp(context_for_jump,1);
+}
+
+struct sigaction renewed_action;
+struct sigaction current_action;
+
+int errMsg_Handler(lua_State *L){
+lua_settop(L,1);
+lua_getglobal(L,"module_name");
+luaL_requiref(L,luaL_checkstring(L,-1),NULL,0);
+lua_getfield(L,-1,"serialise");
+lua_insert(L,1);
+lua_pop(L,2);
+PCALL_ERRH(1,1,0,"Error Serialising Object: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Serialising Object: %s!");
+lua_getglobal(L,"debug");
+lua_getfield(L,-1,"traceback");
+lua_insert(L,1);
+lua_pushinteger(L,2);
+lua_replace(L,-2);
+PCALL_ERRH(2,1,0,"Error Performing TraceBack: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Performing TraceBack: %s!");
+return 1;
+}
+
 int main(int n,char *args[]){
 struct proto_states *states=(struct proto_states*)]===],os.getenv("ANDROID_ROOT")=="/system"and""or"_",[===[alloca(sizeof(struct proto_states));
+L=luaL_newstate();
+luaL_openlibs(L);
+char script[]===],3+script_len,"]=",script1,[===[;
+DOSTR_ERRH(script,"Error within Module-Search Script: %s!",CUSTOM_GOTO,premature_end);
+REG
+memset(script,0,sizeof script);
+strcpy(script,]===],script2,[===[);
+do{
 states->progress=0;
 states->associative=0;
 states->depth=3;
 memset(states->tracks,0,1+3*states->depth);
 memset(states->traversal,0,2+3*states->depth);
-L=luaL_newstate();
-luaL_openlibs(L);
-char script[]===],3+script_len,']=',script1,[===[;
-DOSTR_ERRH(script,"Error within Module-Search Script: %s!",CUSTOM_GOTO,premature_end);
-REG
-if(lua_gettop(L)>0 && lua_isstring(L,-1)){
-chdir(luaL_checkstring(L,-1));
-lua_pop(L,1);
-}
-memset(script,0,sizeof script);
-strcpy(script,]===],script2,[===[);
+memset(&current_action,0,sizeof current_action);
+memset(&renewed_action,0,sizeof renewed_action);
+renewed_action.sa_handler=interrupt_SigHandler;
+sigemptyset(&renewed_action.sa_mask);
+renewed_action.sa_flags=0;
+sigaction(SIGINT,NULL,&current_action);
+if(memcmp(&current_action,&renewed_action,sizeof renewed_action))
+sigaction(SIGINT,&renewed_action,NULL);
+sigsetjmp(context_for_jump,1);
 DOSTR_ERRH(script,"Error Finding Script File: %s!",CUSTOM_GOTO,premature_end);
 if(lua_isfunction(L,-1)){
+lua_insert(L,1);
 int ctop=lua_gettop(L);
 if(parse_console_command_options(n,args,states)->traversal[0]==-1)
 goto premature_end;
-PCALL_ERRH(lua_gettop(L)-ctop,LUA_MULTRET,0,"Error within Script File: %s!",CUSTOM_GOTO,premature_end);
-}else if(lua_isboolean(L,-1)&& !lua_toboolean(L,-1)){
-lua_pop(L,1);
-parse_console_command_options(n,args,states);
+for(int idx=lua_gettop(L);idx>ctop;idx--)
+lua_insert(L,2);
+lua_pushcfunction(L,errMsg_Handler);
+lua_insert(L,1);
+PCALL_ERRH(lua_gettop(L)-2,LUA_MULTRET,1,"Error within Script File: %s!",CLEAR_STACK,0);
+if((ctop=lua_gettop(L))>1){
+lua_geti(L,LUA_REGISTRYINDEX,LUA_RIDX_GLOBALS);
+luaL_getsubtable(L,-1,"stack_dump");
+lua_insert(L,2);
+for(int idx=3;idx<2+ctop;idx++){
+lua_pushvalue(L,idx);
+lua_seti(L,2,1+luaL_len(L,2));
 }
+lua_rotate(L,1,-2);
+lua_pop(L,3);
+}
+}else{
+_Bool script_file_unfound=lua_isboolean(L,-1)&& !lua_toboolean(L,-1),script_file_syntactic_error=lua_isstring(L,-1)&& !lua_toboolean(L,-2);
+if(!script_file_unfound && !script_file_syntactic_error)
+CLEAR_STACK(0);
+else{
+if(script_file_unfound)
+lua_pop(L,1);
+else if(script_file_syntactic_error){
+printf("Syntactic Error within Script File: %s!",luaL_checkstring(L,-1));
+lua_pop(L,2);
+}
+if(parse_console_command_options(n,args,states)->traversal[0]==-1)
+goto premature_end;
+}
+}
+lua_geti(L,LUA_REGISTRYINDEX,LUA_RIDX_GLOBALS);
+luaL_getsubtable(L,-1,"stack_dump");
+lua_pop(L,2);
+}while(lua_gettop(L)<LUA_MINSTACK ||(lua_remove(L,1),1));
 premature_end:
 lua_close(L);
 return 0;
