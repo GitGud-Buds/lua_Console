@@ -5,7 +5,7 @@ if type(object)~="table"then
 return object
 else
 if touched[object]and touched[object]<layer then
-return tostring(object).."-loophole patch"
+return tostring(object).." - loophole patch"
 else
 touched[object]=layer
 end
@@ -3347,8 +3347,8 @@ debug.setmetatable(consolidate_File,consolidate_File)
 --range[6][12]
 
 local interface={
-version=1.2734375,
-renewed=20260919,
+version=1.2890625,
+renewed=20260921,
 ["Pointers in Practice"]="Treating certain parameters as tables or pointing to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-call time.",
 replicate=replicate,
 zip=zip,
@@ -3381,7 +3381,7 @@ consolidate_File=consolidate_File
 do
 --range[4][15]
 local status="ready for run";
-local digest=447777989764290570;
+local digest=-166127260185768310;
 --range[2][12]
 --[===[
 ⚙
@@ -3557,39 +3557,83 @@ if type(handle)~="table"then
 return handle,absolute_path,where_in
 end
 return handle]===]
-local function serialise(self,compact,indent_char,serialised,layer,assembler)
-indent_char,serialised,layer,assembler=indent_char or compact,serialised or indent_char or compact,layer or 1,assembler or{}
-compact,indent_char,serialised=type(compact)=="boolean"and compact or false,type(indent_char)=="string"and indent_char or"",type(serialised)=="table"and serialised or{}
-if type(self)=="string"then
-table.insert(assembler,("%q"):format(self))
+local function identifier_Generator(state)
+state=state or{96}
+if type(state[2])~="string"then
+state[1]=96+(state[1]-96)%26
+end
+return function()
+state[1]=86+(state[1]-86)%36
+state[1]=1+state[1]
+if state[1]==87 then
+local roll=math.random(87,122)
+state[2]=(type(state[2])=="string"and state[2]or"")..(roll<97 and roll-87 or string.char(roll))
+end
+return(type(state[2])=="string"and state[2]or"")..(state[1]<97 and state[1]-87 or string.char(state[1]))
+end
+end
+local id_gen=identifier_Generator()
+local function serialise(self,compact,indent_char,serialised,layer1,layer2,assembler,table_keys)
+if not self and not compact and not indent_char and not serialised and not assembler then
+goto final_assemble
+end
+indent_char,serialised,layer1,layer2,assembler,table_keys=type(indent_char)=="string"and indent_char or(type(compact)=="string"and compact or""),type(serialised)=="table"and serialised or(type(indent_char)=="table"and indent_char or(type(compact)=="table"and compact or{})),layer1 or 1,layer2 or 1,assembler or{},table_keys or self
+if type(compact)~="boolean"then
+compact=nil
+end
+if type(self)=="number" or type(self)=="boolean"then
+assembler[1+#assembler]=tostring(self)
 elseif type(self)=="table"then
-if serialised[self]and serialised[self]<layer then
-table.insert(assembler,tostring(self).."-loophole patch")
+if serialised[self]and(compact==false or serialised[self]<layer1)then
+assembler[1+#assembler]=compact==false and(table_keys or{})[self]or("%q"):format(tostring(self).." - loophole patch")
 goto skip
 else
-serialised[self]=layer
+serialised[self]=layer1
 end
-table.insert(assembler,[===[{
-]===])
+assembler[1+#assembler]=[===[{
+]===]
 for k,v in next,self do
-table.insert(assembler,indent_char:rep(layer))
-table.insert(assembler,"[")
-assembler=serialise(k,compact,indent_char,serialised,1+layer,assembler)
-table.insert(assembler,"]=")
-assembler=serialise(v,compact,indent_char,serialised,1+layer,assembler)
-table.insert(assembler,[===[,
-]===])
+assembler[1+#assembler]=indent_char:rep(layer1)
+assembler[1+#assembler]="["
+if compact==false and type(k)=="table"and(serialised[table_keys]or not table_keys[k])then
+if serialised[table_keys]then
+local first_identifier=id_gen()
+table.insert(assembler,1,"local "..first_identifier.."=")
+table_keys={assembler,[table_keys]=first_identifier}
 end
-table.insert(assembler,indent_char:rep(layer-1).."}")
+table_keys[k]=id_gen()
+table_keys[1+#table_keys]={"local "..table_keys[k].."="}
+serialise(k,compact,indent_char,serialised,nil,1+layer2,table_keys[#table_keys],table_keys)
+end
+serialise(k,compact,indent_char,serialised,1+layer1,layer2,assembler,table_keys)
+assembler[1+#assembler]="]="
+serialise(v,compact,indent_char,serialised,1+layer1,layer2,assembler,table_keys)
+assembler[1+#assembler]=[===[,
+]===]
+end
+assembler[1+#assembler]=indent_char:rep(layer1-1).."}"
 ::skip::
 else
-table.insert(assembler,tostring(self))
+assembler[1+#assembler]=("%q"):format(tostring(self))
 end
-if layer>1 then
-return assembler
+::final_assemble::
+if layer2>1 then
+if not self and not compact and not indent_char and not serialised and not assembler then
+return table.concat(table_keys[layer2]):gsub([===[=[^
+]-{]===],"={"):gsub([===[,(
+[^
+]-})]===],"%1"),serialise(nil,nil,nil,nil,nil,layer2-1,nil,table_keys)
+end
 else
-if compact and indent_char==""then
+if compact==false and layer1<=1 and not serialised[table_keys]then
+return serialise(nil,nil,nil,nil,nil,#table_keys,nil,table_keys)
+elseif compact and indent_char==""then
 return(table.concat(assembler):gsub("%s+",""):gsub(",}","}"))
+elseif not self and not compact and not indent_char and not serialised and not assembler then
+return(table.concat(table_keys[layer2]):gsub([===[=[^
+]-{]===],"={"):gsub([===[,(
+[^
+]-})]===],"%1"))
 else
 return(table.concat(assembler):gsub([===[=[^
 ]-{]===],"={"):gsub([===[,(
@@ -3598,34 +3642,33 @@ return(table.concat(assembler):gsub([===[=[^
 end
 end
 end
-local function meta_Hash(self,hashed,layer,sum,nb,xy,imba)
-hashed,layer,sum=hashed or{},layer or 1,sum or 0
+local function meta_Hash(self,threshold,hashed,layer,sum,nb,xy,imba)
+threshold,hashed,layer,sum=math.type(threshold)=="integer"and threshold or 1,type(hashed)=="table"and hashed or(type(threshold)=="table"and threshold or{}),layer or 1,sum or 0
 nb=nb or function(n,byte)return byte+n*(n+byte-1)end --before Hornor optimisation: n^2-n+n*byte+byte
 xy=xy or function(x,y)return x^2+y*(x+y*(x+y-1))end --before Hornor optimisation: y^3-y^2+x*y^2+x*y+x^2
 imba=imba or function(ref,content)
-local smaller,larger
+local sign,smaller,larger=ref*content==0 and 0 or ref*content//math.abs(ref*content)
 if math.abs(ref)<math.abs(content)then
-smaller,larger=ref,content
+smaller,larger=math.abs(ref),math.abs(content)
 else
-smaller,larger=content,ref
+smaller,larger=math.abs(content),math.abs(ref)
 end
-if smaller==0 then
-return 0
+if smaller<=1 then
+return sign*larger
 end
-return math.ceil(larger/smaller^(larger>=1e3*smaller^3 and 3 or 1))*(math.abs(smaller)==1 and 1 or larger%smaller)
+local power=0
+while larger>=1e3*smaller^(1+power)do
+power=1+power
 end
-local type_of_function,ishandle,first_line
-if type(self)=="function"then
-type_of_function=debug.getinfo(self,"S").what
+return sign*math.ceil(larger/smaller^power)*(larger%smaller>0 and larger%smaller or smaller)
 end
-if type(self)=="userdata"then
-ishandle,first_line=pcall(function(userdata)return userdata:read()end,self)
-end
-if type(self)=="boolean"then
+if self==nil then
+return 0+sum
+elseif type(self)=="boolean"then
 if self==true then
-return 593+sum
+return 691+sum
 elseif self==false then
-return 491+sum
+return 593+sum
 end
 elseif math.type(self)=="integer"then
 return self+sum
@@ -3639,20 +3682,13 @@ x,y=0,1+y
 end
 end
 return sum
-elseif type(self)=="function"and type_of_function~="C"then
-return meta_Hash(self:dump(),hashed,1+layer,sum,nb,xy,imba)
-elseif type(self)=="userdata"and ishandle then
-local x,y=0,1
-while x<#first_line do
-x=1+x
-if type(layer)=="string"then
-hashed[layer][y]=math.tointeger(nb(x,first_line:byte(x)))+(hashed[layer][y]or 0)
-end
-sum=math.tointeger(nb(math.tointeger(xy(x,y)),first_line:byte(x)))+sum
-end
+elseif type(self)=="function"and debug.getinfo(self,"S").what~="C"then
+return meta_Hash(self:dump(),threshold,hashed,1+layer,sum,nb,xy,imba)
+elseif io.type(self)=="file"then
+local y=0
 for file_line in self:lines()do
-x,y=0,1+y
-local linesum=0
+y=1+y
+local x,linesum=0,0
 while x<#file_line do
 x=1+x
 if type(layer)=="string"then
@@ -3671,26 +3707,50 @@ end
 return sum
 elseif type(self)=="table"then
 if hashed[self]and hashed[self]<layer then
-return meta_Hash(tostring(self).."-loophole patch",hashed,1+layer,sum,nb,xy,imba)
+if threshold+hashed[self]<layer then
+return meta_Hash(type(self).." - loophole patch",threshold,hashed,1+layer,sum,nb,xy,imba)
+end
 else
 hashed[self]=layer
 end
 for k,v in next,self do
-sum=math.tointeger(imba(meta_Hash(k,hashed,1+layer,type(k)=="table"and sum or nil,nb,xy,imba),meta_Hash(v,hashed,1+layer,type(v)=="table"and sum or nil,nb,xy,imba)))+sum
+sum=math.tointeger(imba(meta_Hash(k,threshold,hashed,1+layer,nil,nb,xy,imba),meta_Hash(v,threshold,hashed,1+layer,nil,nb,xy,imba)))+sum
 end
 return math.tointeger(imba(2969,sum==0 and 2971 or sum))
 end
-return meta_Hash(tostring(self),hashed,1+layer,sum,nb,xy,imba)
+return meta_Hash(tostring(self),threshold,hashed,1+layer,sum,nb,xy,imba)
 end
 local function directory_CheckSum(directory,location,namecontent)
-namecontent=namecontent or function(namesum,contentsum)return contentsum>=1e3*namesum^3 and math.ceil(contentsum/namesum^3)*(contentsum%namesum)or math.ceil(contentsum/namesum)*(contentsum%namesum)end
-local sum,compare=0,{absolute_path=location}
-if type(directory)=="userdata"then
-if os.getenv("ANDROID_ROOT")=="/system"and directory:read()~=location then
-error("Incorrect Usage - First Readout Must Match Second Argument "..tostring(location).."!")
+namecontent=namecontent or function(namesum,contentsum)
+local sign,smaller,larger=namesum*contentsum==0 and 0 or namesum*contentsum//math.abs(namesum*contentsum)
+if math.abs(namesum)<math.abs(contentsum)then
+smaller,larger=math.abs(namesum),math.abs(contentsum)
+else
+smaller,larger=math.abs(contentsum),math.abs(namesum)
+end
+if smaller<=1 then
+return sign*larger
+end
+local power=0
+while larger>=1e3*smaller^(1+power)do
+power=1+power
+end
+return sign*math.ceil(larger/smaller^power)*(larger%smaller>0 and larger%smaller or smaller)
+end
+local sum,compare=0,{absolute_path=tostring(location)}
+if io.type(directory)=="file"then
+if os.getenv("ANDROID_ROOT")=="/system"then
+local first_readout=directory:read()
+if first_readout~=compare.absolute_path then
+error("Incorrect Usage: First Readout - "..first_readout.." - Must Match Second Argument - "..compare.absolute_path.."!")
+end
 end
 for subdir in directory:lines()do
 local relative_path=subdir:match("^"..compare.absolute_path.."(.+)$")
+if not relative_path then
+warn("Current item - ",subdir," - does not belong to the directory undergoing checksum - ",compare.absolute_path,"!")
+goto next_item
+end
 local namesum,skip=meta_Hash(relative_path)
 if os.getenv("ANDROID_ROOT")=="/system"then
 skip=io.popen('find "'..subdir..'" -type d 2>/dev/null'):read()
@@ -3698,44 +3758,45 @@ elseif os.getenv("OS")=="Windows_NT"then
 skip=os.execute('dir "'..subdir..'" /A:D /S /B')
 end
 if not skip then
-print("Accessing file: "..subdir)
+print("Accessing File: "..subdir)
 compare[relative_path]={}
-local lines,contentsum=meta_Hash(io.input(subdir),compare,relative_path)
+local lines,contentsum=meta_Hash(io.input(subdir),nil,compare,relative_path)
 sum=math.tointeger(namecontent(namesum,contentsum))+sum
 compare[relative_path].contentsum=contentsum
 io.input(subdir):close()
-print(lines.." lines summed up")
+print(lines.." Lines Summed Up")
 else
 sum=sum-namesum
 compare[relative_path]=-namesum
 end
+::next_item::
 end
 directory:close()
-elseif tostring(directory)then
-if tostring(directory):find(location)~=1 then
-error("Incorrect Usage - Second Argument "..tostring(location).." Must Be a Sub-String of First Argument "..tostring(directory).."!")
+elseif type(directory)=="string"then
+if directory:find(compare.absolute_path)~=1 then
+error("Incorrect Usage: Second Argument - "..compare.absolute_path.." - Must Be a PreFix of First Argument - "..directory.."!")
 end
-local relative_path=tostring(directory):match("^"..compare.absolute_path.."(.+)$")
+local relative_path=directory:match("^"..compare.absolute_path.."(.+)$")
 local namesum,skip=meta_Hash(relative_path)
 if os.getenv("ANDROID_ROOT")=="/system"then
-skip=io.popen('find "'..tostring(directory)..'" -type d 2>/dev/null'):read()
+skip=io.popen('find "'..directory..'" -type d 2>/dev/null'):read()
 elseif os.getenv("OS")=="Windows_NT"then
-skip=os.execute('dir "'..tostring(directory)..'" /A:D /S /B')
+skip=os.execute('dir "'..directory..'" /A:D /S /B')
 end
 if not skip then
-print("Accessing file: "..tostring(directory))
+print("Accessing File: "..directory)
 compare[relative_path]={}
-local lines,contentsum=meta_Hash(io.input(tostring(directory)),compare,relative_path)
+local lines,contentsum=meta_Hash(io.input(directory),nil,compare,relative_path)
 sum=math.tointeger(namecontent(namesum,contentsum))+sum
 compare[relative_path].contentsum=contentsum
-io.input(tostring(directory)):close()
-print(lines.." lines summed up")
+io.input(directory):close()
+print(lines.." Lines Summed Up")
 else
 sum=sum-namesum
 compare[relative_path]=-namesum
 end
 end
-print([===[Process finished - here you are:
+print([===[Process Finished - Here You Are:
 ]===]..sum)
 return sum,compare
 end
@@ -3810,7 +3871,7 @@ end
 return debug.setmetatable({name=snapshot,func=object},uniform_metatable)
 elseif type(object)=="table"then
 if traversed[object]then
-return tostring(object).."-loophole patch"
+return tostring(object).." - loophole patch"
 else
 traversed[object]=true
 end
@@ -3859,11 +3920,12 @@ function directory_Match(directory)
 ]===]..dir_mat.."\nend\nlocal success2,module_finder,module_path,module_location=pcall(directory_Match,"..("%q"):format('"'..(os.getenv("ANDROID_ROOT")=="/system"and where:match("^(.-/)[^/]+/$")or io.popen('cd /D "'..where..'.." && cd'):read().."\\")..'"')..[===[)
 if success2 then
 local iter_func,invar_state,ctrl_var_init
+if module_finder then
 if not module_path then
 iter_func,invar_state,ctrl_var_init=ipairs(module_finder)
 end
 for i,v in module_path and module_finder:lines()or iter_func,not module_path and invar_state or nil,not module_path and ctrl_var_init or nil do
-if(module_path and module_location or(i%3==2 and module_finder[1+i]))and(module_path and i or v):match('%-'..]===]..interface.version..[===[)then
+if(module_path or(i%3==2 and module_finder[1+i]))and(module_path and i or v):match('%-'..]===]..interface.version..[===[)then
 package.path=module_path and i or v
 if os.getenv('ANDROID_ROOT')=='/system'then
 module_name=(module_path and i or v):match('/([^/]-)%-'..]===]..interface.version..[===[)
@@ -3877,11 +3939,12 @@ if module_name then
 require(module_name)
 else
 module_finder,module_path,module_location=directory_Match(false)
+if module_finder then
 if not module_path then
 iter_func,invar_state,ctrl_var_init=ipairs(module_finder)
 end
 for i,v in module_path and module_finder:lines()or iter_func,not module_path and invar_state or nil,not module_path and ctrl_var_init or nil do
-if(module_path and module_location or(i%3==2 and module_finder[1+i]))and(module_path and i or v):match('%-'..]===]..interface.version..[===[)then
+if(module_path or(i%3==2 and module_finder[1+i]))and(module_path and i or v):match('%-'..]===]..interface.version..[===[)then
 package.path=module_path and i or v
 if os.getenv('ANDROID_ROOT')=='/system'then
 module_name=(module_path and i or v):match('/([^/]-)%-'..]===]..interface.version..[===[)
@@ -3899,21 +3962,43 @@ end
 end
 end
 end
+end
+end
 package.path=cache_package_path]===]):gsub("\n","n\\\n"),("%q"):format([===[if type(stack_dump)=='table'then
-print('Please Enter Global to Serialise, Either to Proceed UnDisrupted or QUIT to Opt Out...')
+::relocated::
+print('Please Enter Directory to Relocate or Globals to Serialise, Either to Proceed UnDisrupted or QUIT to Opt Out...')
 local directives,quit,handle=io.input(io.stdin):read()
 if directives=='QUIT'then
 quit=true
 goto cut_short
+elseif directives~=''then
+local redirectory
+if os.getenv('ANDROID_ROOT')=='/system'then
+redirectory=io.popen('find '..directives..' -type d 2>/dev/null'):read()
+elseif os.getenv('OS')=='Windows_NT'then
+local cache_directives=directives
+if directives:find('".-"$')==1 then
+cache_directives=directives:match('^"(.-)"$')
+end
+redirectory=io.popen('dir '..directives..' /A:D /S /B'):read()or cache_directives
+if redirectory:find(cache_directives)==1 then
+redirectory=cache_directives
+end
+end
+if redirectory then
+require(module_name).c_UpBinds.chdir(redirectory)
+print('Working Directory Relocated at '..redirectory..'!')
+goto relocated
+end
 end
 for token in directives:gmatch('%S+')do
 if token=='QUIT'then
 quit=true
 elseif load('return '..token)()~=nil then
 if not handle then
-handle=io.output('/sdcard/Download/Codes/Memory Dump')
+handle=os.getenv('ANDROID_ROOT')=='/system'and io.output(io.popen('find /sdcard/Download/Codes/ -type d 2>/dev/null'):read()and'/sdcard/Download/Codes/Memory Dump'or'./Memory Dump')or io.output('.\\Memory Dump')
 end
-handle:write(require(module_name).serialise(load('return '..token)(),'\t'),'\n')
+handle:write(table.concat(table.pack(require(module_name).serialise(load('return '..token)(),false,'\t')),'\n'),'\n')
 end
 end
 if handle then
@@ -3926,48 +4011,45 @@ end
 end
 if os.getenv('ANDROID_ROOT')=='/system'then
 local success,script_finder,script_path,script_location=pcall(directory_Match or require(module_name).directory_Match,nil)
-if not success then
-return false
-elseif not script_path then
-if script_finder then
-warn('More than 1 File Existent as BootStrap to Script! Turning to Search within Current Working Directory: ',io.popen('pwd'):read(),'!')
-end
-script_finder,script_path,script_location=(directory_Match or require(module_name).directory_Match)(false)
+if success and script_finder then
 local iter_func,invar_state,ctrl_var_init
-if not script_path then
+if script_location then
+return loadfile(script_path)
+elseif not script_path then
 iter_func,invar_state,ctrl_var_init=ipairs(script_finder)
 end
 for i,v in script_path and script_finder:lines()or iter_func,not script_path and invar_state or nil,not script_path and ctrl_var_init or nil do
-if script_path and script_location or(i%3==2 and script_finder[1+i])then
+if script_path or(i%3==2 and script_finder[1+i])then
 if(script_path and i or v):match('/script%.?[^/%.]-$')then
-return loadfile(script_path)
+return loadfile(script_path and i or v)
 end
 end
 end
-return false
-elseif script_location then
-return loadfile(script_path)
+warn('No Valid Script File Found: Either among BootStrapped Files or within Current Working Directory - ',io.popen('pwd'):read(),' - Please Try Again!')
 end
 return false
 elseif os.getenv('OS')=='Windows_NT'then
 local script_path=os.getenv('script_path')
-if not script_path then
-local script_finder,script_location
-script_finder,script_path,script_location=(directory_Match or require(module_name).directory_Match)(false)
+if script_path then
+return loadfile(script_path)
+end
+local success,script_finder,script_location
+success,script_finder,script_path,script_location=pcall(directory_Match or require(module_name).directory_Match,false)
+if success and script_finder then
 local iter_func,invar_state,ctrl_var_init
 if not script_path then
 iter_func,invar_state,ctrl_var_init=ipairs(script_finder)
 end
 for i,v in script_path and script_finder:lines()or iter_func,not script_path and invar_state or nil,not script_path and ctrl_var_init or nil do
-if script_path and script_location or(i%3==2 and script_finder[1+i])then
+if script_path or(i%3==2 and script_finder[1+i])then
 if(script_path and i or v):match('\\script%.?[^\\%.]-$')then
-return loadfile(script_path)
+return loadfile(script_path and i or v)
 end
 end
+end
+warn('No Valid Script File Found within Current Working Directory - ',io.popen('cd'):read(),' - Please Try Again!')
 end
 return false
-end
-return loadfile(script_path)
 end]===]):gsub("\n","n\\\n")
 local script_len=math.max(#script1,#script2)
 io.output(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version)):write([===[
@@ -3979,6 +4061,7 @@ io.output(where..keystone(interface.version,interface.renewed)..keystone(interfa
 #include<pthread.h>
 #include<setjmp.h>
 #include<signal.h>
+#include<execinfo.h>
 #include<lua.h>
 #include<lualib.h>
 #include<lauxlib.h>
@@ -5369,13 +5452,31 @@ return states;
 
 sigjmp_buf context_for_jump;
 
-void interrupt_SigHandler(int signum){
-if(signum==SIGINT)
-siglongjmp(context_for_jump,1);
-}
+int collective_signals[]={SIGINT,SIGABRT,SIGSEGV,SIGBUS,SIGILL,SIGFPE};
 
 struct sigaction renewed_action;
 struct sigaction current_action;
+
+void versatile_SigHandler(int signum){
+if(signum==SIGINT)
+siglongjmp(context_for_jump,1);
+else if(signum==SIGABRT || signum==SIGSEGV || signum==SIGBUS || signum==SIGILL || signum==SIGFPE){
+int stack_depth;
+void *preliminary_info[27];
+char **stack_traceback;
+stack_depth=backtrace(preliminary_info,27);
+stack_traceback=backtrace_symbols(preliminary_info,stack_depth);
+if(stack_traceback){
+printf("Trace Back to Stack Depth #%d:\n",stack_depth);
+for(int idx=0;idx<stack_depth;idx++)
+printf("%d\t%s\n",idx,stack_traceback[idx]);
+free(stack_traceback);
+}
+renewed_action.sa_handler=SIG_DFL;
+sigaction(signum,&renewed_action,NULL);
+raise(signum);
+}
+}
 
 int errMsg_Handler(lua_State *L){
 lua_settop(L,1);
@@ -5384,7 +5485,8 @@ luaL_requiref(L,luaL_checkstring(L,-1),NULL,0);
 lua_getfield(L,-1,"serialise");
 lua_insert(L,1);
 lua_pop(L,2);
-PCALL_ERRH(1,1,0,"Error Serialising Object: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Serialising Object: %s!");
+lua_pushstring(L,"\t");
+PCALL_ERRH(2,1,0,"Error Serialising Object: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Serialising Object: %s!");
 lua_getglobal(L,"debug");
 lua_getfield(L,-1,"traceback");
 lua_insert(L,1);
@@ -5409,15 +5511,18 @@ states->associative=0;
 states->depth=3;
 memset(states->tracks,0,1+3*states->depth);
 memset(states->traversal,0,2+3*states->depth);
-memset(&current_action,0,sizeof current_action);
 memset(&renewed_action,0,sizeof renewed_action);
-renewed_action.sa_handler=interrupt_SigHandler;
+renewed_action.sa_handler=versatile_SigHandler;
 sigemptyset(&renewed_action.sa_mask);
 renewed_action.sa_flags=0;
-sigaction(SIGINT,NULL,&current_action);
+for(int idx=0;idx<sizeof collective_signals;idx++){
+memset(&current_action,0,sizeof current_action);
+sigaction(collective_signals[idx],NULL,&current_action);
 if(memcmp(&current_action,&renewed_action,sizeof renewed_action))
-sigaction(SIGINT,&renewed_action,NULL);
-sigsetjmp(context_for_jump,1);
+sigaction(collective_signals[idx],&renewed_action,NULL);
+}
+if(sigsetjmp(context_for_jump,1))
+CLEAR_STACK(0);
 DOSTR_ERRH(script,"Error Finding Script File: %s!",CUSTOM_GOTO,premature_end);
 if(lua_isfunction(L,-1)){
 lua_insert(L,1);
@@ -5469,7 +5574,7 @@ goto not_bother
 end
 os.execute("rm -rvf $PREFIX/local/c_M")
 os.execute("mkdir -v -m=rwx $PREFIX/local/c_M")
-if os.execute('clang -x c "'..where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version)..'" -fPIC -ggdb -O0 -ffp-contract=fast -Wall -o $PREFIX/local/c_M/lua_Console -L$PREFIX/local/lib -llua -L. -lm -pthread')then
+if os.execute('clang -x c "'..where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version)..'" -fPIC -ggdb -O0 -ffp-contract=fast -Wall -o $PREFIX/local/c_M/lua_Console -L$PREFIX/local/lib -llua -L$PREFIX/lib -landroid-execinfo -pthread -lm')then
 os.execute([===[export "PATH=$PREFIX/bin"
 unset LUA_INIT
 unset LUA_INIT_]===].._VERSION:match("%f[%s%.%d][%s%.%w]*"):gsub("%s",""):gsub("%.","_").."\n"..[===[cat > ~/.bashrc << EOF
