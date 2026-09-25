@@ -41,7 +41,7 @@ params.unique={}
 params.stateless=(initial_params or params.unique).stateless
 params.offset=(initial_params or params.unique).offset or 1
 params.unit=params.offset//math.abs(params.offset)
-params.offset=params.unit<0 and 1+params.offset%params.far_reach or(params.offset%params.far_reach>0 and params.offset%params.far_reach or params.far_reach)
+params.offset=params.unit<0 and 1+params.offset%params.far_reach or 1+(params.offset-1)%params.far_reach
 params.onset=params.offset
 params.initialised=true
 ::second::
@@ -52,7 +52,7 @@ if not args.initd then
 args.initd=true
 goto first
 end
-x=(args.unit+x)%args.far_reach>0 and(args.unit+x)%args.far_reach or args.far_reach
+x=1+(args.unit+x-1)%args.far_reach
 if x==args.onset then
 return nil
 end
@@ -71,7 +71,7 @@ if not params.initd then
 params.initd=true
 goto first
 end
-params.offset=(params.unit+params.offset)%params.far_reach>0 and(params.unit+params.offset)%params.far_reach or params.far_reach
+params.offset=1+(params.unit+params.offset-1)%params.far_reach
 if params.offset==params.onset then
 return nil
 end
@@ -89,7 +89,7 @@ while j<=#lists and(lists[j]or params.unique)[params.offset]~=nil do
 element[1+#element]=lists[j][params.offset]
 j=1+j
 end
-params.offset=(params.unit+params.offset)%params.far_reach>0 and(params.unit+params.offset)%params.far_reach or params.far_reach
+params.offset=1+(params.unit+params.offset-1)%params.far_reach
 if params.offset~=params.onset then
 return element,zip(lists,nil,params)
 else
@@ -149,8 +149,8 @@ if #sorted_array>0 then
 if range==true then
 range={1,#sorted_array}
 end
-range[1]=tonumber(range[1])and(tonumber(range[1])%#sorted_array>0 and tonumber(range[1])%#sorted_array or #sorted_array)or 1
-range[2]=tonumber(range[2])and(tonumber(range[2])%#sorted_array>0 and tonumber(range[2])%#sorted_array or #sorted_array)or #sorted_array
+range[1]=tonumber(range[1])and 1+(tonumber(range[1])-1)%#sorted_array or 1
+range[2]=tonumber(range[2])and 1+(tonumber(range[2])-1)%#sorted_array or #sorted_array
 if range[1]>range[2]then
 range[1],range[2]=range[2],range[1]
 end
@@ -2343,7 +2343,7 @@ end
 dispose,dest=dest and dispose or nil,dest or dispose
 for idx=1,2 do
 rows[idx]=rows[idx]or rows[3-idx]
-rows[idx]=rows[idx]%#self>0 and rows[idx]%#self or #self
+rows[idx]=1+(rows[idx]-1)%#self
 end
 if rows[1]>rows[2]then
 rows[1],rows[2]=rows[2],rows[1]
@@ -2380,7 +2380,7 @@ end
 dispose,dest=dest and dispose or nil,dest or dispose or self
 for idx=2,3 do
 rows[idx]=rows[idx]or rows[5-idx]
-rows[idx]=rows[idx]%#self>0 and rows[idx]%#self or #self
+rows[idx]=1+(rows[idx]-1)%#self
 end
 if rows[2]>rows[3]then
 rows[2],rows[3]=rows[3],rows[2]
@@ -2425,7 +2425,7 @@ dispose,dest=dest and dispose or nil,dest or dispose
 valve[2]=valve[2]or valve[3]-1
 valve[3]=valve[3]or 1+valve[2]
 for idx=2,3 do
-valve[idx]=valve[idx]%#self>0 and valve[idx]%#self or #self
+valve[idx]=1+(valve[idx]-1)%#self
 end
 valve[1]=(valve[3]-valve[2])//math.abs(valve[3]-valve[2])*(math.abs(valve[1])%(1+math.max(valve[2],valve[3])-math.min(valve[2],valve[3])))
 if not rawequal(dest,self)then
@@ -2515,7 +2515,7 @@ dispose,result=result and dispose or nil,result or dispose or self
 if self[debug.getmetatable(self)]=="excel"then
 local sequential,procedure,insertion
 if math.type(processor)=="integer"then
-processor=processor%#self>0 and processor%#self or #self
+processor=1+(processor-1)%#self
 sequential,procedure=processor,require(module_name).meta_Hash
 elseif type(processor)=="function"then
 procedure=processor
@@ -2544,13 +2544,13 @@ else
 stop=start
 end
 end
-start=start%#self>0 and start%#self or #self
-stop=stop%#self>0 and stop%#self or #self
+start=1+(start-1)%#self
+stop=1+(stop-1)%#self
 for idx2=start,stop do
 sequential[idx2]=1+(sequential[idx2]or 0)
 end
 elseif math.type(processor[idx1])=="integer"then
-local row_num=processor[idx1]%#self>0 and processor[idx1]or #self
+local row_num=1+(processor[idx1]-1)%#self
 sequential[row_num]=1+(sequential[row_num]or 0)
 end
 end
@@ -2563,7 +2563,7 @@ end
 end
 table.sort(sequential)
 else
-sequential=tonumber(processor[1])%#self>0 and tonumber(processor[1])%#self or #self
+sequential=1+(tonumber(processor[1])-1)%#self
 end
 procedure=type(processor.proc)=="function"and processor.proc or require(module_name).meta_Hash
 end
@@ -3347,8 +3347,8 @@ debug.setmetatable(consolidate_File,consolidate_File)
 --range[6][12]
 
 local interface={
-version=1.2890625,
-renewed=20260921,
+version=1.3046875,
+renewed=20260925,
 ["Pointers in Practice"]="Treating certain parameters as tables or pointing to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-call time.",
 replicate=replicate,
 zip=zip,
@@ -3381,7 +3381,7 @@ consolidate_File=consolidate_File
 do
 --range[4][15]
 local status="ready for run";
-local digest=-166127260185768310;
+local digest=1561956346735487160;
 --range[2][12]
 --[===[
 ⚙
@@ -3625,7 +3625,7 @@ return table.concat(table_keys[layer2]):gsub([===[=[^
 ]-})]===],"%1"),serialise(nil,nil,nil,nil,nil,layer2-1,nil,table_keys)
 end
 else
-if compact==false and layer1<=1 and not serialised[table_keys]then
+if compact==false and layer1<=1 and type(self)=="table"and not serialised[table_keys]then
 return serialise(nil,nil,nil,nil,nil,#table_keys,nil,table_keys)
 elseif compact and indent_char==""then
 return(table.concat(assembler):gsub("%s+",""):gsub(",}","}"))
@@ -3660,7 +3660,7 @@ local power=0
 while larger>=1e3*smaller^(1+power)do
 power=1+power
 end
-return sign*math.ceil(larger/smaller^power)*(larger%smaller>0 and larger%smaller or smaller)
+return sign*math.ceil(larger/smaller^power)*(1+(larger-1)%smaller)
 end
 if self==nil then
 return 0+sum
@@ -3735,7 +3735,7 @@ local power=0
 while larger>=1e3*smaller^(1+power)do
 power=1+power
 end
-return sign*math.ceil(larger/smaller^power)*(larger%smaller>0 and larger%smaller or smaller)
+return sign*math.ceil(larger/smaller^power)*(1+(larger-1)%smaller)
 end
 local sum,compare=0,{absolute_path=tostring(location)}
 if io.type(directory)=="file"then
@@ -3910,9 +3910,9 @@ local cstatus=status
 
 --autorun part 1:
 if status=="off maintenance"then
-status="mained by c"
+status="hosted by c"
 local script1,script2=("%q"):format([===[local cache_package_path=package.path
-package.path=]===]..("%q"):format(find_self).."\nlocal success1=pcall(require,'"..required_name..[===[')
+package.path=]===]..("%q"):format(find_self).."\nlocal success1,module_instance=pcall(require,'"..required_name..[===[')
 if success1 then
 module_name=']===]..required_name..[===['
 else
@@ -3936,7 +3936,7 @@ break
 end
 end
 if module_name then
-require(module_name)
+module_instance=require(module_name)
 else
 module_finder,module_path,module_location=directory_Match(false)
 if module_finder then
@@ -3955,7 +3955,7 @@ break
 end
 end
 if module_name then
-require(module_name)
+module_instance=require(module_name)
 else
 error('Unable to Find Module Corresponding to Version: '..]===]..interface.version..[===[ ..'!')
 end
@@ -3964,18 +3964,21 @@ end
 end
 end
 end
-package.path=cache_package_path]===]):gsub("\n","n\\\n"),("%q"):format([===[if type(stack_dump)=='table'then
+package.path=cache_package_path
+return module_instance]===]):gsub("\n","n\\\n"),("%q"):format([===[if math.type(task_serial)=='integer'then
 ::relocated::
-print('Please Enter Directory to Relocate or Globals to Serialise, Either to Proceed UnDisrupted or QUIT to Opt Out...')
+print('Task #'..task_serial..': Please Enter Directory to Relocate or Globals to Serialise, Either to Proceed UnDisrupted or QUIT to Opt Out...')
 local directives,quit,handle=io.input(io.stdin):read()
 if directives=='QUIT'then
 quit=true
 goto cut_short
-elseif directives~=''then
+elseif directives==''or not directives then
+goto cut_short
+else
 local redirectory
 if os.getenv('ANDROID_ROOT')=='/system'then
 redirectory=io.popen('find '..directives..' -type d 2>/dev/null'):read()
-elseif os.getenv('OS')=='Windows_NT'then
+elseif os.getenv('OS')=='Windows_NT'and os.execute('dir '..directives..' /A:D /S /B')then
 local cache_directives=directives
 if directives:find('".-"$')==1 then
 cache_directives=directives:match('^"(.-)"$')
@@ -3996,7 +3999,7 @@ if token=='QUIT'then
 quit=true
 elseif load('return '..token)()~=nil then
 if not handle then
-handle=os.getenv('ANDROID_ROOT')=='/system'and io.output(io.popen('find /sdcard/Download/Codes/ -type d 2>/dev/null'):read()and'/sdcard/Download/Codes/Memory Dump'or'./Memory Dump')or io.output('.\\Memory Dump')
+handle=os.getenv('ANDROID_ROOT')=='/system'and io.open(io.popen('find /sdcard/Download/Codes/ -type d 2>/dev/null'):read()and'/sdcard/Download/Codes/Memory Dump'or'./Memory Dump','a+')or io.open('.\\Memory Dump','a+')
 end
 handle:write(table.concat(table.pack(require(module_name).serialise(load('return '..token)(),false,'\t')),'\n'),'\n')
 end
@@ -4062,6 +4065,8 @@ io.output(where..keystone(interface.version,interface.renewed)..keystone(interfa
 #include<setjmp.h>
 #include<signal.h>
 #include<execinfo.h>
+#include<fcntl.h>
+#include<sys/stat.h>
 #include<lua.h>
 #include<lualib.h>
 #include<lauxlib.h>
@@ -4076,22 +4081,22 @@ luaL_error(L,OPTIONAL_FSTR,luaL_checkstring(L,-1));\
 else \
 lua_error(L);\
 }while(0)
-#define CLEAR_STACK(HIND_TOP) do{\
+#define CLEAR_STACK(HIND_TOP) ({\
 lua_settop(L,HIND_TOP);\
 continue;\
-}while(0)
-#define PCALL_ERRH(NARGS,NRESULTS,ERRH,PREPEND_FSTR,ON_ERR,DICTATION) do{\
+})
+#define PCALL_ERRH(NARGS,NRESULTS,ERRH,PREPEND_FSTR,ON_ERR,DICTATION) ({\
 if(lua_pcall(L,NARGS,NRESULTS,ERRH)!=LUA_OK){\
 printf(PREPEND_FSTR,lua_isstring(L,-1)?luaL_checkstring(L,-1):luaL_typename(L,-1));\
 ON_ERR(DICTATION);\
 }\
-}while(0)
-#define DOSTR_ERRH(SCRIPT,PREPEND_FSTR,ON_ERR,DICTATION) do{\
+})
+#define DOSTR_ERRH(SCRIPT,PREPEND_FSTR,ON_ERR,DICTATION) ({\
 if(luaL_dostring(L,SCRIPT)!=LUA_OK){\
 printf(PREPEND_FSTR,lua_isstring(L,-1)?luaL_checkstring(L,-1):luaL_typename(L,-1));\
 ON_ERR(DICTATION);\
 }\
-}while(0)
+})
 
 int unique_Key(lua_State *L){
 return 0;
@@ -4948,8 +4953,7 @@ luaL_Reg c_UpBinds[]={
 {NULL,NULL}
 };
 
-#define UTF8_OFFSETS lua_pushinteger(L,1);\
-lua_arith(L,LUA_OPSUB);\
+#define UTF8_LENGTH do{\
 lua_getglobal(L,"utf8");\
 lua_getfield(L,-1,"offset");\
 lua_getfield(L,-2,"len");\
@@ -4958,79 +4962,156 @@ lua_pushvalue(L,1);\
 lua_pushinteger(L,1);\
 lua_pushinteger(L,string_length);\
 PCALL_ERRH(3,1,0,"Error Obtaining UTF-8 String Length: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Obtaining UTF-8 String Length: %s!");\
-lua_rotate(L,-3,-1);\
-lua_insert(L,-2);\
-lua_arith(L,LUA_OPMOD);\
-lua_pushinteger(L,1);\
-lua_arith(L,LUA_OPADD);\
+lua_rotate(L,2,2);\
+}while(0)
+
+#define UTF8_OFFSETS(POS_ON_STACK,WHICH_SIDE) do{\
+lua_pushvalue(L,2);\
 lua_pushvalue(L,1);\
-lua_insert(L,-2);\
-PCALL_ERRH(2,2,0,"Error Obtaining UTF-8 Character Offsets: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Obtaining UTF-8 Character Offsets: %s!");
+lua_rotate(L,POS_ON_STACK<0?POS_ON_STACK-2:POS_ON_STACK,-1);\
+PCALL_ERRH(2,2,0,"Error Obtaining UTF-8 Character Offsets: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Obtaining UTF-8 Character Offsets: %s!");\
+if(WHICH_SIDE>=0){\
+if(WHICH_SIDE)\
+lua_remove(L,-2);\
+else \
+lua_pop(L,1);\
+}\
+}while(0)
 
 int string_Subscription(lua_State *L){
-lua_settop(L,2);
 size_t string_length;
-const char *string_itself=luaL_checklstring(L,-2,&string_length);
-if(lua_isinteger(L,-1)){
-UTF8_OFFSETS
+const char *string_itself=luaL_checklstring(L,1,&string_length);
+UTF8_LENGTH;
+int ctop=lua_gettop(L);
+for(int idx1=4;idx1<=ctop;idx1++){
+if(lua_isinteger(L,4)){
+UTF8_OFFSETS(4,-1);
 lua_pushlstring(L,string_itself+luaL_checkinteger(L,-2)-1,1+luaL_checkinteger(L,-1)-luaL_checkinteger(L,-2));
-}else if(lua_isstring(L,-1)){
-lua_getmetatable(L,-2);
-lua_pushstring(L,"_index");
-lua_rawget(L,-2);
-lua_replace(L,-2);
-lua_insert(L,-2);
-lua_rawget(L,-2);
-}else
-luaL_error(L,"Invalid Subscript!");
-return 1;
+lua_insert(L,-3);
+lua_pop(L,2);
+}else if(lua_isstring(L,4)){
+size_t directive_length;
+const char *directive_string=luaL_checklstring(L,4,&directive_length);
+char *stop=directive_length+(char*)directive_string;
+int which=-1;
+long directives[3]={0,0,0};
+char *head=(char*)directive_string,*tail,*colon;
+while(++which<sizeof directives){
+colon=strchr(head,':');
+while(directives[which]=strtol(head,&tail,0),head>=tail && tail<colon && tail<stop)
+head++;
+if(tail>=stop)
+break;
+if(colon)
+head=++colon;
+else
+break;
+}
+lua_remove(L,4);
+lua_Integer temp=luaL_checkinteger(L,3);
+int lower=1+((directives[0]?:1)-1)%temp,upper=1+((directives[1]?:temp)-1)%temp;
+if(directives[2]){
+if((lower<upper && directives[2]<0)||(lower>upper && directives[2]>0)){
+int swap=lower;
+lower=upper;
+upper=swap;
+}
+int count_pieces=0;
+for(int idx2=lower;lower>upper?idx2>=upper:idx2<=upper;idx2+=directives[2]){
+count_pieces++;
+luaL_checkstack(L,3,"Unable to Allocate Memory for the Extra Stack Space!");
+lua_pushinteger(L,idx2);
+UTF8_OFFSETS(-1,-1);
+lua_pushlstring(L,string_itself+luaL_checkinteger(L,-2)-1,1+luaL_checkinteger(L,-1)-luaL_checkinteger(L,-2));
+lua_insert(L,-3);
+lua_pop(L,2);
+}
+lua_concat(L,count_pieces);
+}else{
+luaL_checkstack(L,3,"Unable to Allocate Memory for the Extra Stack Space!");
+lua_pushinteger(L,lower>upper?upper:lower);
+UTF8_OFFSETS(-1,0);
+lua_pushinteger(L,lower>upper?lower:upper);
+UTF8_OFFSETS(-1,1);
+lua_pushlstring(L,string_itself+luaL_checkinteger(L,-2)-1,1+luaL_checkinteger(L,-1)-luaL_checkinteger(L,-2));
+lua_insert(L,-3);
+lua_pop(L,2);
+}
+}else{
+lua_remove(L,4);
+printf("Invalid Directive @Parameter #%d!",idx1);
+}
+}
+return lua_gettop(L)-3;
 }
 
 int string_Modification(lua_State *L){
 lua_settop(L,3);
+luaL_checktype(L,-1,LUA_TTABLE);
 size_t string_length;
 const char *string_itself=luaL_checklstring(L,-3,&string_length);
-luaL_checktype(L,-1,LUA_TTABLE);
+UTF8_LENGTH;
 if(lua_isinteger(L,-2)){
-lua_insert(L,-2);
-UTF8_OFFSETS
+UTF8_OFFSETS(-2,-1);
 lua_pushlstring(L,string_itself,luaL_checkinteger(L,-2)-1);
-lua_geti(L,2,1);
+lua_geti(L,-4,1);
 lua_pushlstring(L,luaL_checkinteger(L,-3)+string_itself,string_length-luaL_checkinteger(L,-3));
 lua_concat(L,3);
-lua_seti(L,2,2);
+lua_seti(L,-4,2);
+}else if(lua_isstring(L,-2)){
+size_t directive_length;
+const char *directive_string=luaL_checklstring(L,4,&directive_length);
+char *stop=directive_length+(char*)directive_string;
+int which=-1;
+long directives[2]={0,0};
+char *head=(char*)directive_string,*tail,*colon;
+while(++which<sizeof directives){
+colon=strchr(head,':');
+while(directives[which]=strtol(head,&tail,0),head>=tail && tail<colon && tail<stop)
+head++;
+if(tail>=stop)
+break;
+if(colon)
+head=++colon;
+else
+break;
+}
+lua_Integer temp=luaL_checkinteger(L,-3);
+int lower=1+((directives[0]?:1)-1)%temp,upper=1+((directives[1]?:temp)-1)%temp;
+lua_pushinteger(L,lower>upper?upper:lower);
+UTF8_OFFSETS(-1,0);
+lua_pushinteger(L,lower>upper?lower:upper);
+UTF8_OFFSETS(-1,1);
+lua_pushlstring(L,string_itself,luaL_checkinteger(L,-2)-1);
+lua_geti(L,-4,1);
+lua_pushlstring(L,luaL_checkinteger(L,-3)+string_itself,string_length-luaL_checkinteger(L,-3));
+lua_concat(L,3);
+lua_seti(L,-4,2);
 }else
 luaL_error(L,"Invalid Subscript!");
 return 0;
 }
 
-#define REG lua_pushstring(L,"");\
+#define REG do{\
+lua_pushstring(L,"");\
 lua_getmetatable(L,-1);\
 lua_replace(L,-2);\
-lua_pushstring(L,"__index");\
-lua_pushstring(L,"_index");\
-lua_pushvalue(L,-2);\
-lua_rawget(L,-4);\
-lua_rawset(L,-4);\
+lua_pushstring(L,"__call");\
 lua_pushcfunction(L,string_Subscription);\
 lua_rawset(L,-3);\
 lua_pushstring(L,"__newindex");\
 lua_pushcfunction(L,string_Modification);\
 lua_rawset(L,-3);\
-lua_getglobal(L,"module_name");\
-lua_replace(L,-2);\
-luaL_requiref(L,luaL_checkstring(L,-1),NULL,0);\
-if(luaL_getsubtable(L,-1,"c_UpBinds"))\
-luaL_error(L,"Field Already Exists!");\
-lua_remove(L,-2);\
-lua_remove(L,-2);\
+luaL_getsubtable(L,-2,"c_UpBinds");\
+lua_insert(L,-3);\
+lua_pop(L,2);\
 int idx=-1;\
 while(++idx,udc_UpBinds[idx].name || udc_UpBinds[idx].func){\
-lua_createtable(L,0,1);\
+luaL_newmetatable(L,udc_UpBinds[idx].name);\
 lua_pushcfunction(L,udc_UpBinds[idx].func);\
 lua_setfield(L,-2,"__call");\
-lua_setfield(L,LUA_REGISTRYINDEX,udc_UpBinds[idx].name);\
 lua_newuserdatauv(L,sizeof(luaL_Reg),0);\
+lua_replace(L,-2);\
 luaL_setmetatable(L,udc_UpBinds[idx].name);\
 lua_setfield(L,-2,udc_UpBinds[idx].name);\
 }\
@@ -5039,7 +5120,8 @@ while(++idx,c_UpBinds[idx].name || c_UpBinds[idx].func){\
 lua_pushcfunction(L,c_UpBinds[idx].func);\
 lua_setfield(L,-2,c_UpBinds[idx].name);\
 }\
-lua_pop(L,1);
+lua_pop(L,1);\
+}while(0)
 
 pthread_mutex_t lock=PTHREAD_MUTEX_INITIALIZER;
 
@@ -5063,7 +5145,7 @@ char script[]===],3+script_len,"]=",script1,[===[;
 pthread_mutex_lock(&lock);
 DOSTR_ERRH(script,"Error within Module-Search Script: %s!",CUSTOM_GOTO,premature_end);
 pthread_mutex_unlock(&lock);
-REG
+REG;
 int ctop=lua_gettop(L);
 PCALL_ERRH(0,LUA_MULTRET,0,"Error Executing Task Script: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Executing Task Script: %s!");
 luaL_checkstack(L,3,"Unable to Allocate Memory for the Extra Stack Space!");
@@ -5450,6 +5532,8 @@ states->traversal[strlen(states->tracks)]=-1;
 return states;
 }
 
+sig_atomic_t signal_counter=0;
+
 sigjmp_buf context_for_jump;
 
 int collective_signals[]={SIGINT,SIGABRT,SIGSEGV,SIGBUS,SIGILL,SIGFPE};
@@ -5457,10 +5541,20 @@ int collective_signals[]={SIGINT,SIGABRT,SIGSEGV,SIGBUS,SIGILL,SIGFPE};
 struct sigaction renewed_action;
 struct sigaction current_action;
 
+void interpreter_Count_Hook_Function(lua_State *L,lua_Debug *hook_arg){
+if(hook_arg->event==LUA_HOOKCOUNT && signal_counter<3 && signal_counter>0){
+signal_counter=0;
+luaL_error(L,"Lua Script Aborted According to User Request!");
+}
+}
+
 void versatile_SigHandler(int signum){
-if(signum==SIGINT)
+if(signum==SIGINT){
+if(signal_counter<3)
+signal_counter++;
+else
 siglongjmp(context_for_jump,1);
-else if(signum==SIGABRT || signum==SIGSEGV || signum==SIGBUS || signum==SIGILL || signum==SIGFPE){
+}else if(signum==SIGABRT || signum==SIGSEGV || signum==SIGBUS || signum==SIGILL || signum==SIGFPE){
 int stack_depth;
 void *preliminary_info[27];
 char **stack_traceback;
@@ -5496,21 +5590,27 @@ PCALL_ERRH(2,1,0,"Error Performing TraceBack: %s!",RAISE_APPROPRIATE_LUA_ERROR,"
 return 1;
 }
 
+char stack_dump[1024*1024];
+char *tail=stack_dump;
+
 int main(int n,char *args[]){
 struct proto_states *states=(struct proto_states*)]===],os.getenv("ANDROID_ROOT")=="/system"and""or"_",[===[alloca(sizeof(struct proto_states));
 L=luaL_newstate();
 luaL_openlibs(L);
 char script[]===],3+script_len,"]=",script1,[===[;
 DOSTR_ERRH(script,"Error within Module-Search Script: %s!",CUSTOM_GOTO,premature_end);
-REG
+REG;
 memset(script,0,sizeof script);
 strcpy(script,]===],script2,[===[);
+memset(stack_dump,0,sizeof stack_dump);
 do{
+lua_sethook(L,NULL,0,0);
 states->progress=0;
 states->associative=0;
 states->depth=3;
 memset(states->tracks,0,1+3*states->depth);
 memset(states->traversal,0,2+3*states->depth);
+signal_counter=0;
 memset(&renewed_action,0,sizeof renewed_action);
 renewed_action.sa_handler=versatile_SigHandler;
 sigemptyset(&renewed_action.sa_mask);
@@ -5521,34 +5621,80 @@ sigaction(collective_signals[idx],NULL,&current_action);
 if(memcmp(&current_action,&renewed_action,sizeof renewed_action))
 sigaction(collective_signals[idx],&renewed_action,NULL);
 }
-if(sigsetjmp(context_for_jump,1))
-CLEAR_STACK(0);
+if(sigsetjmp(context_for_jump,1)){
+struct stat attr;
+int dump_descriptor=open(!stat("/sdcard/Download/Codes/",&attr)&&S_ISDIR(attr.st_mode)?"/sdcard/Download/Codes/Memory Dump":"./Memory Dump",O_CREAT | O_WRONLY | O_APPEND,S_IRUSR | S_IWUSR);
+if(dump_descriptor!=-1){
+if(tail>sizeof stack_dump+stack_dump)
+tail=sizeof stack_dump+stack_dump;
+ssize_t write_increment;
+char *proceeding_pointer=stack_dump;
+while(write_increment=write(dump_descriptor,proceeding_pointer,(size_t)(tail-proceeding_pointer)),write_increment>0 && (proceeding_pointer+=write_increment)<tail);
+close(dump_descriptor);
+}
+continue;
+}
 DOSTR_ERRH(script,"Error Finding Script File: %s!",CUSTOM_GOTO,premature_end);
+if(lua_getglobal(L,"task_serial")==LUA_TNUMBER){
+lua_pushinteger(L,1);
+lua_arith(L,LUA_OPADD);
+lua_setglobal(L,"task_serial");
+}else{
+lua_pushinteger(L,2);
+lua_setglobal(L,"task_serial");
+lua_getglobal(L,"module_name");
+luaL_requiref(L,luaL_checkstring(L,-1),NULL,0);
+lua_getfield(L,-1,"serialise");
+lua_pushboolean(L,0);
+lua_pushstring(L,"\t");
+lua_rotate(L,1,3);
+lua_pop(L,3);
+}
 if(lua_isfunction(L,-1)){
-lua_insert(L,1);
+lua_insert(L,4);
 int ctop=lua_gettop(L);
 if(parse_console_command_options(n,args,states)->traversal[0]==-1)
 goto premature_end;
-for(int idx=lua_gettop(L);idx>ctop;idx--)
-lua_insert(L,2);
+lua_rotate(L,5,lua_gettop(L)-ctop);
 lua_pushcfunction(L,errMsg_Handler);
-lua_insert(L,1);
-PCALL_ERRH(lua_gettop(L)-2,LUA_MULTRET,1,"Error within Script File: %s!",CLEAR_STACK,0);
-if((ctop=lua_gettop(L))>1){
-lua_geti(L,LUA_REGISTRYINDEX,LUA_RIDX_GLOBALS);
-luaL_getsubtable(L,-1,"stack_dump");
-lua_insert(L,2);
-for(int idx=3;idx<2+ctop;idx++){
+lua_insert(L,4);
+lua_sethook(L,interpreter_Count_Hook_Function,LUA_MASKCOUNT,27000);
+PCALL_ERRH(lua_gettop(L)-5,LUA_MULTRET,4,"Error within Script File: %s!",CLEAR_STACK,3);
+lua_sethook(L,NULL,0,0);
+lua_remove(L,4);
+if((ctop=lua_gettop(L))>3){
+for(int idx=4;idx<=ctop;idx++){
+luaL_checkstack(L,6,"Unable to Allocate Memory for the Extra Stack Space!");
+lua_pushvalue(L,1);
 lua_pushvalue(L,idx);
-lua_seti(L,2,1+luaL_len(L,2));
+lua_pushvalue(L,2);
+lua_pushvalue(L,3);
+PCALL_ERRH(3,LUA_MULTRET,0,"Error Serialising Individual Result: %s!",CUSTOM_GOTO,premature_end);
+lua_pushstring(L,"\n");
 }
-lua_rotate(L,1,-2);
-lua_pop(L,3);
+lua_getglobal(L,"task_serial");
+lua_pushfstring(L,"--finish line of stack dump for task #%d\n",luaL_checkinteger(L,-1)-1);
+lua_remove(L,-2);
+lua_concat(L,lua_gettop(L)-ctop);
+size_t result_length;
+const char *result_string=luaL_checklstring(L,-1,&result_length);
+if(result_length>=sizeof stack_dump)
+memcpy(stack_dump,result_string,sizeof stack_dump);
+else{
+if(result_length+tail>=sizeof stack_dump+stack_dump)
+memmove(result_length+stack_dump,stack_dump,sizeof stack_dump -result_length);
+else
+memmove(result_length+stack_dump,stack_dump,tail-stack_dump);
+memcpy(stack_dump,result_string,result_length);
+}
+if(tail<sizeof stack_dump+stack_dump)
+tail+=result_length;
+lua_pop(L,1);
 }
 }else{
 _Bool script_file_unfound=lua_isboolean(L,-1)&& !lua_toboolean(L,-1),script_file_syntactic_error=lua_isstring(L,-1)&& !lua_toboolean(L,-2);
 if(!script_file_unfound && !script_file_syntactic_error)
-CLEAR_STACK(0);
+CLEAR_STACK(3);
 else{
 if(script_file_unfound)
 lua_pop(L,1);
@@ -5560,10 +5706,7 @@ if(parse_console_command_options(n,args,states)->traversal[0]==-1)
 goto premature_end;
 }
 }
-lua_geti(L,LUA_REGISTRYINDEX,LUA_RIDX_GLOBALS);
-luaL_getsubtable(L,-1,"stack_dump");
-lua_pop(L,2);
-}while(lua_gettop(L)<LUA_MINSTACK ||(lua_remove(L,1),1));
+}while(lua_gettop(L)<LUA_MINSTACK-3 || lua_checkstack(L,5));
 premature_end:
 lua_close(L);
 return 0;
@@ -5573,7 +5716,7 @@ if os.getenv("ANDROID_ROOT")~="/system"then
 goto not_bother
 end
 os.execute("rm -rvf $PREFIX/local/c_M")
-os.execute("mkdir -v -m=rwx $PREFIX/local/c_M")
+os.execute("mkdir -v -m +rwx $PREFIX/local/c_M")
 if os.execute('clang -x c "'..where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version)..'" -fPIC -ggdb -O0 -ffp-contract=fast -Wall -o $PREFIX/local/c_M/lua_Console -L$PREFIX/local/lib -llua -L$PREFIX/lib -landroid-execinfo -pthread -lm')then
 os.execute([===[export "PATH=$PREFIX/bin"
 unset LUA_INIT
