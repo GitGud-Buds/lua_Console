@@ -3347,8 +3347,8 @@ debug.setmetatable(consolidate_File,consolidate_File)
 --range[6][12]
 
 local interface={
-version=1.3046875,
-renewed=20260925,
+version=1.3203125,
+renewed=20260929,
 ["Pointers in Practice"]="Treating certain parameters as tables or pointing to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-call time.",
 replicate=replicate,
 zip=zip,
@@ -3381,7 +3381,7 @@ consolidate_File=consolidate_File
 do
 --range[4][15]
 local status="ready for run";
-local digest=1561956346735487160;
+local digest=130343202677436160;
 --range[2][12]
 --[===[
 ⚙
@@ -3581,7 +3581,7 @@ indent_char,serialised,layer1,layer2,assembler,table_keys=type(indent_char)=="st
 if type(compact)~="boolean"then
 compact=nil
 end
-if type(self)=="number" or type(self)=="boolean"then
+if type(self)=="number"or type(self)=="boolean"then
 assembler[1+#assembler]=tostring(self)
 elseif type(self)=="table"then
 if serialised[self]and(compact==false or serialised[self]<layer1)then
@@ -3910,7 +3910,7 @@ local cstatus=status
 
 --autorun part 1:
 if status=="off maintenance"then
-status="hosted by c"
+status="mained by c"
 local script1,script2=("%q"):format([===[local cache_package_path=package.path
 package.path=]===]..("%q"):format(find_self).."\nlocal success1,module_instance=pcall(require,'"..required_name..[===[')
 if success1 then
@@ -4098,772 +4098,253 @@ ON_ERR(DICTATION);\
 }\
 })
 
-int unique_Key(lua_State *L){
-return 0;
-}
+struct ref_couple{
+int ref;
+int ivrs_ref;
+};
 
-int lookUp(lua_State *L){
+int deFragment(lua_State *L){
 lua_settop(L,2);
-lua_pushvalue(L,2);
-if(lua_gettable(L,lua_upvalueindex(2))!=LUA_TNIL){
-lua_pushvalue(L,-1);
-lua_gettable(L,lua_upvalueindex(5));
-lua_getfield(L,-1,"set");
-lua_pushvalue(L,2);
-lua_pushvalue(L,2);
-if(lua_gettable(L,-3)!=LUA_TNIL){
-lua_pushinteger(L,1);
-lua_arith(L,LUA_OPADD);
-lua_settable(L,-3);
-}else{
+lua_pushvalue(L,lua_upvalueindex(1));
+lua_gettable(L,-3);
+lua_createtable(L,luaL_optinteger(L,-2,lua_rawlen(L,-3)),5);
+lua_pushnil(L);
+while(lua_next(L,-5)){
+if(lua_isinteger(L,-2))
+lua_rawseti(L,-3,1+lua_rawlen(L,-3));
+else
 lua_pop(L,1);
-lua_pushinteger(L,1);
+}
+lua_pushinteger(L,lua_rawlen(L,-1));
+if(!lua_rawequal(L,-4,-1))
+printf("Internal Inconsistency Occurred between Total Element Counts %lld Recorded and %lld Actual!",luaL_optinteger(L,-4,lua_rawlen(L,-5)),luaL_optinteger(L,-1,lua_rawlen(L,-2)));
+lua_setfield(L,-2,"t");
+lua_pushvalue(L,lua_upvalueindex(1));
+lua_rotate(L,-3,-1);
 lua_settable(L,-3);
-}
-lua_pop(L,2);
-lua_gettable(L,lua_upvalueindex(3));
-}
-else{
-lua_getmetatable(L,lua_upvalueindex(1));
-lua_pushvalue(L,2);
-lua_gettable(L,-2);
-if(lua_isnil(L,-1)){
-lua_pushvalue(L,lua_upvalueindex(6));
-lua_pushvalue(L,2);
-PCALL_ERRH(1,1,0,"Error Applying Hash Function to Key: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Applying Hash Function to Key: %s!");
-lua_gettable(L,lua_upvalueindex(3));
-}
-}
+lua_pushinteger(L,1);
+lua_setfield(L,-2,"m");
+lua_pushinteger(L,1+lua_rawlen(L,-1));
+lua_setfield(L,-2,"p");
+lua_pushinteger(L,lua_rawlen(L,-1));
+lua_setfield(L,-2,"n");
 return 1;
-}
-
-int inverse_LookUp(lua_State *L){
-lua_settop(L,3);
-lua_insert(L,-2);
-if(lua_gettable(L,lua_upvalueindex(4))==LUA_TTABLE &&(lua_pushvalue(L,lua_upvalueindex(7)),lua_gettable(L,-2)==LUA_TSTRING &&(lua_pushstring(L,"Merged Entries"),lua_rawequal(L,-2,-1)))){
-lua_pop(L,2);
-lua_newtable(L);
-for(int idx=1;idx<=luaL_len(L,-2);idx++){
-if(lua_isboolean(L,-3)&& lua_toboolean(L,-3)){
-lua_geti(L,-2,idx);
-lua_pushvalue(L,-1);
-lua_gettable(L,lua_upvalueindex(5));
-lua_settable(L,-3);
-}else{
-lua_geti(L,-2,idx);
-lua_gettable(L,lua_upvalueindex(5));
-lua_seti(L,-2,idx);
-}
-}
-}else{
-lua_settop(L,3);
-if(lua_isboolean(L,-2)&& lua_toboolean(L,-2)){
-lua_createtable(L,0,1);
-lua_insert(L,-2);
-lua_pushvalue(L,-1);
-lua_gettable(L,lua_upvalueindex(5));
-lua_settable(L,-3);
-}else
-lua_gettable(L,lua_upvalueindex(5));
-}
-return 1;
-}
-
-int enumerate(lua_State *L){
-lua_settop(L,3);
-lua_pushvalue(L,2);
-if(lua_gettable(L,lua_upvalueindex(2))!=LUA_TNIL){
-if(!lua_toboolean(L,3)){
-lua_pushvalue(L,-1);
-lua_gettable(L,lua_upvalueindex(5));
-lua_getfield(L,-1,"set");
-lua_pushvalue(L,2);
-lua_pushnil(L);
-lua_settable(L,-3);
-lua_pop(L,1);
-lua_getfield(L,-1,"list");
-int equal_found=0,size=luaL_len(L,-1);
-for(int idx=1;idx<=size;idx++){
-lua_geti(L,-1,idx);
-if(!equal_found)
-equal_found=lua_rawequal(L,2,-1);
-lua_pop(L,1);
-if(equal_found){
-if(idx<size){
-lua_geti(L,-1,1+idx);
-lua_seti(L,-2,idx);
-}else{
-lua_pushnil(L);
-lua_seti(L,-2,idx);
-}
-}
-}
-if(!luaL_len(L,-1)){
-lua_pushvalue(L,4);
-lua_pushnil(L);
-lua_settable(L,lua_upvalueindex(5));
-}
-lua_copy(L,2,-2);
-lua_pushnil(L);
-lua_replace(L,-2);
-lua_settable(L,lua_upvalueindex(2));
-}else{
-lua_pushvalue(L,-1);
-lua_gettable(L,lua_upvalueindex(5));
-lua_getfield(L,-1,"set");
-lua_pushvalue(L,2);
-lua_pushvalue(L,2);
-if(lua_gettable(L,-3)!=LUA_TNIL){
-lua_pushinteger(L,1);
-lua_arith(L,LUA_OPADD);
-lua_settable(L,-3);
-}else{
-lua_pop(L,1);
-lua_pushinteger(L,1);
-lua_settable(L,-3);
-}
-lua_pop(L,2);
-}
-}else if(lua_toboolean(L,3)){
-lua_copy(L,lua_upvalueindex(6),-1);
-lua_pushvalue(L,2);
-PCALL_ERRH(1,1,0,"Error Applying Hash Function to Key: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Applying Hash Function to Key: %s!");
-lua_pushvalue(L,-1);
-if(lua_gettable(L,lua_upvalueindex(5))!=LUA_TNIL){
-lua_getfield(L,-1,"list");
-lua_newtable(L);
-if(lua_getmetatable(L,2)){
-lua_getfield(L,-1,"__eq");
-lua_remove(L,-2);
-}else
-lua_pushnil(L);
-for(int idx=luaL_len(L,-3);idx>=1;idx--){
-_Bool equal_found=0;
-if(lua_isfunction(L,-1)){
-lua_pushvalue(L,-1);
-lua_geti(L,-4,idx);
-lua_pushvalue(L,2);
-PCALL_ERRH(2,1,0,"Error Invoking Compare Meta-Method: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Invoking Compare Meta-Method: %s!");
-if(lua_toboolean(L,-1)){
-lua_pop(L,1);
-lua_geti(L,-3,idx);
-lua_seti(L,-3,1+luaL_len(L,-3));
-lua_pushinteger(L,idx);
-lua_seti(L,-3,1+luaL_len(L,-3));
-equal_found=1;
-}else
-lua_pop(L,1);
-}
-if(!equal_found){
-lua_geti(L,-3,idx);
-if(lua_getmetatable(L,-1)){
-if(lua_getfield(L,-1,"__eq")!=LUA_TNIL){
-lua_pushvalue(L,-3);
-lua_pushvalue(L,2);
-PCALL_ERRH(2,1,0,"Error Invoking Compare Meta-Method: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Invoking Compare Meta-Method: %s!");
-if(lua_toboolean(L,-1)){
-lua_pop(L,2);
-lua_seti(L,-3,1+luaL_len(L,-3));
-lua_pushinteger(L,idx);
-lua_seti(L,-3,1+luaL_len(L,-3));
-equal_found=1;
-}else
-lua_pop(L,3);
-}else
-lua_pop(L,3);
-}else
-lua_pop(L,1);
-}
-if(equal_found)
-continue;
-else if(lua_geti(L,-3,idx),lua_rawequal(L,2,-1)){
-lua_seti(L,-3,1+luaL_len(L,-3));
-lua_pushinteger(L,idx);
-lua_seti(L,-3,1+luaL_len(L,-3));
-}else
-lua_pop(L,1);
-}
-lua_pop(L,1);
-if(!luaL_len(L,-1)){
-lua_copy(L,2,-1);
-lua_seti(L,-2,1+luaL_len(L,-2));
-lua_pop(L,1);
-lua_getfield(L,-1,"set");
-}else{
-int casenum=0;
-while(casenum+=2,casenum<=luaL_len(L,-1)){
-lua_geti(L,-1,casenum);
-int equal_found=0,size=luaL_len(L,-2);
-for(int idx=1;idx<=size;idx++){
-lua_pushinteger(L,idx);
-if(!equal_found)
-equal_found=lua_rawequal(L,-2,-1);
-lua_pop(L,1);
-if(equal_found){
-if(idx<size){
-lua_geti(L,-3,1+idx);
-lua_seti(L,-4,idx);
-}else{
-lua_pushnil(L);
-lua_seti(L,-4,idx);
-}
-}
-}
-lua_pop(L,1);
-}
-lua_pushvalue(L,2);
-lua_seti(L,-3,1+luaL_len(L,-3));
-lua_remove(L,-2);
-lua_getfield(L,-2,"set");
-for(int idx=1;idx<=luaL_len(L,-2);idx+=2){
-lua_geti(L,-2,idx);
-lua_pushvalue(L,-1);
-lua_pushnil(L);
-lua_settable(L,lua_upvalueindex(2));
-lua_pushnil(L);
-lua_settable(L,-3);
-}
-lua_remove(L,-2);
-}
-lua_pushvalue(L,2);
-lua_pushvalue(L,2);
-if(lua_gettable(L,-3)!=LUA_TNIL){
-lua_pushinteger(L,1);
-lua_arith(L,LUA_OPADD);
-lua_settable(L,-3);
-}else{
-lua_pop(L,1);
-lua_pushinteger(L,1);
-lua_settable(L,-3);
-}
-lua_copy(L,2,-2);
-lua_copy(L,-3,-1);
-lua_settable(L,lua_upvalueindex(2));
-}else{
-lua_pop(L,1);
-lua_createtable(L,0,2);
-lua_newtable(L);
-lua_pushvalue(L,2);
-lua_pushinteger(L,1);
-lua_settable(L,-3);
-lua_setfield(L,-2,"set");
-lua_newtable(L);
-lua_pushvalue(L,2);
-lua_seti(L,-2,1);
-lua_setfield(L,-2,"list");
-lua_pushvalue(L,-2);
-lua_insert(L,-2);
-lua_settable(L,lua_upvalueindex(5));
-lua_pushvalue(L,2);
-lua_pushvalue(L,-2);
-lua_settable(L,lua_upvalueindex(2));
-}
-}
-return 0;
 }
 
 int set_Field(lua_State *L){
 lua_settop(L,3);
-lua_pushvalue(L,2);
-if(lua_gettable(L,lua_upvalueindex(2))!=LUA_TNIL){
-if(lua_isnil(L,3)){
-lua_pushvalue(L,-1);
-lua_gettable(L,lua_upvalueindex(5));
-lua_getfield(L,-1,"set");
-lua_pushvalue(L,2);
-lua_pushvalue(L,3);
-lua_settable(L,-3);
+struct ref_couple *refs=luaL_checkudata(L,1,"dual_Capable_Map");
+lua_geti(L,LUA_REGISTRYINDEX,refs->ref);
+lua_geti(L,LUA_REGISTRYINDEX,refs->ivrs_ref);
+if(lua_pushvalue(L,2),lua_gettable(L,-3),!lua_rawequal(L,-1,-4)){
+if(lua_isnil(L,-1)){
 lua_pop(L,1);
-lua_getfield(L,-1,"list");
-int equal_found=0,size=luaL_len(L,-1);
-for(int idx=1;idx<=size;idx++){
-lua_geti(L,-1,idx);
-if(!equal_found)
-equal_found=lua_rawequal(L,2,-1);
-lua_pop(L,1);
-if(equal_found){
-if(idx<size){
-lua_geti(L,-1,1+idx);
-lua_seti(L,-2,idx);
-}else{
-lua_pushvalue(L,3);
-lua_seti(L,-2,idx);
-}
-}
-}
-if(!luaL_len(L,-1)){
-lua_pushvalue(L,4);
-lua_pushvalue(L,3);
-lua_settable(L,lua_upvalueindex(5));
-}
-lua_copy(L,2,-2);
-lua_copy(L,3,-1);
-lua_settable(L,lua_upvalueindex(2));
-}else{
-lua_pushvalue(L,-1);
-lua_gettable(L,lua_upvalueindex(5));
-lua_getfield(L,-1,"set");
-lua_pushvalue(L,2);
-lua_pushvalue(L,2);
-if(lua_gettable(L,-3)!=LUA_TNIL){
-lua_pushinteger(L,1);
-lua_arith(L,LUA_OPADD);
-lua_settable(L,-3);
-}else{
-lua_pop(L,1);
-lua_pushinteger(L,1);
-lua_settable(L,-3);
-}
-lua_pop(L,2);
-}
-}else if(!lua_isnil(L,3)){
-lua_copy(L,lua_upvalueindex(6),-1);
-lua_pushvalue(L,2);
-PCALL_ERRH(1,1,0,"Error Applying Hash Function to Key: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Applying Hash Function to Key: %s!");
-lua_pushvalue(L,-1);
-int vtype=lua_gettable(L,lua_upvalueindex(3));
-lua_copy(L,-2,-1);
-int ktype=lua_gettable(L,lua_upvalueindex(5));
-if(vtype!=LUA_TNIL && ktype!=LUA_TNIL){
-lua_getfield(L,-1,"list");
-lua_newtable(L);
-if(lua_getmetatable(L,2)){
-lua_getfield(L,-1,"__eq");
-lua_remove(L,-2);
-}else
+goto clean_is_unnecessary;
+}else if((lua_pushvalue(L,-1),lua_gettable(L,5))==LUA_TTABLE &&(lua_pushvalue(L,lua_upvalueindex(1)),lua_gettable(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"merged_keys"),lua_rawequal(L,-2,-1))){
+lua_getfield(L,-3,"m");
+lua_Integer m=luaL_optinteger(L,-1,1);
+lua_getfield(L,-4,"p");
+lua_Integer p=luaL_optinteger(L,-1,1+lua_rawlen(L,-5));
+lua_getfield(L,-5,"t");
+lua_Integer t=luaL_optinteger(L,-1,lua_rawlen(L,-6));
+lua_getfield(L,-6,"n");
+lua_Integer n=luaL_optinteger(L,-1,lua_rawlen(L,-7));
+t--;
+for(int idx=m;idx<=n;idx++){
+lua_rawgeti(L,-7,idx);
+if(!lua_isnil(L,-1)){
+if(t>1?lua_rawequal(L,-1,2):!lua_rawequal(L,-1,2)){
+if(t>1){
 lua_pushnil(L);
-for(int idx=luaL_len(L,-3);idx>=1;idx--){
-_Bool equal_found=0;
-if(lua_isfunction(L,-1)){
-lua_pushvalue(L,-1);
-lua_geti(L,-4,idx);
-lua_pushvalue(L,2);
-PCALL_ERRH(2,1,0,"Error Invoking Compare Meta-Method: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Invoking Compare Meta-Method: %s!");
-if(lua_toboolean(L,-1)){
-lua_pop(L,1);
-lua_geti(L,-3,idx);
-lua_seti(L,-3,1+luaL_len(L,-3));
-lua_pushinteger(L,idx);
-lua_seti(L,-3,1+luaL_len(L,-3));
-equal_found=1;
-}else
-lua_pop(L,1);
+lua_rawseti(L,-9,idx);
+if(idx<=m){
+m=1+idx;
+lua_pushinteger(L,m);
+lua_setfield(L,-9,"m");
 }
-if(!equal_found){
-lua_geti(L,-3,idx);
-if(lua_getmetatable(L,-1)){
-if(lua_getfield(L,-1,"__eq")!=LUA_TNIL){
-lua_pushvalue(L,-3);
-lua_pushvalue(L,2);
-PCALL_ERRH(2,1,0,"Error Invoking Compare Meta-Method: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Invoking Compare Meta-Method: %s!");
-if(lua_toboolean(L,-1)){
-lua_pop(L,2);
-lua_seti(L,-3,1+luaL_len(L,-3));
-lua_pushinteger(L,idx);
-lua_seti(L,-3,1+luaL_len(L,-3));
-equal_found=1;
-}else
-lua_pop(L,3);
-}else
-lua_pop(L,3);
-}else
-lua_pop(L,1);
+if(idx<p){
+p=idx;
+lua_pushinteger(L,p);
+lua_setfield(L,-9,"p");
 }
-if(equal_found)
-continue;
-else if(lua_geti(L,-3,idx),lua_rawequal(L,2,-1)){
-lua_seti(L,-3,1+luaL_len(L,-3));
-lua_pushinteger(L,idx);
-lua_seti(L,-3,1+luaL_len(L,-3));
-}else
-lua_pop(L,1);
+if(idx>=n){
+n=idx-1;
+lua_pushinteger(L,n);
+lua_setfield(L,-9,"n");
 }
-lua_pop(L,1);
-if(!luaL_len(L,-1)){
-lua_copy(L,2,-1);
-lua_seti(L,-2,1+luaL_len(L,-2));
-lua_pop(L,1);
-lua_getfield(L,-1,"set");
-}else{
-int casenum=0;
-while(casenum+=2,casenum<=luaL_len(L,-1)){
-lua_geti(L,-1,casenum);
-int equal_found=0,size=luaL_len(L,-2);
-for(int idx=1;idx<=size;idx++){
-lua_pushinteger(L,idx);
-if(!equal_found)
-equal_found=lua_rawequal(L,-2,-1);
-lua_pop(L,1);
-if(equal_found){
-if(idx<size){
-lua_geti(L,-3,1+idx);
-lua_seti(L,-4,idx);
-}else{
-lua_pushnil(L);
-lua_seti(L,-4,idx);
 }
+break;
 }
 }
 lua_pop(L,1);
 }
-lua_pushvalue(L,2);
-lua_seti(L,-3,1+luaL_len(L,-3));
-lua_remove(L,-2);
-lua_getfield(L,-2,"set");
-for(int idx=1;idx<=luaL_len(L,-2);idx+=2){
-lua_geti(L,-2,idx);
-lua_pushvalue(L,-1);
-lua_pushnil(L);
-lua_settable(L,lua_upvalueindex(2));
-lua_pushnil(L);
-lua_settable(L,-3);
-}
-lua_remove(L,-2);
-}
-lua_pushvalue(L,2);
-lua_pushvalue(L,2);
-if(lua_gettable(L,-3)!=LUA_TNIL){
-lua_pushinteger(L,1);
-lua_arith(L,LUA_OPADD);
-lua_settable(L,-3);
-}else{
-lua_pop(L,1);
-lua_pushinteger(L,1);
-lua_settable(L,-3);
-}
-lua_copy(L,2,-2);
-lua_copy(L,-3,-1);
-lua_settable(L,lua_upvalueindex(2));
-}else if(vtype==LUA_TNIL && ktype==LUA_TNIL){
-lua_pop(L,1);
-lua_createtable(L,0,2);
-lua_newtable(L);
-lua_pushvalue(L,2);
-lua_pushinteger(L,1);
-lua_settable(L,-3);
-lua_setfield(L,-2,"set");
-lua_newtable(L);
-lua_pushvalue(L,2);
-lua_seti(L,-2,1);
-lua_setfield(L,-2,"list");
-lua_pushvalue(L,-2);
+if(n>=65 && t<=0.65*n){
+lua_settop(L,7);
+lua_getfield(L,1,"deFragment");
 lua_insert(L,-2);
-lua_settable(L,lua_upvalueindex(5));
-lua_pushvalue(L,2);
-lua_pushvalue(L,-2);
-lua_settable(L,lua_upvalueindex(2));
-}else
-luaL_error(L,"Inconsistent Internals!");
-}
-lua_pushvalue(L,-1);
-int ktype=lua_gettable(L,lua_upvalueindex(5));
-lua_copy(L,-2,-1);
-int vtype=lua_gettable(L,lua_upvalueindex(3));
-if((lua_isnil(L,3)&& ktype==LUA_TNIL)||(!lua_isnil(L,3)&& !lua_rawequal(L,3,-1)&& vtype!=LUA_TNIL)){
-lua_pushvalue(L,-1);
-if(lua_gettable(L,lua_upvalueindex(4))==LUA_TTABLE &&(lua_pushvalue(L,lua_upvalueindex(7)),lua_gettable(L,-2)==LUA_TSTRING &&(lua_pushstring(L,"Merged Entries"),lua_rawequal(L,-2,-1)))){
-lua_pop(L,2);
-int equal_found=0,size=luaL_len(L,-1);
-for(int idx=1;idx<=size;idx++){
-lua_geti(L,-1,idx);
-if(!equal_found)
-equal_found=lua_rawequal(L,4,-1);
-lua_pop(L,1);
-if(equal_found){
-if(idx<size){
-lua_geti(L,-1,1+idx);
-lua_seti(L,-2,idx);
-}else{
-lua_pushnil(L);
-lua_seti(L,-2,idx);
-}
-}
-}
-if(luaL_len(L,-1)<=1){
-lua_geti(L,-1,1);
-lua_copy(L,-3,-2);
-lua_settable(L,lua_upvalueindex(4));
-}else
-lua_pop(L,1);
-}else{
-lua_settop(L,5);
-lua_pushvalue(L,-1);
-lua_pushnil(L);
-lua_settable(L,lua_upvalueindex(4));
-}
-}
-if(!lua_isnil(L,3)&& !lua_rawequal(L,3,-1)){
-lua_copy(L,3,-1);
-if(lua_gettable(L,lua_upvalueindex(4))==LUA_TNIL){
-lua_copy(L,3,-1);
-lua_pushvalue(L,-2);
-lua_settable(L,lua_upvalueindex(4));
-}else if(lua_istable(L,-1)&&(lua_pushvalue(L,lua_upvalueindex(7)),lua_gettable(L,-2)==LUA_TSTRING &&(lua_pushstring(L,"Merged Entries"),lua_rawequal(L,-2,-1)))){
-lua_pop(L,1);
-lua_copy(L,4,-1);
-lua_seti(L,-2,1+luaL_len(L,-2));
-lua_pop(L,1);
-}else{
-lua_settop(L,5);
-lua_pushvalue(L,3);
-lua_createtable(L,2,1);
-lua_pushvalue(L,lua_upvalueindex(7));
-lua_pushstring(L,"Merged Entries");
+lua_pushinteger(L,t);
+PCALL_ERRH(2,1,0,"Error Consolidating Merge Table: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Consolidating Merge Table: %s!");
 lua_settable(L,-3);
-lua_rotate(L,5,-1);
-lua_seti(L,-2,1+luaL_len(L,-2));
-lua_pushvalue(L,-3);
-lua_seti(L,-2,1+luaL_len(L,-2));
-lua_settable(L,lua_upvalueindex(4));
+}else if(t>1){
+lua_settop(L,7);
+lua_pushinteger(L,t);
+lua_setfield(L,-2,"t");
+lua_pop(L,2);
+}else{
+lua_copy(L,6,-2);
+lua_settable(L,5);
+lua_settop(L,5);
 }
+}else{
+lua_settop(L,6);
+lua_pushnil(L);
+lua_settable(L,5);
 }
-lua_settop(L,4);
-lua_pushvalue(L,-1);
-if(!(lua_isnil(L,-3)&& lua_gettable(L,lua_upvalueindex(5))!=LUA_TNIL)){
+clean_is_unnecessary:
+if(!lua_isnil(L,3)){
+if((lua_pushvalue(L,3),lua_gettable(L,5))==LUA_TTABLE &&(lua_pushvalue(L,lua_upvalueindex(1)),lua_gettable(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"merged_keys"),lua_rawequal(L,-2,-1))){
+lua_getfield(L,-3,"m");
+lua_Integer m=luaL_optinteger(L,-1,1);
+lua_getfield(L,-4,"p");
+lua_Integer p=luaL_optinteger(L,-1,1+lua_rawlen(L,-5));
+lua_getfield(L,-5,"t");
+lua_Integer t=luaL_optinteger(L,-1,lua_rawlen(L,-6));
+lua_getfield(L,-6,"n");
+lua_Integer n=luaL_optinteger(L,-1,lua_rawlen(L,-7));
+for(int idx=p;idx<=1+n;idx++){
+lua_rawgeti(L,-7,idx);
+if(lua_isnil(L,-1)){
+lua_pushvalue(L,2);
+lua_rawseti(L,-9,idx);
+if(idx<m){
+m=idx;
+lua_pushinteger(L,m);
+lua_setfield(L,-9,"m");
+}
+if(idx<=p){
+p=1+idx;
+lua_pushinteger(L,p);
+lua_setfield(L,-9,"p");
+}
+if(idx>n){
+n=idx;
+lua_pushinteger(L,n);
+lua_setfield(L,-9,"n");
+}
+break;
+}
 lua_pop(L,1);
+}
+lua_settop(L,6);
+t++;
+if(n>=65 && t<=0.65*n){
+lua_getfield(L,1,"deFragment");
 lua_insert(L,-2);
-lua_settable(L,lua_upvalueindex(3));
+lua_pushinteger(L,t);
+PCALL_ERRH(2,1,0,"Error Consolidating Merge Table: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Consolidating Merge Table: %s!");
+lua_pushvalue(L,3);
+lua_insert(L,-2);
+lua_settable(L,-3);
+}else{
+lua_pushinteger(L,t);
+lua_setfield(L,-2,"t");
+lua_pop(L,1);
+}
+}else{
+lua_settop(L,6);
+lua_pushvalue(L,3);
+if(lua_isnil(L,-2)){
+lua_pushvalue(L,2);
+}else{
+lua_createtable(L,2,5);
+lua_pushvalue(L,lua_upvalueindex(1));
+lua_pushliteral(L,"merged_keys");
+lua_settable(L,-3);
+lua_rotate(L,6,-1);
+lua_rawseti(L,-2,1);
+lua_pushvalue(L,2);
+lua_rawseti(L,-2,2);
+lua_pushinteger(L,1);
+lua_setfield(L,-2,"m");
+lua_pushinteger(L,3);
+lua_setfield(L,-2,"p");
+lua_pushinteger(L,2);
+lua_setfield(L,-2,"t");
+lua_pushinteger(L,2);
+lua_setfield(L,-2,"n");
+}
+lua_settable(L,5);
+lua_settop(L,5);
+}
+}
+lua_rotate(L,-4,2);
+lua_settable(L,-4);
 }
 return 0;
 }
 
 int inspect(lua_State *L){
-lua_settop(L,2);
+lua_settop(L,3);
+struct ref_couple *refs=luaL_checkudata(L,1,"dual_Capable_Map");
+lua_geti(L,LUA_REGISTRYINDEX,refs->ivrs_ref);
+lua_geti(L,LUA_REGISTRYINDEX,refs->ref);
 lua_getglobal(L,"module_name");
-lua_getglobal(L,luaL_checkstring(L,-1));
+luaL_requiref(L,luaL_checkstring(L,-1),NULL,0);
 lua_getfield(L,-1,"serialise");
-lua_remove(L,-2);
-lua_remove(L,-2);
-lua_pushvalue(L,lua_upvalueindex(2));
+int ctop=lua_gettop(L);
+lua_pushvalue(L,-1);
+lua_pushvalue(L,-5);
 lua_pushvalue(L,2);
-for(int idx=3;idx<=5;idx++){
-luaL_checkstack(L,3,"Unable to Allocate Memory for the Extra Stack Space!");
-lua_pushvalue(L,-3);
-lua_pushvalue(L,lua_upvalueindex(idx));
-lua_pushvalue(L,-3);
-}
-for(int idx=1;idx<=4;idx++){
-PCALL_ERRH(2,1,0,"Error Serialising Result: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Serialising Result: %s!");
-lua_insert(L,3);
-}
-return 4;
-}
-
-int export_Couple(lua_State *L){
-lua_settop(L,2);
-lua_newtable(L);
-lua_pushnil(L);
-while(lua_next(L,lua_upvalueindex(2))){
-lua_gettable(L,lua_upvalueindex(3));
-lua_pushvalue(L,-2);
+lua_pushvalue(L,3);
+PCALL_ERRH(3,LUA_MULTRET,0,"Error Serialising Result: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Serialising Result: %s!");
+lua_rotate(L,ctop-lua_gettop(L)-1,-1);
+lua_rotate(L,2,-3);
 lua_insert(L,-3);
-lua_settable(L,-4);
-}
-lua_newtable(L);
-lua_pushnil(L);
-while(lua_next(L,lua_upvalueindex(4))){
-if(lua_istable(L,-1) &&(lua_pushvalue(L,lua_upvalueindex(7)),lua_gettable(L,-2)==LUA_TSTRING &&(lua_pushstring(L,"Merged Entries"),lua_rawequal(L,-2,-1)))){
-lua_pop(L,2);
-lua_newtable(L);
-for(int idx=1;idx<=luaL_len(L,-2);idx++){
-if(lua_isboolean(L,2)&& lua_toboolean(L,2)){
-lua_geti(L,-2,idx);
-lua_pushvalue(L,-1);
-lua_gettable(L,lua_upvalueindex(5));
-lua_settable(L,-3);
-}else{
-lua_geti(L,-2,idx);
-lua_gettable(L,lua_upvalueindex(5));
-lua_seti(L,-2,idx);
-}
-}
-lua_remove(L,-2);
-}else{
-lua_settop(L,6);
-if(lua_isboolean(L,2)&& lua_toboolean(L,2)){
-lua_createtable(L,0,1);
-lua_insert(L,-2);
-lua_pushvalue(L,-1);
-lua_gettable(L,lua_upvalueindex(5));
-lua_settable(L,-3);
-}else
-lua_gettable(L,lua_upvalueindex(5));
-}
-lua_pushvalue(L,-2);
-lua_insert(L,-3);
-lua_settable(L,-4);
-}
-return 2;
-}
-
-int finalise(lua_State *L){
-lua_settop(L,1);
-if(lua_getmetatable(L,-1)){
-lua_getfield(L,-1,"_ref");
-luaL_unref(L,LUA_REGISTRYINDEX,lua_tointeger(L,-1));
-lua_pop(L,1);
-lua_pushnil(L);
-lua_replace(L,-2);
-lua_setmetatable(L,-2);
-}
-for(int idx=7;idx>=1;idx--){
-lua_pushnil(L);
-lua_replace(L,lua_upvalueindex(idx));
-}
-return 0;
-}
-
-int auxiliary_Import_Facility(lua_State *L){
-lua_settop(L,1);
-lua_pushnil(L);
-_Bool empty=1;
-while(lua_next(L,lua_upvalueindex(3))){
-lua_pushvalue(L,-1);
-if(lua_gettable(L,lua_upvalueindex(4))==LUA_TNIL){
-lua_copy(L,-3,-1);
-lua_settable(L,lua_upvalueindex(4));
-}else if(lua_istable(L,-1)&&(lua_pushvalue(L,lua_upvalueindex(7)),lua_gettable(L,-2)==LUA_TSTRING &&(lua_pushstring(L,"Merged Entries"),lua_rawequal(L,-2,-1)))){
-lua_pop(L,1);
-lua_copy(L,-4,-1);
-lua_seti(L,-2,1+luaL_len(L,-2));
-lua_pop(L,2);
-}else{
-lua_settop(L,4);
-lua_createtable(L,2,1);
-lua_pushvalue(L,lua_upvalueindex(7));
-lua_pushstring(L,"Merged Entries");
-lua_settable(L,-3);
-lua_insert(L,-2);
-lua_seti(L,-2,1+luaL_len(L,-2));
-lua_pushvalue(L,-3);
-lua_seti(L,-2,1+luaL_len(L,-2));
-lua_settable(L,lua_upvalueindex(4));
-}
-if(empty)
-empty=0;
-}
-if(empty)
-luaL_error(L,"Enumeration Lacks Criteria!");
-return 0;
-}
-
-int create_New_Enumerator(lua_State *L){
-lua_settop(L,3);
-luaL_checktype(L,2,LUA_TTABLE);
-for(int idx=1;idx<=4;idx++){
-if(idx==2)
-lua_pushvalue(L,2);
+PCALL_ERRH(3,LUA_MULTRET,0,"Error Serialising Result: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Serialising Result: %s!");
+int nrets;
+if((nrets=4+lua_gettop(L)-ctop)>0)
+return nrets;
 else
-lua_newtable(L);
-}
-lua_createtable(L,0,1);
-lua_pushstring(L,"k");
-lua_setfield(L,-2,"__mode");
-lua_setmetatable(L,-5);
-lua_createtable(L,0,1);
-lua_pushstring(L,"v");
-lua_setfield(L,-2,"__mode");
-lua_setmetatable(L,-2);
-if(lua_isfunction(L,3))
-lua_rotate(L,3,-1);
-else{
-lua_remove(L,3);
-lua_getglobal(L,"module_name");
-lua_getglobal(L,luaL_checkstring(L,-1));
-lua_getfield(L,-1,"meta_Hash");
-lua_remove(L,-2);
-lua_remove(L,-2);
-}
-lua_pushcfunction(L,unique_Key);
-lua_newuserdatauv(L,sizeof(luaL_Reg),0);
-lua_pushvalue(L,-1);
-lua_insert(L,-8);
-lua_insert(L,-8);
-const struct luaL_Reg operations[]={
-{"__index",lookUp},
-{"inverse_LookUp",inverse_LookUp},
-{"__newindex",enumerate},
-{"inspect",inspect},
-{"export_Couple",export_Couple},
-{"__gc",finalise},
-{"auxiliary_Import_Facility",auxiliary_Import_Facility},
-{"__call",create_New_Enumerator},
-{NULL,NULL}
-};
-luaL_newlibtable(L,operations);
-lua_insert(L,-8);
-luaL_setfuncs(L,operations,7);
-int ref=luaL_ref(L,LUA_REGISTRYINDEX);
-lua_geti(L,LUA_REGISTRYINDEX,ref);
-lua_pushinteger(L,ref);
-lua_setfield(L,-2,"_ref");
-lua_setmetatable(L,-2);
-lua_getfield(L,-1,"auxiliary_Import_Facility");
-lua_pushvalue(L,-2);
-PCALL_ERRH(1,0,0,"Error Importing Enumeration Criteria: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Importing Enumeration Criteria: %s!");
-return 1;
+return 0;
 }
 
-int create_New_Hash_Map(lua_State *L){
-lua_settop(L,3);
-for(int idx=1;idx<=4;idx++){
+int create_Dual_Capable_Map(lua_State *L){
+luaL_testudata(L,1,"dual_Capable_Map");
+if(lua_gettop(L)==1){
+int idx=0;
+while(!lua_isnil(L,lua_upvalueindex(++idx)))
+lua_pushvalue(L,lua_upvalueindex(idx));
+return idx-1;
+}
+for(int idx=lua_gettop(L);idx>1;idx--){
+luaL_checkstack(L,3,"Unable to Allocate Memory for the Extra Stack Space!");
+struct ref_couple *refs=(struct ref_couple*)lua_newuserdatauv(L,sizeof(struct ref_couple),0);
 lua_newtable(L);
+refs->ref=luaL_ref(L,LUA_REGISTRYINDEX);
+lua_newtable(L);
+refs->ivrs_ref=luaL_ref(L,LUA_REGISTRYINDEX);
+luaL_setmetatable(L,"dual_Capable_Map");
+if(lua_istable(L,idx)){
+lua_pushnil(L);
+while(lua_next(L,idx)){
+lua_pushvalue(L,-2);
+lua_insert(L,-3);
+lua_settable(L,-4);
 }
-lua_createtable(L,0,1);
-lua_pushstring(L,"k");
-lua_setfield(L,-2,"__mode");
-lua_setmetatable(L,-5);
-lua_createtable(L,0,1);
-lua_pushstring(L,"v");
-lua_setfield(L,-2,"__mode");
-lua_setmetatable(L,-2);
-if(lua_isfunction(L,3))
-lua_rotate(L,3,-1);
-else{
-lua_remove(L,3);
-lua_getglobal(L,"module_name");
-lua_getglobal(L,luaL_checkstring(L,-1));
-lua_getfield(L,-1,"meta_Hash");
-lua_remove(L,-2);
-lua_remove(L,-2);
+}else if(!lua_isnil(L,idx)){
+lua_pushvalue(L,idx);
+lua_seti(L,-2,1+luaL_len(L,-2));
 }
-lua_pushcfunction(L,unique_Key);
-lua_newuserdatauv(L,sizeof(luaL_Reg),0);
-lua_pushvalue(L,-1);
-lua_insert(L,-8);
-lua_insert(L,-8);
-const struct luaL_Reg operations[]={
-{"__index",lookUp},
-{"inverse_LookUp",inverse_LookUp},
+lua_replace(L,idx);
+}
+return lua_gettop(L)-1;
+}
+
+const luaL_Reg dual_Capable_Map[]={
+{"deFragment",deFragment},
 {"__newindex",set_Field},
 {"inspect",inspect},
-{"export_Couple",export_Couple},
-{"__gc",finalise},
-{"__call",create_New_Hash_Map},
-{NULL,NULL}
-};
-luaL_newlibtable(L,operations);
-lua_insert(L,-8);
-luaL_setfuncs(L,operations,7);
-int ref=luaL_ref(L,LUA_REGISTRYINDEX);
-lua_geti(L,LUA_REGISTRYINDEX,ref);
-lua_pushinteger(L,ref);
-lua_setfield(L,-2,"_ref");
-lua_setmetatable(L,-2);
-if(lua_istable(L,2)){
-lua_pushnil(L);
-while(lua_next(L,2)){
-lua_pushvalue(L,-2);
-lua_insert(L,-3);
-lua_settable(L,-4);
-}
-}
-return 1;
-}
-
-luaL_Reg udc_UpBinds[]={
-{"enumerator",create_New_Enumerator},
-{"hash_Map",create_New_Hash_Map},
+{"__call",create_Dual_Capable_Map},
 {NULL,NULL}
 };
 
@@ -4945,7 +4426,7 @@ return 3;
 
 int thread_Consolidator(lua_State *L);
 
-luaL_Reg c_UpBinds[]={
+const luaL_Reg c_UpBinds[]={
 {"thread_Consolidator",thread_Consolidator},
 {"chdir",chdir_Conveyed},
 {"sleep",sleep_Conveyed},
@@ -5093,35 +4574,36 @@ return 0;
 }
 
 #define REG do{\
-lua_pushstring(L,"");\
+lua_pushliteral(L,"");\
 lua_getmetatable(L,-1);\
 lua_replace(L,-2);\
-lua_pushstring(L,"__call");\
+lua_pushliteral(L,"__call");\
 lua_pushcfunction(L,string_Subscription);\
 lua_rawset(L,-3);\
-lua_pushstring(L,"__newindex");\
+lua_pushliteral(L,"__newindex");\
 lua_pushcfunction(L,string_Modification);\
 lua_rawset(L,-3);\
 luaL_getsubtable(L,-2,"c_UpBinds");\
 lua_insert(L,-3);\
 lua_pop(L,2);\
-int idx=-1;\
-while(++idx,udc_UpBinds[idx].name || udc_UpBinds[idx].func){\
-luaL_newmetatable(L,udc_UpBinds[idx].name);\
-lua_pushcfunction(L,udc_UpBinds[idx].func);\
-lua_setfield(L,-2,"__call");\
-lua_newuserdatauv(L,sizeof(luaL_Reg),0);\
+luaL_newmetatable(L,"dual_Capable_Map");\
+lua_pushlightuserdata(L,(int**)&collective_signals);\
+luaL_setfuncs(L,dual_Capable_Map,1);\
+lua_pushvalue(L,-1);\
+lua_setfield(L,-2,"__index");\
+lua_newuserdatauv(L,0,0);\
 lua_replace(L,-2);\
-luaL_setmetatable(L,udc_UpBinds[idx].name);\
-lua_setfield(L,-2,udc_UpBinds[idx].name);\
-}\
-idx=-1;\
+luaL_setmetatable(L,"dual_Capable_Map");\
+lua_setfield(L,-2,"dual_Capable_Map");\
+int idx=-1;\
 while(++idx,c_UpBinds[idx].name || c_UpBinds[idx].func){\
 lua_pushcfunction(L,c_UpBinds[idx].func);\
 lua_setfield(L,-2,c_UpBinds[idx].name);\
 }\
 lua_pop(L,1);\
 }while(0)
+
+const int collective_signals[]={SIGINT,SIGABRT,SIGSEGV,SIGBUS,SIGILL,SIGFPE};
 
 pthread_mutex_t lock=PTHREAD_MUTEX_INITIALIZER;
 
@@ -5161,7 +4643,7 @@ for(int idx=ctop-lua_gettop(L);idx<=-1;idx++){
 luaL_checkstack(L,3,"Unable to Allocate Memory for the Extra Stack Space!");
 lua_pushvalue(L,ctop);
 lua_pushvalue(L,idx-1);
-lua_pushstring(L,"\t");
+lua_pushliteral(L,"\t");
 PCALL_ERRH(2,1,0,"Error Serialising Result: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Serialising Result: %s!");
 size_t len;
 const char *cache_result=lua_tolstring(L,-1,&len);
@@ -5415,10 +4897,10 @@ memset(serial,0,3+serial_len);
 if(serial_len!=sprintf(serial,"%d",cache_progress))
 luaL_error(L,"System Error!");
 luaL_checkstack(L,3,"Unable to Allocate Memory for the Extra Stack Space!");
-lua_pushstring(L,"evaluated_console_command");
+lua_pushliteral(L,"evaluated_console_command");
 lua_pushstring(L,serial);
 if(cache_progress<states->tracks[strlen(states->tracks)-1])
-lua_pushstring(L,",");
+lua_pushliteral(L,",");
 }
 }
 }else if(args[states->progress][strlen(args[states->progress])-1]==')'|| args[states->progress][strlen(args[states->progress])-1]=='}'){
@@ -5536,8 +5018,6 @@ sig_atomic_t signal_counter=0;
 
 sigjmp_buf context_for_jump;
 
-int collective_signals[]={SIGINT,SIGABRT,SIGSEGV,SIGBUS,SIGILL,SIGFPE};
-
 struct sigaction renewed_action;
 struct sigaction current_action;
 
@@ -5579,7 +5059,7 @@ luaL_requiref(L,luaL_checkstring(L,-1),NULL,0);
 lua_getfield(L,-1,"serialise");
 lua_insert(L,1);
 lua_pop(L,2);
-lua_pushstring(L,"\t");
+lua_pushliteral(L,"\t");
 PCALL_ERRH(2,1,0,"Error Serialising Object: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Serialising Object: %s!");
 lua_getglobal(L,"debug");
 lua_getfield(L,-1,"traceback");
@@ -5646,7 +5126,7 @@ lua_getglobal(L,"module_name");
 luaL_requiref(L,luaL_checkstring(L,-1),NULL,0);
 lua_getfield(L,-1,"serialise");
 lua_pushboolean(L,0);
-lua_pushstring(L,"\t");
+lua_pushliteral(L,"\t");
 lua_rotate(L,1,3);
 lua_pop(L,3);
 }
@@ -5655,7 +5135,8 @@ lua_insert(L,4);
 int ctop=lua_gettop(L);
 if(parse_console_command_options(n,args,states)->traversal[0]==-1)
 goto premature_end;
-lua_rotate(L,5,lua_gettop(L)-ctop);
+if((ctop=lua_gettop(L)-ctop)>0)
+lua_rotate(L,5,ctop);
 lua_pushcfunction(L,errMsg_Handler);
 lua_insert(L,4);
 lua_sethook(L,interpreter_Count_Hook_Function,LUA_MASKCOUNT,27000);
@@ -5664,13 +5145,20 @@ lua_sethook(L,NULL,0,0);
 lua_remove(L,4);
 if((ctop=lua_gettop(L))>3){
 for(int idx=4;idx<=ctop;idx++){
-luaL_checkstack(L,6,"Unable to Allocate Memory for the Extra Stack Space!");
+luaL_checkstack(L,15,"Unable to Allocate Memory for the Extra Stack Space!");
 lua_pushvalue(L,1);
 lua_pushvalue(L,idx);
 lua_pushvalue(L,2);
 lua_pushvalue(L,3);
+int bret=lua_gettop(L);
 PCALL_ERRH(3,LUA_MULTRET,0,"Error Serialising Individual Result: %s!",CUSTOM_GOTO,premature_end);
-lua_pushstring(L,"\n");
+if(lua_gettop(L)-bret>1){
+for(int idx=lua_gettop(L);idx>bret;idx--){
+lua_pushliteral(L,"\n");
+lua_insert(L,idx);
+}
+}
+lua_pushliteral(L,"\n");
 }
 lua_getglobal(L,"task_serial");
 lua_pushfstring(L,"--finish line of stack dump for task #%d\n",luaL_checkinteger(L,-1)-1);
