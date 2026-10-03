@@ -1,4 +1,4 @@
---range[8][12]
+--range[6][18]
 local function replicate(object,touched,layer)
 touched,layer=touched or{},layer or 1
 if type(object)~="table"then
@@ -537,15 +537,15 @@ states,cache_layer,cache_ctrl,cache_yield1,cache_yield2=states[args or"args"]["a
 end
 end
 else
-local iter_func,invar_state,ctrl_var
+local gen_func,invar_state,ctrl_var_init
 if states[args or"args"][2*layer-1]==states[args or"args"][2*layer]and type(states[args or"args"][2*layer])=="function"then
-iter_func=states[args or"args"][2*layer]
+gen_func=states[args or"args"][2*layer]
 elseif type(states[args or"args"]["customgen"..layer])=="function"then
-iter_func,invar_state,ctrl_var=states[args or"args"]["customgen"..layer](states[args or"args"][2*layer-1],states[args or"args"][2*layer])
+gen_func,invar_state,ctrl_var_init=states[args or"args"]["customgen"..layer](states[args or"args"][2*layer-1],states[args or"args"][2*layer])
 else
-iter_func,invar_state,ctrl_var=table_Player(states[args or"args"][2*layer-1],states[args or"args"][2*layer])
+gen_func,invar_state,ctrl_var_init=table_Player(states[args or"args"][2*layer-1],states[args or"args"][2*layer])
 end
-for ctrl,yield1,yield2 in iter_func,invar_state,ctrl_var do
+for ctrl,yield1,yield2 in gen_func,invar_state,ctrl_var_init do
 if states[args or"args"]["bhrconds"..layer](states,layer,ctrl,yield1,yield2)then
 states,cache_layer,cache_ctrl,cache_yield1,cache_yield2=states[args or"args"]["bbhrdo"..layer](states,layer,ctrl,yield1,yield2)
 return states,cache_layer or layer,cache_ctrl or ctrl,cache_yield1 or yield1,cache_yield2 or yield2
@@ -1436,8 +1436,6 @@ coroutine.close(thread)
 return nil
 end
 end
-
---range[8][15]
 
 local function uni_Inc_Rand(a, b, precision)
 precision = precision or 1e6
@@ -3344,13 +3342,14 @@ consolidate_File.__index=consolidate_File
 
 debug.setmetatable(consolidate_File,consolidate_File)
 
---range[6][12]
 
+--range[6][15]
 local interface={
-version=1.3203125,
-renewed=20260929,
-["Pointers in Practice"]="Treating certain parameters as tables or pointing to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-call time.",
-replicate=replicate,
+version=1.3515625,
+renewed=20261003,
+["Pointers in Practice"]="Deeming certain parameters tables or refering to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-invoke time."
+--range[3][18]
+,replicate=replicate,
 zip=zip,
 comp_Factory=comp_Factory,
 binary_Search=binary_Search,
@@ -3360,9 +3359,7 @@ arithmetiCalc=arithmetiCalc,
 group_Generator=group_Generator,
 permutation_Generator=permutation_Generator,
 grouped_Combination_Generator=grouped_Combination_Generator,
-partially_Determined_Permutation_Generator=partially_Determined_Permutation_Generator
---range[6][15]
-,
+partially_Determined_Permutation_Generator=partially_Determined_Permutation_Generator,
 uni_Inc_Rand=uni_Inc_Rand,
 kahan_Product=kahan_Product,
 kahan_Sum=kahan_Sum,
@@ -3373,19 +3370,14 @@ dimensional_Animator=dimensional_Animator,
 plot_Pixels=plot_Pixels,
 directory_Contrast=directory_Contrast,
 consolidate_File=consolidate_File
---range[4][12]
+--range[3][15]
 }
 
 
 --a few declarations:
 do
---range[4][15]
 local status="ready for run";
-local digest=130343202677436160;
---range[2][12]
---[===[
-⚙
---]===]
+local digest=-1540464406403281290;
 local required_name,find_self,where=...
 if os.getenv("ANDROID_ROOT")=="/system"then
 where=find_self:match("^(.-/)[^/]+$")
@@ -3557,90 +3549,167 @@ if type(handle)~="table"then
 return handle,absolute_path,where_in
 end
 return handle]===]
-local function identifier_Generator(state)
-state=state or{96}
-if type(state[2])~="string"then
-state[1]=96+(state[1]-96)%26
-end
+local function identifier_Generator()
+local serial,prefix=94
 return function()
-state[1]=86+(state[1]-86)%36
-state[1]=1+state[1]
-if state[1]==87 then
-local roll=math.random(87,122)
-state[2]=(type(state[2])=="string"and state[2]or"")..(roll<97 and roll-87 or string.char(roll))
+serial=1+serial
+if serial==96 and not prefix then
+serial=1+serial
 end
-return(type(state[2])=="string"and state[2]or"")..(state[1]<97 and state[1]-87 or string.char(state[1]))
+serial=86+(serial-86)%37
+if serial==86 then
+local roll=math.random(86,122)
+if not prefix and roll<97 then
+roll=95
+end
+prefix=(prefix or"")..(roll<97 and roll~=95 and(roll-85)%10-(roll-85)//10 or string.char(roll))
+end
+return(prefix or"")..(serial<97 and serial~=95 and(serial-85)%10-(serial-85)//10 or string.char(serial))
 end
 end
 local id_gen=identifier_Generator()
-local function serialise(self,compact,indent_char,serialised,layer1,layer2,assembler,table_keys)
-if not self and not compact and not indent_char and not serialised and not assembler then
-goto final_assemble
+local function serialise(object,option,indent_char,delve_guard,serialised,assembler)
+indent_char,delve_guard,serialised,assembler=type(indent_char)=="string"and indent_char or(type(option)=="string"and option or""),math.type(delve_guard)=="integer"and delve_guard or(math.type(indent_char)=="integer"and indent_char or(math.type(option)=="integer"and option or 1)),serialised or{},assembler or{}
+if type(option)~="boolean"then
+option=nil
 end
-indent_char,serialised,layer1,layer2,assembler,table_keys=type(indent_char)=="string"and indent_char or(type(compact)=="string"and compact or""),type(serialised)=="table"and serialised or(type(indent_char)=="table"and indent_char or(type(compact)=="table"and compact or{})),layer1 or 1,layer2 or 1,assembler or{},table_keys or self
-if type(compact)~="boolean"then
-compact=nil
-end
-if type(self)=="number"or type(self)=="boolean"then
-assembler[1+#assembler]=tostring(self)
-elseif type(self)=="table"then
-if serialised[self]and(compact==false or serialised[self]<layer1)then
-assembler[1+#assembler]=compact==false and(table_keys or{})[self]or("%q"):format(tostring(self).." - loophole patch")
-goto skip
+if type(object)=="number"or type(object)=="boolean"or object==nil then
+return tostring(object)
+elseif type(object)=="table"or(type(object)=="userdata"and(debug.getmetatable(object)or{}).__name=="dual_Capable_Map")then
+local depth,traversal,how,who,whence,which,gen_func,invar_state,k,v=1,{},{},{}
+if option then
+whence,which=object,true
 else
-serialised[self]=layer1
+whence,which={},{}
 end
-assembler[1+#assembler]=[===[{
-]===]
-for k,v in next,self do
-assembler[1+#assembler]=indent_char:rep(layer1)
+::next_node::
+if not option and serialised[object]and delve_guard+serialised[object]<depth then
+assembler[1+#assembler]=("%q"):format(tostring(object).." - loophole patch")
+depth=depth-1
+object=table.remove(traversal)
+gen_func=table.remove(how)
+invar_state=table.remove(who)
+k=table.remove(whence)
+if which[1+depth]~=nil then
+v=which[1+depth]
+which[1+depth]=nil
+goto key_processed
+end
+goto value_processed
+elseif not serialised[object]then
+serialised[object]=option and id_gen()or depth
+end
+if option and not which then
+assembler[1+#assembler]=serialised[object]
+object=table.remove(traversal)
+if which==false then
+which=true
+goto key_processed
+end
+which=true
+goto value_processed
+end
+assembler[1+#assembler]=option and"local "..serialised[object].."=require(module_name).c_UpBinds.dual_Capable_Map{\n"or"{\n"
+gen_func,invar_state=pairs(object)
+::next_pair::
+k,v=gen_func(invar_state,k)
+if k==nil then
+if #assembler>1 then
+table.remove(assembler,#assembler-1)
+end
+goto end_of_object
+end
+assembler[1+#assembler]=indent_char:rep(depth)
 assembler[1+#assembler]="["
-if compact==false and type(k)=="table"and(serialised[table_keys]or not table_keys[k])then
-if serialised[table_keys]then
-local first_identifier=id_gen()
-table.insert(assembler,1,"local "..first_identifier.."=")
-table_keys={assembler,[table_keys]=first_identifier}
+if type(k)=="table"or(type(k)=="userdata"and(debug.getmetatable(k)or{}).__name=="dual_Capable_Map")then
+if option then
+if not serialised[k]then
+traversal[1+#traversal]=k
 end
-table_keys[k]=id_gen()
-table_keys[1+#table_keys]={"local "..table_keys[k].."="}
-serialise(k,compact,indent_char,serialised,nil,1+layer2,table_keys[#table_keys],table_keys)
+which=false
 end
-serialise(k,compact,indent_char,serialised,1+layer1,layer2,assembler,table_keys)
+traversal[1+#traversal]=object
+object=k
+if not option then
+depth=1+depth
+how[1+#how]=gen_func
+who[1+#who]=invar_state
+whence[1+#whence]=k
+k=nil
+which[depth]=v
+end
+goto next_node
+else
+assembler[1+#assembler]=serialise(k,option,indent_char,delve_guard,serialised,assembler)
+end
+::key_processed::
 assembler[1+#assembler]="]="
-serialise(v,compact,indent_char,serialised,1+layer1,layer2,assembler,table_keys)
-assembler[1+#assembler]=[===[,
-]===]
+if type(v)=="table"or(type(v)=="userdata"and(debug.getmetatable(v)or{}).__name=="dual_Capable_Map")then
+if option then
+if not serialised[v]then
+traversal[1+#traversal]=v
 end
-assembler[1+#assembler]=indent_char:rep(layer1-1).."}"
-::skip::
+which=nil
+end
+traversal[1+#traversal]=object
+object=v
+if not option then
+depth=1+depth
+how[1+#how]=gen_func
+who[1+#who]=invar_state
+whence[1+#whence]=k
+k=nil
+end
+goto next_node
 else
-assembler[1+#assembler]=("%q"):format(tostring(self))
+assembler[1+#assembler]=serialise(v,option,indent_char,delve_guard,serialised,assembler)
 end
-::final_assemble::
-if layer2>1 then
-if not self and not compact and not indent_char and not serialised and not assembler then
-return table.concat(table_keys[layer2]):gsub([===[=[^
-]-{]===],"={"):gsub([===[,(
-[^
-]-})]===],"%1"),serialise(nil,nil,nil,nil,nil,layer2-1,nil,table_keys)
+::value_processed::
+assembler[1+#assembler]=","
+assembler[1+#assembler]="\n"
+if option and(how[k]or how[v]or rawequal(k,object)or rawequal(v,object))then
+local assignment={serialised[object]}
+table.move(assembler,#assembler-5,#assembler-2,2,assignment)
+table.move({},1,7,#assembler-6,assembler)
+who[1+#who]=table.concat(assignment)
+end
+goto next_pair
+::end_of_object::
+assembler[1+#assembler]=indent_char:rep(depth-1).."}"
+if option then
+table.insert(who,1,table.concat(assembler))
+how[object]=serialised[object]
+object=table.remove(traversal,1)
+if object then
+assembler={}
+goto next_node
+end
+assembler=who
+assembler[1+#assembler]="return "..how[whence]
+else
+depth=depth-1
+object=table.remove(traversal)
+gen_func=table.remove(how)
+invar_state=table.remove(who)
+k=table.remove(whence)
+if depth>0 and object and gen_func and invar_state then
+if which[1+depth]~=nil then
+v=which[1+depth]
+which[1+depth]=nil
+goto key_processed
+end
+goto value_processed
+end
 end
 else
-if compact==false and layer1<=1 and type(self)=="table"and not serialised[table_keys]then
-return serialise(nil,nil,nil,nil,nil,#table_keys,nil,table_keys)
-elseif compact and indent_char==""then
-return(table.concat(assembler):gsub("%s+",""):gsub(",}","}"))
-elseif not self and not compact and not indent_char and not serialised and not assembler then
-return(table.concat(table_keys[layer2]):gsub([===[=[^
-]-{]===],"={"):gsub([===[,(
-[^
-]-})]===],"%1"))
-else
-return(table.concat(assembler):gsub([===[=[^
-]-{]===],"={"):gsub([===[,(
-[^
-]-})]===],"%1"))
+return("%q"):format(tostring(object))
 end
+if option then
+return table.unpack(assembler)
+elseif option==false and indent_char==""then
+return(table.concat(assembler):gsub("%s+",""))
 end
+return table.concat(assembler)
 end
 local function meta_Hash(self,threshold,hashed,layer,sum,nb,xy,imba)
 threshold,hashed,layer,sum=math.type(threshold)=="integer"and threshold or 1,type(hashed)=="table"and hashed or(type(threshold)=="table"and threshold or{}),layer or 1,sum or 0
@@ -3763,7 +3832,7 @@ compare[relative_path]={}
 local lines,contentsum=meta_Hash(io.input(subdir),nil,compare,relative_path)
 sum=math.tointeger(namecontent(namesum,contentsum))+sum
 compare[relative_path].contentsum=contentsum
-io.input(subdir):close()
+io.input():close()
 print(lines.." Lines Summed Up")
 else
 sum=sum-namesum
@@ -3789,7 +3858,7 @@ compare[relative_path]={}
 local lines,contentsum=meta_Hash(io.input(directory),nil,compare,relative_path)
 sum=math.tointeger(namecontent(namesum,contentsum))+sum
 compare[relative_path].contentsum=contentsum
-io.input(directory):close()
+io.input():close()
 print(lines.." Lines Summed Up")
 else
 sum=sum-namesum
@@ -3852,8 +3921,8 @@ break
 end
 end
 end
-io.input(find_self):close()
-io.close()
+io.input():close()
+io.output():close()
 uniform_metatable.stack_delve_depth=nil
 end
 error(call_results[2],0)
@@ -3910,7 +3979,7 @@ local cstatus=status
 
 --autorun part 1:
 if status=="off maintenance"then
-status="mained by c"
+status="maint by c"
 local script1,script2=("%q"):format([===[local cache_package_path=package.path
 package.path=]===]..("%q"):format(find_self).."\nlocal success1,module_instance=pcall(require,'"..required_name..[===[')
 if success1 then
@@ -3919,12 +3988,12 @@ else
 function directory_Match(directory)
 ]===]..dir_mat.."\nend\nlocal success2,module_finder,module_path,module_location=pcall(directory_Match,"..("%q"):format('"'..(os.getenv("ANDROID_ROOT")=="/system"and where:match("^(.-/)[^/]+/$")or io.popen('cd /D "'..where..'.." && cd'):read().."\\")..'"')..[===[)
 if success2 then
-local iter_func,invar_state,ctrl_var_init
+local gen_func,invar_state,ctrl_var_init
 if module_finder then
 if not module_path then
-iter_func,invar_state,ctrl_var_init=ipairs(module_finder)
+gen_func,invar_state,ctrl_var_init=ipairs(module_finder)
 end
-for i,v in module_path and module_finder:lines()or iter_func,not module_path and invar_state or nil,not module_path and ctrl_var_init or nil do
+for i,v in module_path and module_finder:lines()or gen_func,not module_path and invar_state or nil,not module_path and ctrl_var_init or nil do
 if(module_path or(i%3==2 and module_finder[1+i]))and(module_path and i or v):match('%-'..]===]..interface.version..[===[)then
 package.path=module_path and i or v
 if os.getenv('ANDROID_ROOT')=='/system'then
@@ -3941,9 +4010,9 @@ else
 module_finder,module_path,module_location=directory_Match(false)
 if module_finder then
 if not module_path then
-iter_func,invar_state,ctrl_var_init=ipairs(module_finder)
+gen_func,invar_state,ctrl_var_init=ipairs(module_finder)
 end
-for i,v in module_path and module_finder:lines()or iter_func,not module_path and invar_state or nil,not module_path and ctrl_var_init or nil do
+for i,v in module_path and module_finder:lines()or gen_func,not module_path and invar_state or nil,not module_path and ctrl_var_init or nil do
 if(module_path or(i%3==2 and module_finder[1+i]))and(module_path and i or v):match('%-'..]===]..interface.version..[===[)then
 package.path=module_path and i or v
 if os.getenv('ANDROID_ROOT')=='/system'then
@@ -4001,7 +4070,7 @@ elseif load('return '..token)()~=nil then
 if not handle then
 handle=os.getenv('ANDROID_ROOT')=='/system'and io.open(io.popen('find /sdcard/Download/Codes/ -type d 2>/dev/null'):read()and'/sdcard/Download/Codes/Memory Dump'or'./Memory Dump','a+')or io.open('.\\Memory Dump','a+')
 end
-handle:write(table.concat(table.pack(require(module_name).serialise(load('return '..token)(),false,'\t')),'\n'),'\n')
+handle:write(table.concat(table.pack(require(module_name).serialise(load('return '..token)(),true,'\t')),'\n'),'\n')
 end
 end
 if handle then
@@ -4015,13 +4084,13 @@ end
 if os.getenv('ANDROID_ROOT')=='/system'then
 local success,script_finder,script_path,script_location=pcall(directory_Match or require(module_name).directory_Match,nil)
 if success and script_finder then
-local iter_func,invar_state,ctrl_var_init
+local gen_func,invar_state,ctrl_var_init
 if script_location then
 return loadfile(script_path)
 elseif not script_path then
-iter_func,invar_state,ctrl_var_init=ipairs(script_finder)
+gen_func,invar_state,ctrl_var_init=ipairs(script_finder)
 end
-for i,v in script_path and script_finder:lines()or iter_func,not script_path and invar_state or nil,not script_path and ctrl_var_init or nil do
+for i,v in script_path and script_finder:lines()or gen_func,not script_path and invar_state or nil,not script_path and ctrl_var_init or nil do
 if script_path or(i%3==2 and script_finder[1+i])then
 if(script_path and i or v):match('/script%.?[^/%.]-$')then
 return loadfile(script_path and i or v)
@@ -4039,11 +4108,11 @@ end
 local success,script_finder,script_location
 success,script_finder,script_path,script_location=pcall(directory_Match or require(module_name).directory_Match,false)
 if success and script_finder then
-local iter_func,invar_state,ctrl_var_init
+local gen_func,invar_state,ctrl_var_init
 if not script_path then
-iter_func,invar_state,ctrl_var_init=ipairs(script_finder)
+gen_func,invar_state,ctrl_var_init=ipairs(script_finder)
 end
-for i,v in script_path and script_finder:lines()or iter_func,not script_path and invar_state or nil,not script_path and ctrl_var_init or nil do
+for i,v in script_path and script_finder:lines()or gen_func,not script_path and invar_state or nil,not script_path and ctrl_var_init or nil do
 if script_path or(i%3==2 and script_finder[1+i])then
 if(script_path and i or v):match('\\script%.?[^\\%.]-$')then
 return loadfile(script_path and i or v)
@@ -4106,7 +4175,7 @@ int ivrs_ref;
 int deFragment(lua_State *L){
 lua_settop(L,2);
 lua_pushvalue(L,lua_upvalueindex(1));
-lua_gettable(L,-3);
+lua_rawget(L,-3);
 lua_createtable(L,luaL_optinteger(L,-2,lua_rawlen(L,-3)),5);
 lua_pushnil(L);
 while(lua_next(L,-5)){
@@ -4116,12 +4185,12 @@ else
 lua_pop(L,1);
 }
 lua_pushinteger(L,lua_rawlen(L,-1));
-if(!lua_rawequal(L,-4,-1))
+if(!lua_isnil(L,-4)&& !lua_rawequal(L,-4,-1))
 printf("Internal Inconsistency Occurred between Total Element Counts %lld Recorded and %lld Actual!",luaL_optinteger(L,-4,lua_rawlen(L,-5)),luaL_optinteger(L,-1,lua_rawlen(L,-2)));
 lua_setfield(L,-2,"t");
 lua_pushvalue(L,lua_upvalueindex(1));
 lua_rotate(L,-3,-1);
-lua_settable(L,-3);
+lua_rawset(L,-3);
 lua_pushinteger(L,1);
 lua_setfield(L,-2,"m");
 lua_pushinteger(L,1+lua_rawlen(L,-1));
@@ -4134,13 +4203,13 @@ return 1;
 int set_Field(lua_State *L){
 lua_settop(L,3);
 struct ref_couple *refs=luaL_checkudata(L,1,"dual_Capable_Map");
-lua_geti(L,LUA_REGISTRYINDEX,refs->ref);
-lua_geti(L,LUA_REGISTRYINDEX,refs->ivrs_ref);
-if(lua_pushvalue(L,2),lua_gettable(L,-3),!lua_rawequal(L,-1,-4)){
+lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ref);
+lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ivrs_ref);
+if(lua_pushvalue(L,2),lua_rawget(L,-3),!lua_rawequal(L,-1,-4)){
 if(lua_isnil(L,-1)){
 lua_pop(L,1);
 goto clean_is_unnecessary;
-}else if((lua_pushvalue(L,-1),lua_gettable(L,5))==LUA_TTABLE &&(lua_pushvalue(L,lua_upvalueindex(1)),lua_gettable(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"merged_keys"),lua_rawequal(L,-2,-1))){
+}else if((lua_pushvalue(L,-1),lua_rawget(L,5))==LUA_TTABLE &&(lua_pushvalue(L,lua_upvalueindex(1)),lua_rawget(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"merged_keys"),lua_rawequal(L,-2,-1))){
 lua_getfield(L,-3,"m");
 lua_Integer m=luaL_optinteger(L,-1,1);
 lua_getfield(L,-4,"p");
@@ -4178,31 +4247,97 @@ break;
 }
 lua_pop(L,1);
 }
-if(n>=65 && t<=0.65*n){
+if(n>=27 && t<=0.65*n){
 lua_settop(L,7);
+lua_pushvalue(L,-2);
 lua_getfield(L,1,"deFragment");
-lua_insert(L,-2);
+lua_rotate(L,-3,-1);
 lua_pushinteger(L,t);
 PCALL_ERRH(2,1,0,"Error Consolidating Merge Table: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Consolidating Merge Table: %s!");
-lua_settable(L,-3);
+lua_rawset(L,5);
 }else if(t>1){
 lua_settop(L,7);
 lua_pushinteger(L,t);
 lua_setfield(L,-2,"t");
-lua_pop(L,2);
+lua_pop(L,1);
 }else{
 lua_copy(L,6,-2);
-lua_settable(L,5);
-lua_settop(L,5);
+lua_rawset(L,5);
+lua_settop(L,6);
+}
+}else{
+lua_settop(L,6);
+lua_pushvalue(L,-1);
+lua_pushnil(L);
+lua_rawset(L,5);
+}
+if(lua_istable(L,-1)|| luaL_testudata(L,-1,"dual_Capable_Map")|| lua_istable(L,2)|| luaL_testudata(L,2,"dual_Capable_Map")){
+lua_pushvalue(L,lua_upvalueindex(1));
+lua_replace(L,-2);
+if((lua_pushvalue(L,-1),lua_rawget(L,4))==LUA_TTABLE &&(lua_pushvalue(L,-2),lua_rawget(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"collected_nodes"),lua_rawequal(L,-2,-1))){
+lua_getfield(L,-3,"m");
+lua_Integer m=luaL_optinteger(L,-1,1);
+lua_getfield(L,-4,"p");
+lua_Integer p=luaL_optinteger(L,-1,1+lua_rawlen(L,-5));
+lua_getfield(L,-5,"t");
+lua_Integer t=luaL_optinteger(L,-1,lua_rawlen(L,-6));
+lua_getfield(L,-6,"n");
+lua_Integer n=luaL_optinteger(L,-1,lua_rawlen(L,-7));
+t--;
+for(int idx=m;idx<=n;idx++){
+lua_rawgeti(L,-7,idx);
+if(!lua_isnil(L,-1)){
+if(t>1?lua_rawequal(L,-1,2):!lua_rawequal(L,-1,2)){
+if(t>1){
+lua_pushnil(L);
+lua_rawseti(L,-9,idx);
+if(idx<=m){
+m=1+idx;
+lua_pushinteger(L,m);
+lua_setfield(L,-9,"m");
+}
+if(idx<p){
+p=idx;
+lua_pushinteger(L,p);
+lua_setfield(L,-9,"p");
+}
+if(idx>=n){
+n=idx-1;
+lua_pushinteger(L,n);
+lua_setfield(L,-9,"n");
+}
+}
+break;
+}
+}
+lua_pop(L,1);
+}
+if(n>=27 && t<=0.65*n){
+lua_settop(L,7);
+lua_getfield(L,1,"deFragment");
+lua_insert(L,-2);
+lua_pushinteger(L,t);
+PCALL_ERRH(2,1,0,"Error Consolidating Jump Table: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Consolidating Jump Table: %s!");
+lua_rawset(L,4);
+}else if(t>1){
+lua_settop(L,7);
+lua_pushinteger(L,t);
+lua_setfield(L,-2,"t");
+}else{
+lua_copy(L,6,-2);
+lua_rawset(L,4);
 }
 }else{
 lua_settop(L,6);
 lua_pushnil(L);
-lua_settable(L,5);
+lua_rawset(L,4);
 }
+}
+lua_settop(L,5);
 clean_is_unnecessary:
 if(!lua_isnil(L,3)){
-if((lua_pushvalue(L,3),lua_gettable(L,5))==LUA_TTABLE &&(lua_pushvalue(L,lua_upvalueindex(1)),lua_gettable(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"merged_keys"),lua_rawequal(L,-2,-1))){
+lua_pushvalue(L,lua_upvalueindex(1));
+if((lua_pushvalue(L,3),lua_rawget(L,5))==LUA_TTABLE &&(lua_pushvalue(L,-2),lua_rawget(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"merged_keys"),lua_rawequal(L,-2,-1))){
 lua_getfield(L,-3,"m");
 lua_Integer m=luaL_optinteger(L,-1,1);
 lua_getfield(L,-4,"p");
@@ -4235,32 +4370,32 @@ break;
 }
 lua_pop(L,1);
 }
-lua_settop(L,6);
+lua_settop(L,7);
 t++;
-if(n>=65 && t<=0.65*n){
+if(n>=27 && t<=0.65*n){
 lua_getfield(L,1,"deFragment");
 lua_insert(L,-2);
 lua_pushinteger(L,t);
 PCALL_ERRH(2,1,0,"Error Consolidating Merge Table: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Consolidating Merge Table: %s!");
 lua_pushvalue(L,3);
 lua_insert(L,-2);
-lua_settable(L,-3);
+lua_rawset(L,5);
 }else{
 lua_pushinteger(L,t);
 lua_setfield(L,-2,"t");
 lua_pop(L,1);
 }
 }else{
-lua_settop(L,6);
+lua_settop(L,7);
 lua_pushvalue(L,3);
 if(lua_isnil(L,-2)){
 lua_pushvalue(L,2);
 }else{
 lua_createtable(L,2,5);
-lua_pushvalue(L,lua_upvalueindex(1));
+lua_pushvalue(L,6);
 lua_pushliteral(L,"merged_keys");
-lua_settable(L,-3);
-lua_rotate(L,6,-1);
+lua_rawset(L,-3);
+lua_rotate(L,7,-1);
 lua_rawseti(L,-2,1);
 lua_pushvalue(L,2);
 lua_rawseti(L,-2,2);
@@ -4273,21 +4408,241 @@ lua_setfield(L,-2,"t");
 lua_pushinteger(L,2);
 lua_setfield(L,-2,"n");
 }
-lua_settable(L,5);
+lua_rawset(L,5);
+lua_settop(L,6);
+}
+if(lua_istable(L,3)|| luaL_testudata(L,3,"dual_Capable_Map")|| lua_istable(L,2)|| luaL_testudata(L,2,"dual_Capable_Map")){
+if((lua_pushvalue(L,-1),lua_rawget(L,4))==LUA_TTABLE &&(lua_pushvalue(L,-2),lua_rawget(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"collected_nodes"),lua_rawequal(L,-2,-1))){
+lua_getfield(L,-3,"m");
+lua_Integer m=luaL_optinteger(L,-1,1);
+lua_getfield(L,-4,"p");
+lua_Integer p=luaL_optinteger(L,-1,1+lua_rawlen(L,-5));
+lua_getfield(L,-5,"t");
+lua_Integer t=luaL_optinteger(L,-1,lua_rawlen(L,-6));
+lua_getfield(L,-6,"n");
+lua_Integer n=luaL_optinteger(L,-1,lua_rawlen(L,-7));
+for(int idx=p;idx<=1+n;idx++){
+lua_rawgeti(L,-7,idx);
+if(lua_isnil(L,-1)){
+lua_pushvalue(L,2);
+lua_rawseti(L,-9,idx);
+if(idx<m){
+m=idx;
+lua_pushinteger(L,m);
+lua_setfield(L,-9,"m");
+}
+if(idx<=p){
+p=1+idx;
+lua_pushinteger(L,p);
+lua_setfield(L,-9,"p");
+}
+if(idx>n){
+n=idx;
+lua_pushinteger(L,n);
+lua_setfield(L,-9,"n");
+}
+break;
+}
+lua_pop(L,1);
+}
+lua_settop(L,7);
+t++;
+if(n>=27 && t<=0.65*n){
+lua_getfield(L,1,"deFragment");
+lua_insert(L,-2);
+lua_pushinteger(L,t);
+PCALL_ERRH(2,1,0,"Error Consolidating Jump Table: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Consolidating Jump Table: %s!");
+lua_rawset(L,4);
+}else{
+lua_pushinteger(L,t);
+lua_setfield(L,-2,"t");
+}
+}else{
+lua_settop(L,7);
+if(lua_isnil(L,-1)){
+lua_pushvalue(L,2);
+lua_replace(L,-2);
+}else{
+lua_createtable(L,2,5);
+lua_pushvalue(L,6);
+lua_pushliteral(L,"collected_nodes");
+lua_rawset(L,-3);
+lua_rotate(L,7,-1);
+lua_rawseti(L,-2,1);
+lua_pushvalue(L,2);
+lua_rawseti(L,-2,2);
+lua_pushinteger(L,1);
+lua_setfield(L,-2,"m");
+lua_pushinteger(L,3);
+lua_setfield(L,-2,"p");
+lua_pushinteger(L,2);
+lua_setfield(L,-2,"t");
+lua_pushinteger(L,2);
+lua_setfield(L,-2,"n");
+}
+lua_rawset(L,4);
+}
+}
+}
 lua_settop(L,5);
-}
-}
 lua_rotate(L,-4,2);
-lua_settable(L,-4);
+lua_rawset(L,-4);
 }
 return 0;
+}
+
+int natural_LookUp(lua_State *L){
+lua_settop(L,2);
+struct ref_couple *refs=luaL_checkudata(L,-2,"dual_Capable_Map");
+lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ref);
+lua_pushvalue(L,-2);
+lua_rawget(L,-2);
+if(lua_istable(L,-1)&& lua_rawequal(L,lua_upvalueindex(1),-3)&&(lua_rotate(L,-3,-1),lua_rawget(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"collected_nodes"),lua_rawequal(L,-2,-1))){
+lua_getfield(L,-5,"deFragment");
+lua_rotate(L,-4,-1);
+PCALL_ERRH(1,1,0,"Error Consolidating Jump Table: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Consolidating Jump Table: %s!");
+return 1;
+}
+lua_settop(L,4);
+return 1;
+}
+
+int LookUp(lua_State *L){
+lua_settop(L,2);
+struct ref_couple *refs=luaL_checkudata(L,-2,"dual_Capable_Map");
+lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ivrs_ref);
+lua_insert(L,-2);
+lua_rawget(L,-2);
+if(lua_istable(L,-1)&&(lua_pushvalue(L,lua_upvalueindex(1)),lua_rawget(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"merged_keys"),lua_rawequal(L,-2,-1))){
+lua_getfield(L,-5,"deFragment");
+lua_rotate(L,-4,-1);
+PCALL_ERRH(1,1,0,"Error Consolidating Merge Table: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Consolidating Merge Table: %s!");
+return 1;
+}
+lua_settop(L,3);
+return 1;
+}
+
+int generator_Function(lua_State *L){
+lua_settop(L,2);
+skip_upvalue:
+if(lua_next(L,-2)){
+int idx=0;
+while(!lua_isnil(L,lua_upvalueindex(++idx))){
+if(lua_rawequal(L,lua_upvalueindex(idx),-2)){
+lua_pop(L,1);
+goto skip_upvalue;
+}
+}
+return 2;
+}else{
+lua_pushnil(L);
+return 1;
+}
+}
+
+int generator_Factory(lua_State *L){
+lua_settop(L,2);
+struct ref_couple *refs=luaL_checkudata(L,-2,"dual_Capable_Map");
+lua_getfield(L,-2,"gen_func");
+lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ref);
+lua_rotate(L,-3,-1);
+return 3;
+}
+
+int create_Dual_Capable_Map(lua_State *L){
+luaL_checkudata(L,1,"dual_Capable_Map");
+if(lua_gettop(L)==1){
+int idx=0;
+while(!lua_isnil(L,lua_upvalueindex(++idx)))
+lua_pushvalue(L,lua_upvalueindex(idx));
+return idx-1;
+}
+for(int idx=lua_gettop(L);idx>1;idx--){
+luaL_checkstack(L,6,"Unable to Allocate Memory for the Extra Stack Space!");
+struct ref_couple *refs=(struct ref_couple*)lua_newuserdatauv(L,sizeof(struct ref_couple),0);
+lua_newtable(L);
+refs->ref=luaL_ref(L,LUA_REGISTRYINDEX);
+lua_newtable(L);
+refs->ivrs_ref=luaL_ref(L,LUA_REGISTRYINDEX);
+luaL_setmetatable(L,"dual_Capable_Map");
+if(luaL_testudata(L,idx,"dual_Capable_Map")){
+lua_getglobal(L,"pairs");
+lua_pushvalue(L,idx);
+PCALL_ERRH(1,3,0,"Error Invoking Generator Factory: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Invoking Generator Factory: %s!");
+lua_pushvalue(L,-3);
+lua_pushvalue(L,-3);
+lua_rotate(L,-3,-1);
+next_pair:
+PCALL_ERRH(2,2,0,"Error Invoking Generator Function: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Invoking Generator Function: %s!");
+if(lua_isnil(L,-2))
+lua_pop(L,4);
+else{
+lua_pushvalue(L,-2);
+lua_insert(L,-2);
+lua_settable(L,-6);
+lua_pushvalue(L,-3);
+lua_pushvalue(L,-3);
+lua_rotate(L,-3,-1);
+goto next_pair;
+}
+}else if(lua_istable(L,idx)){
+lua_pushnil(L);
+while(lua_next(L,idx)){
+lua_pushvalue(L,-2);
+lua_insert(L,-3);
+lua_settable(L,-4);
+}
+}else if(!lua_isnil(L,idx)){
+lua_pushvalue(L,idx);
+lua_seti(L,-2,1+luaL_len(L,-2));
+}
+lua_replace(L,idx);
+}
+return lua_gettop(L)-1;
+}
+
+int get_Field(lua_State *L){
+lua_settop(L,2);
+lua_getmetatable(L,-2);
+if(luaL_getmetatable(L,"dual_Capable_Map")==LUA_TTABLE && lua_rawequal(L,-2,-1)){
+lua_pushvalue(L,-3);
+lua_rawget(L,-2);
+if(lua_isnil(L,-1)){
+lua_pushliteral(L,"nLookUp");
+lua_rawget(L,-3);
+lua_pushvalue(L,-6);
+lua_pushvalue(L,-6);
+PCALL_ERRH(2,1,0,"Error Performing Ordinary LookUp: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Performing Ordinary LookUp: %s!");
+if(lua_isnil(L,-1)){
+lua_pushliteral(L,"LookUp");
+lua_rawget(L,-4);
+lua_rotate(L,-7,-2);
+PCALL_ERRH(2,1,0,"Error Performing Inverse LookUp: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Performing Inverse LookUp: %s!");
+if(!lua_isnil(L,-1))
+return 1;
+}else
+return 1;
+}else
+return 1;
+}else
+luaL_error(L,"Associated MetaTable Has Been Tampered!");
+return 0;
+}
+
+int get_Length(lua_State *L){
+lua_settop(L,1);
+struct ref_couple *refs=luaL_checkudata(L,-1,"dual_Capable_Map");
+lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ref);
+lua_pushinteger(L,lua_rawlen(L,-1));
+return 1;
 }
 
 int inspect(lua_State *L){
 lua_settop(L,3);
 struct ref_couple *refs=luaL_checkudata(L,1,"dual_Capable_Map");
-lua_geti(L,LUA_REGISTRYINDEX,refs->ivrs_ref);
-lua_geti(L,LUA_REGISTRYINDEX,refs->ref);
+lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ivrs_ref);
+lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ref);
 lua_getglobal(L,"module_name");
 luaL_requiref(L,luaL_checkstring(L,-1),NULL,0);
 lua_getfield(L,-1,"serialise");
@@ -4308,43 +4663,28 @@ else
 return 0;
 }
 
-int create_Dual_Capable_Map(lua_State *L){
-luaL_testudata(L,1,"dual_Capable_Map");
-if(lua_gettop(L)==1){
-int idx=0;
-while(!lua_isnil(L,lua_upvalueindex(++idx)))
-lua_pushvalue(L,lua_upvalueindex(idx));
-return idx-1;
-}
-for(int idx=lua_gettop(L);idx>1;idx--){
-luaL_checkstack(L,3,"Unable to Allocate Memory for the Extra Stack Space!");
-struct ref_couple *refs=(struct ref_couple*)lua_newuserdatauv(L,sizeof(struct ref_couple),0);
-lua_newtable(L);
-refs->ref=luaL_ref(L,LUA_REGISTRYINDEX);
-lua_newtable(L);
-refs->ivrs_ref=luaL_ref(L,LUA_REGISTRYINDEX);
-luaL_setmetatable(L,"dual_Capable_Map");
-if(lua_istable(L,idx)){
+int unbind_Tables(lua_State *L){
+lua_settop(L,2);
+struct ref_couple *refs=luaL_checkudata(L,-2,"dual_Capable_Map");
+luaL_unref(L,-2,refs->ivrs_ref);
+luaL_unref(L,-2,refs->ref);
 lua_pushnil(L);
-while(lua_next(L,idx)){
-lua_pushvalue(L,-2);
-lua_insert(L,-3);
-lua_settable(L,-4);
-}
-}else if(!lua_isnil(L,idx)){
-lua_pushvalue(L,idx);
-lua_seti(L,-2,1+luaL_len(L,-2));
-}
-lua_replace(L,idx);
-}
-return lua_gettop(L)-1;
+lua_setmetatable(L,-3);
+return 0;
 }
 
 const luaL_Reg dual_Capable_Map[]={
 {"deFragment",deFragment},
 {"__newindex",set_Field},
-{"inspect",inspect},
+{"nLookUp",natural_LookUp},
+{"LookUp",LookUp},
+{"gen_func",generator_Function},
+{"__pairs",generator_Factory},
 {"__call",create_Dual_Capable_Map},
+{"__index",get_Field},
+{"__len",get_Length},
+{"inspect",inspect},
+{"__gc",unbind_Tables},
 {NULL,NULL}
 };
 
@@ -4528,7 +4868,12 @@ return lua_gettop(L)-3;
 
 int string_Modification(lua_State *L){
 lua_settop(L,3);
-luaL_checktype(L,-1,LUA_TTABLE);
+if(!lua_istable(L,-1)&&!luaL_testudata(L,-1,"dual_Capable_Map")){
+lua_pushstring(L,luaL_typename(L,-1));
+lua_pushliteral(L," Received at Parameter #3 where Table or Dual Capable Map Expected!");
+lua_concat(L,2);
+lua_error(L);
+}
 size_t string_length;
 const char *string_itself=luaL_checklstring(L,-3,&string_length);
 UTF8_LENGTH;
@@ -4587,13 +4932,13 @@ luaL_getsubtable(L,-2,"c_UpBinds");\
 lua_insert(L,-3);\
 lua_pop(L,2);\
 luaL_newmetatable(L,"dual_Capable_Map");\
-lua_pushlightuserdata(L,(int**)&collective_signals);\
-luaL_setfuncs(L,dual_Capable_Map,1);\
-lua_pushvalue(L,-1);\
-lua_setfield(L,-2,"__index");\
+lua_pushlightuserdata(L,&renewed_action);\
+lua_pushlightuserdata(L,&current_action);\
+lua_pushnil(L);\
+luaL_setfuncs(L,dual_Capable_Map,3);\
 lua_newuserdatauv(L,0,0);\
-lua_replace(L,-2);\
-luaL_setmetatable(L,"dual_Capable_Map");\
+lua_insert(L,-2);\
+lua_setmetatable(L,-2);\
 lua_setfield(L,-2,"dual_Capable_Map");\
 int idx=-1;\
 while(++idx,c_UpBinds[idx].name || c_UpBinds[idx].func){\
@@ -4603,7 +4948,8 @@ lua_setfield(L,-2,c_UpBinds[idx].name);\
 lua_pop(L,1);\
 }while(0)
 
-const int collective_signals[]={SIGINT,SIGABRT,SIGSEGV,SIGBUS,SIGILL,SIGFPE};
+struct sigaction renewed_action;
+struct sigaction current_action;
 
 pthread_mutex_t lock=PTHREAD_MUTEX_INITIALIZER;
 
@@ -5018,8 +5364,7 @@ sig_atomic_t signal_counter=0;
 
 sigjmp_buf context_for_jump;
 
-struct sigaction renewed_action;
-struct sigaction current_action;
+const int collective_signals[]={SIGINT,SIGABRT,SIGSEGV,SIGBUS,SIGILL,SIGFPE};
 
 void interpreter_Count_Hook_Function(lua_State *L,lua_Debug *hook_arg){
 if(hook_arg->event==LUA_HOOKCOUNT && signal_counter<3 && signal_counter>0){
@@ -5125,7 +5470,7 @@ lua_setglobal(L,"task_serial");
 lua_getglobal(L,"module_name");
 luaL_requiref(L,luaL_checkstring(L,-1),NULL,0);
 lua_getfield(L,-1,"serialise");
-lua_pushboolean(L,0);
+lua_pushboolean(L,1);
 lua_pushliteral(L,"\t");
 lua_rotate(L,1,3);
 lua_pop(L,3);
@@ -5145,7 +5490,7 @@ lua_sethook(L,NULL,0,0);
 lua_remove(L,4);
 if((ctop=lua_gettop(L))>3){
 for(int idx=4;idx<=ctop;idx++){
-luaL_checkstack(L,15,"Unable to Allocate Memory for the Extra Stack Space!");
+luaL_checkstack(L,27,"Unable to Allocate Memory for the Extra Stack Space!");
 lua_pushvalue(L,1);
 lua_pushvalue(L,idx);
 lua_pushvalue(L,2);
@@ -5154,6 +5499,7 @@ int bret=lua_gettop(L);
 PCALL_ERRH(3,LUA_MULTRET,0,"Error Serialising Individual Result: %s!",CUSTOM_GOTO,premature_end);
 if(lua_gettop(L)-bret>1){
 for(int idx=lua_gettop(L);idx>bret;idx--){
+luaL_checkstack(L,3,"Unable to Allocate Memory for the Extra Stack Space!");
 lua_pushliteral(L,"\n");
 lua_insert(L,idx);
 }
@@ -5199,7 +5545,7 @@ premature_end:
 lua_close(L);
 return 0;
 }]===])
-io.close()
+io.output():close()
 if os.getenv("ANDROID_ROOT")~="/system"then
 goto not_bother
 end
@@ -5238,29 +5584,36 @@ end
 end
 line_number,status=0,"checksum"
 io.output(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
-io.write("--range[6][6]\n")
-io.input(find_self):seek("set")
-for code_line in io.input(find_self):lines()do
+io.input():seek("set")
+local code_line
+repeat
+local next_line=io.input():read()
+if code_line then
 line_number=1+line_number
-if line_number>math.max(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])then
+if ranges[bracket_number]and line_number>math.max(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])then
 bracket_number=bracket_number-1
-while not ranges[bracket_number]do
+while bracket_number>0 and not ranges[bracket_number]do
 bracket_number=bracket_number-1
 end
 end
-if code_line:find("%s-%-%-")~=1 then
-if line_number>=math.min(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])and line_number<=math.max(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])then
-if code_line:find("%s-⚙%s-$")==1 then
-io.write('--range[6][5]\nlocal status="off maintenance";\nlocal digest=;\n',[===[--range[5][6]
-]===])
+if code_line:find("%s-%-%-%s-range%s-%[%s-(%d+)%s-%]%s-%[%s-(%d+)%s-%]%s-$")~=1 then
+if ranges[bracket_number]and line_number>=math.min(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])and line_number<=math.max(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])then
+goto skip_line
+end
+if code_line:find("%s-local%s-status%s-=%s-\"%s-.-%s-\"%s-;%s-$")==1 then
+io.write('local status="'..status..'";',next_line and"\n"or"")
+elseif code_line:find("%s-local%s-digest%s-=%s-.-%s-;%s-$")==1 then
+io.write("local digest=0;",next_line and"\n"or"")
 else
-io.write(code_line,"\n")
+io.write(code_line,next_line and"\n"or"")
+end
+::skip_line::
 end
 end
-end
-end
-io.write("--range[5][5]")
-io.close()
+code_line=next_line
+until not next_line
+io.output():close()
+local standard_handle=io.input()
 local household_sum=directory_CheckSum(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version),where)
 if household_sum==digest then
 os.remove(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
@@ -5272,8 +5625,8 @@ elseif status=="off maintenance"then
 status="checksum"
 os.remove(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
 line_number,bracket_number,ranges,interface.version,interface.renewed=0,0,{},2^(-6)+interface.version,tonumber(os.date("%Y%m%d"))
-io.input(find_self):seek("set")
-for code_line in io.input(find_self):lines()do
+io.input(standard_handle):seek("set")
+for code_line in io.input():lines()do
 line_number=1+line_number
 local found,_,capture1,capture2=code_line:find("%s-%-%-%s-range%s-%[%s-(%d+)%s-%]%s-%[%s-(%d+)%s-%]%s-$")
 if found and found<=1 then
@@ -5282,62 +5635,78 @@ ranges[tonumber(capture1)]=ranges[tonumber(capture1)]or{}
 ranges[tonumber(capture1)][keystone(tonumber(capture1),tonumber(capture2))]=line_number
 end
 end
-line_number=0
+line_number,code_line=0,nil
 io.output(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
-io.write("--range[6][6]\n")
-io.input(find_self):seek("set")
-for code_line in io.input(find_self):lines()do
+io.input():seek("set")
+repeat
+local next_line=io.input():read()
+if code_line then
 line_number=1+line_number
-if line_number>math.max(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])then
+if ranges[bracket_number]and line_number>math.max(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])then
 bracket_number=bracket_number-1
-while not ranges[bracket_number]do
+while bracket_number>0 and not ranges[bracket_number]do
 bracket_number=bracket_number-1
 end
 end
-if code_line:find("%s-%-%-")~=1 then
-if line_number>=math.min(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])and line_number<=math.max(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])then
+if code_line:find("%s-%-%-%s-range%s-%[%s-(%d+)%s-%]%s-%[%s-(%d+)%s-%]%s-$")~=1 then
+if ranges[bracket_number]and line_number>=math.min(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])and line_number<=math.max(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])then
+goto skip_line
+end
 if code_line:find("%s-version%s-=%s-.-%s-,%s-$")==1 then
-io.write((code_line:gsub("%s-(version)%s-(=)%s-.-%s-(,)%s-$","%1%2"..interface.version..[===[%3
-]===])))
+io.write("version="..interface.version..",",next_line and"\n"or"")
 elseif code_line:find("%s-renewed%s-=%s-.-%s-,%s-$")==1 then
-io.write((code_line:gsub("%s-(renewed)%s-(=)%s-.-%s-(,)%s-$","%1%2"..interface.renewed..[===[%3
-]===])))
-elseif code_line:find("%s-⚙%s-$")==1 then
-io.write('--range[6][5]\nlocal status="off maintenance";\nlocal digest=;\n',[===[--range[5][6]
-]===])
+io.write("renewed="..interface.renewed..",",next_line and"\n"or"")
+elseif code_line:find("%s-local%s-status%s-=%s-\"%s-.-%s-\"%s-;%s-$")==1 then
+io.write('local status="'..status..'";',next_line and"\n"or"")
+elseif code_line:find("%s-local%s-digest%s-=%s-.-%s-;%s-$")==1 then
+io.write("local digest=0;",next_line and"\n"or"")
 else
-io.write(code_line,"\n")
+io.write(code_line,next_line and"\n"or"")
+end
+::skip_line::
 end
 end
-end
-end
-io.write("--range[5][5]")
-io.close()
-household_sum,status=directory_CheckSum(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version),where),"ready for run"
+code_line=next_line
+until not next_line
+io.output():close()
+local database_found,database_finder,database_path,database_location=pcall(directory_Match,'"'..(os.getenv("ANDROID_ROOT")=="/system"and where:match("^(.-/)[^/]+/$")or io.popen('cd /D "'..where..'.." && cd'):read().."\\")..(os.getenv("ANDROID_ROOT")=="/system"and'" -path *'..interface.renewed.."* -type f"or"*"..interface.renewed..'*" A:-D'))
+household_sum,status,code_line=directory_CheckSum(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version),where),"ready for run",nil
 io.output(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
-io.input(find_self):seek("set")
-local code_line
+if database_found then
+io.write("--range[15][18]\n")
+if database_location and database_path:find(database_location)==1 then
+io.write("local database_snapshot=[",("="):rep(15),"[",io.input(database_path):read("a"),"]",("="):rep(15),"]\n")
+io.input():close()
+elseif type(database_finder)=="table"then
+for idx=1,#database_finder//3 do
+io.write("local database_snapshot",idx,"=[",("="):rep(15),"[",io.input(database_finder[3*idx-1]):read("a"),"]",("="):rep(15),"]\n")
+io.input():close()
+end
+end
+io.write("--range[15][15]\n")
+end
+io.input(standard_handle):seek("set")
 repeat
 local next_line=io.input():read()
 if code_line then
 if code_line:find("%s-version%s-=%s-.-%s-,%s-$")==1 then
-io.write(code_line:gsub("%s-(version)%s-(=)%s-.-%s-(,)%s-$","%1%2"..interface.version.."%3"),next_line and"\n"or"")
+io.write("version="..interface.version..",",next_line and"\n"or"")
 elseif code_line:find("%s-renewed%s-=%s-.-%s-,%s-$")==1 then
-io.write(code_line:gsub("%s-(renewed)%s-(=)%s-.-%s-(,)%s-$","%1%2"..interface.renewed.."%3"),next_line and"\n"or"")
+io.write("renewed="..interface.renewed..",",next_line and"\n"or"")
 elseif code_line:find("%s-local%s-status%s-=%s-\"%s-.-%s-\"%s-;%s-$")==1 then
-io.write(code_line:gsub("%s-(local)%s-(status)%s-(=)%s-(\")%s-.-%s-(\")%s-(;)%s-$","%1 %2%3%4"..status.."%5%6"),next_line and"\n"or"")
+io.write('local status="'..status..'";',next_line and"\n"or"")
 elseif code_line:find("%s-local%s-digest%s-=%s-.-%s-;%s-$")==1 then
-io.write(code_line:gsub("%s-(local)%s-(digest)%s-(=)%s-.-%s-(;)%s-$","%1 %2%3"..household_sum.."%4"),next_line and"\n"or"")
+io.write("local digest="..household_sum..";",next_line and"\n"or"")
 else
 io.write(code_line,next_line and"\n"or"")
 end
 end
 code_line=next_line
 until not next_line
-io.close()
+io.output():close()
 end
 end
-io.input(find_self):close()
+io.input(standard_handle):close()
 status=cstatus
 end
 
@@ -5376,4 +5745,3 @@ end
 
 
 return interface
---range[2][15]
