@@ -1,4 +1,3 @@
---range[6][18]
 local function replicate(object,touched,layer)
 touched,layer=touched or{},layer or 1
 if type(object)~="table"then
@@ -2237,24 +2236,24 @@ print("No difference found!")
 else
 for idx,k2,v2 in table_Player(compare2,{key_word=false,stateless=true})do
 if compare1[k2] == nil then
-result = k2.." in "..compare2.absolute_path.." unfound in "..compare1.absolute_path
+result = k2.." in "..compare2.root_path.." unfound in "..compare1.root_path
 print(result)
 table.insert(results,result)
 end
 end
 for idx1,k1,v1 in table_Player(compare1,{key_word=false,stateless=true})do
 if compare2[k1] == nil then
-result = k1.." in "..compare1.absolute_path.." unfound in "..compare2.absolute_path
+result = k1.." in "..compare1.root_path.." unfound in "..compare2.root_path
 print(result)
 table.insert(results,result)
 elseif compare2[k1] ~= v1 then
 if type(compare2[k1]) ~= type(v1)then
 if type(v1) == "number"then
-result = k1.." in "..compare1.absolute_path.." is a directory!"
+result = k1.." in "..compare1.root_path.." is a directory!"
 print(result)
 table.insert(results,result)
 elseif type(compare2[k1]) == "number"then
-result = k1.." in "..compare2.absolute_path.." is a directory!"
+result = k1.." in "..compare2.root_path.." is a directory!"
 print(result)
 table.insert(results,result)
 end
@@ -2264,7 +2263,7 @@ for idx2,k2,v2 in table_Player(compare2,{key_word=false,stateless=true})do
 if type(v1) == type(v2) and type(v1) == "table"then
 if v1.contentsum == v2.contentsum then
 if k1 ~= k2 then
-result = "Oddly enough, "..k1.." in "..compare1.absolute_path.." and "..k2.." in "..compare2.absolute_path.." are in fact identical!"
+result = "Oddly enough, "..k1.." in "..compare1.root_path.." and "..k2.." in "..compare2.root_path.." are in fact identical!"
 print(result)
 table.insert(results,result)
 end
@@ -2280,7 +2279,7 @@ end
 end
 end
 if identical < 1 then
-result = "No match found for line "..idx1.." from "..k1.." of "..compare1.absolute_path.." in "..k2.." of "..compare2.absolute_path.."!"
+result = "No match found for line "..idx1.." from "..k1.." of "..compare1.root_path.." in "..k2.." of "..compare2.root_path.."!"
 print(result)
 table.insert(results,result)
 end
@@ -2290,7 +2289,7 @@ break
 end
 end
 for k,v in next,pattern_MisAlign(captures,1,sieve,#v1)do
-result = "Lines from "..k.." to "..v[1].." in "..k1.." of "..compare1.absolute_path.." and lines from "..k-v[2].." to "..v[1]-v[2].." in "..k2.." of "..compare2.absolute_path.." have been misaligned!"
+result = "Lines from "..k.." to "..v[1].." in "..k1.." of "..compare1.root_path.." and lines from "..k-v[2].." to "..v[1]-v[2].." in "..k2.." of "..compare2.root_path.." have been misaligned!"
 print(result)
 table.insert(results,result)
 end
@@ -2306,7 +2305,7 @@ end
 end
 end
 if identical < 1 then
-result = "No match found for line "..idx2.." from "..k2.." of "..compare2.absolute_path.." in "..k1.." of "..compare1.absolute_path.."!"
+result = "No match found for line "..idx2.." from "..k2.." of "..compare2.root_path.." in "..k1.." of "..compare1.root_path.."!"
 print(result)
 table.insert(results,result)
 end
@@ -2316,7 +2315,7 @@ break
 end
 end
 for k,v in next,pattern_MisAlign(captures,1,sieve,#v2)do
-result = "Lines from "..k.." to "..v[1].." in "..k2.." of "..compare1.absolute_path.." and lines from "..k-v[2].." to "..v[1]-v[2].." in "..k1.." of "..compare2.absolute_path.." have been misaligned!"
+result = "Lines from "..k.." to "..v[1].." in "..k2.." of "..compare1.root_path.." and lines from "..k-v[2].." to "..v[1]-v[2].." in "..k1.." of "..compare2.root_path.." have been misaligned!"
 print(result)
 table.insert(results,result)
 end
@@ -3343,13 +3342,11 @@ consolidate_File.__index=consolidate_File
 debug.setmetatable(consolidate_File,consolidate_File)
 
 
---range[6][15]
 local interface={
-version=1.3515625,
-renewed=20261003,
-["Pointers in Practice"]="Deeming certain parameters tables or refering to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-invoke time."
---range[3][18]
-,replicate=replicate,
+version=1.3828125,
+renewed=20261007,
+["Pointers in Practice"]="Deeming certain parameters tables or refering to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-invoke time.",
+replicate=replicate,
 zip=zip,
 comp_Factory=comp_Factory,
 binary_Search=binary_Search,
@@ -3370,14 +3367,13 @@ dimensional_Animator=dimensional_Animator,
 plot_Pixels=plot_Pixels,
 directory_Contrast=directory_Contrast,
 consolidate_File=consolidate_File
---range[3][15]
 }
 
 
 --a few declarations:
 do
 local status="ready for run";
-local digest=-1540464406403281290;
+local digest=4215989936413940436;
 local required_name,find_self,where=...
 if os.getenv("ANDROID_ROOT")=="/system"then
 where=find_self:match("^(.-/)[^/]+$")
@@ -3575,10 +3571,10 @@ option=nil
 end
 if type(object)=="number"or type(object)=="boolean"or object==nil then
 return tostring(object)
-elseif type(object)=="table"or(type(object)=="userdata"and(debug.getmetatable(object)or{}).__name=="dual_Capable_Map")then
-local depth,traversal,how,who,whence,which,gen_func,invar_state,k,v=1,{},{},{}
+elseif type(object)=="table"or(type(object)=="userdata"and tostring(object):find("dual_Capable_Map")==1)then
+local depth,traversal,how,who,whence,which,gen_func,k,v=1,{},{}
 if option then
-whence,which=object,true
+who,whence,which={},object,true
 else
 whence,which={},{}
 end
@@ -3588,7 +3584,6 @@ assembler[1+#assembler]=("%q"):format(tostring(object).." - loophole patch")
 depth=depth-1
 object=table.remove(traversal)
 gen_func=table.remove(how)
-invar_state=table.remove(who)
 k=table.remove(whence)
 if which[1+depth]~=nil then
 v=which[1+depth]
@@ -3610,18 +3605,18 @@ which=true
 goto value_processed
 end
 assembler[1+#assembler]=option and"local "..serialised[object].."=require(module_name).c_UpBinds.dual_Capable_Map{\n"or"{\n"
-gen_func,invar_state=pairs(object)
+gen_func=pairs(object)
 ::next_pair::
-k,v=gen_func(invar_state,k)
+k,v=gen_func(object,k)
 if k==nil then
-if #assembler>1 then
+if #assembler>1 and assembler[#assembler-1]==","then
 table.remove(assembler,#assembler-1)
 end
 goto end_of_object
 end
 assembler[1+#assembler]=indent_char:rep(depth)
 assembler[1+#assembler]="["
-if type(k)=="table"or(type(k)=="userdata"and(debug.getmetatable(k)or{}).__name=="dual_Capable_Map")then
+if type(k)=="table"or(type(k)=="userdata"and tostring(k):find("dual_Capable_Map")==1)then
 if option then
 if not serialised[k]then
 traversal[1+#traversal]=k
@@ -3633,7 +3628,6 @@ object=k
 if not option then
 depth=1+depth
 how[1+#how]=gen_func
-who[1+#who]=invar_state
 whence[1+#whence]=k
 k=nil
 which[depth]=v
@@ -3644,7 +3638,7 @@ assembler[1+#assembler]=serialise(k,option,indent_char,delve_guard,serialised,as
 end
 ::key_processed::
 assembler[1+#assembler]="]="
-if type(v)=="table"or(type(v)=="userdata"and(debug.getmetatable(v)or{}).__name=="dual_Capable_Map")then
+if type(v)=="table"or(type(v)=="userdata"and tostring(v):find("dual_Capable_Map")==1)then
 if option then
 if not serialised[v]then
 traversal[1+#traversal]=v
@@ -3656,7 +3650,6 @@ object=v
 if not option then
 depth=1+depth
 how[1+#how]=gen_func
-who[1+#who]=invar_state
 whence[1+#whence]=k
 k=nil
 end
@@ -3690,9 +3683,8 @@ else
 depth=depth-1
 object=table.remove(traversal)
 gen_func=table.remove(how)
-invar_state=table.remove(who)
 k=table.remove(whence)
-if depth>0 and object and gen_func and invar_state then
+if depth>0 and object and gen_func then
 if which[1+depth]~=nil then
 v=which[1+depth]
 which[1+depth]=nil
@@ -3711,8 +3703,8 @@ return(table.concat(assembler):gsub("%s+",""))
 end
 return table.concat(assembler)
 end
-local function meta_Hash(self,threshold,hashed,layer,sum,nb,xy,imba)
-threshold,hashed,layer,sum=math.type(threshold)=="integer"and threshold or 1,type(hashed)=="table"and hashed or(type(threshold)=="table"and threshold or{}),layer or 1,sum or 0
+local function meta_Hash(object,delve_guard,hashed,depth,sum,nb,xy,imba)
+delve_guard,hashed,depth,sum=math.type(delve_guard)=="integer"and delve_guard or 1,type(hashed)=="table"and hashed or(type(delve_guard)=="table"and delve_guard or{}),depth or 1,sum or 0
 nb=nb or function(n,byte)return byte+n*(n+byte-1)end --before Hornor optimisation: n^2-n+n*byte+byte
 xy=xy or function(x,y)return x^2+y*(x+y*(x+y-1))end --before Hornor optimisation: y^3-y^2+x*y^2+x*y+x^2
 imba=imba or function(ref,content)
@@ -3731,63 +3723,61 @@ power=1+power
 end
 return sign*math.ceil(larger/smaller^power)*(1+(larger-1)%smaller)
 end
-if self==nil then
+if object==nil then
 return 0+sum
-elseif type(self)=="boolean"then
-if self==true then
+elseif type(object)=="boolean"then
+if object==true then
 return 691+sum
-elseif self==false then
+elseif object==false then
 return 593+sum
 end
-elseif math.type(self)=="integer"then
-return self+sum
-elseif type(self)=="string"then
+elseif math.type(object)=="integer"then
+return object+sum
+elseif type(object)=="string"then
 local x,y,n=0,1,0
-while n<#self do
+while n<#object do
 x,n=1+x,1+n
-sum=math.tointeger(nb(math.tointeger(xy(x,y)),self:byte(n)))+sum
-if self:byte(n)==10 then
+sum=math.tointeger(nb(math.tointeger(xy(x,y)),object:byte(n)))+sum
+if object:byte(n)==10 then
 x,y=0,1+y
 end
 end
 return sum
-elseif type(self)=="function"and debug.getinfo(self,"S").what~="C"then
-return meta_Hash(self:dump(),threshold,hashed,1+layer,sum,nb,xy,imba)
-elseif io.type(self)=="file"then
+elseif type(object)=="function"and debug.getinfo(object,"S").what~="C"then
+return meta_Hash(object:dump(),delve_guard,hashed,1+depth,sum,nb,xy,imba)
+elseif io.type(object)=="file"then
 local y=0
-for file_line in self:lines()do
+for file_line in object:lines()do
 y=1+y
 local x,linesum=0,0
 while x<#file_line do
 x=1+x
-if type(layer)=="string"then
+if type(depth)=="string"then
 linesum=math.tointeger(nb(x,file_line:byte(x)))+linesum
 end
 sum=math.tointeger(nb(math.tointeger(xy(x,y)),file_line:byte(x)))+sum
 end
-if type(layer)=="string"then
-hashed[layer][y]=linesum
+if type(depth)=="string"then
+hashed[depth][y]=linesum
 end
 end
-self:seek("set")
-if type(layer)=="string"then
+object:seek("set")
+if type(depth)=="string"then
 return y,sum
 end
 return sum
-elseif type(self)=="table"then
-if hashed[self]and hashed[self]<layer then
-if threshold+hashed[self]<layer then
-return meta_Hash(type(self).." - loophole patch",threshold,hashed,1+layer,sum,nb,xy,imba)
+elseif type(object)=="table"or(type(object)=="userdata"and tostring(object):find("dual_Capable_Map")==1)then
+if hashed[object]and delve_guard+hashed[object]<depth then
+return meta_Hash(type(object).." - loophole patch",delve_guard,hashed,1+depth,sum,nb,xy,imba)
+elseif not hashed[object]then
+hashed[object]=depth
 end
-else
-hashed[self]=layer
-end
-for k,v in next,self do
-sum=math.tointeger(imba(meta_Hash(k,threshold,hashed,1+layer,nil,nb,xy,imba),meta_Hash(v,threshold,hashed,1+layer,nil,nb,xy,imba)))+sum
+for k,v in pairs(object)do
+sum=math.tointeger(imba(meta_Hash(k,delve_guard,hashed,1+depth,nil,nb,xy,imba),meta_Hash(v,delve_guard,hashed,1+depth,nil,nb,xy,imba)))+sum
 end
 return math.tointeger(imba(2969,sum==0 and 2971 or sum))
 end
-return meta_Hash(tostring(self),threshold,hashed,1+layer,sum,nb,xy,imba)
+return meta_Hash(tostring(object),delve_guard,hashed,1+depth,sum,nb,xy,imba)
 end
 local function directory_CheckSum(directory,location,namecontent)
 namecontent=namecontent or function(namesum,contentsum)
@@ -3806,18 +3796,18 @@ power=1+power
 end
 return sign*math.ceil(larger/smaller^power)*(1+(larger-1)%smaller)
 end
-local sum,compare=0,{absolute_path=tostring(location)}
+local sum,compare=0,{root_path=tostring(location)}
 if io.type(directory)=="file"then
 if os.getenv("ANDROID_ROOT")=="/system"then
 local first_readout=directory:read()
-if first_readout~=compare.absolute_path then
-error("Incorrect Usage: First Readout - "..first_readout.." - Must Match Second Argument - "..compare.absolute_path.."!")
+if first_readout~=compare.root_path then
+error("Incorrect Usage: First Readout - "..first_readout.." - Must Match Second Argument - "..compare.root_path.."!")
 end
 end
 for subdir in directory:lines()do
-local relative_path=subdir:match("^"..compare.absolute_path.."(.+)$")
+local relative_path=subdir:match("^"..compare.root_path.."(.+)$")
 if not relative_path then
-warn("Current item - ",subdir," - does not belong to the directory undergoing checksum - ",compare.absolute_path,"!")
+warn("Current item - ",subdir," - does not belong to the directory undergoing checksum - ",compare.root_path,"!")
 goto next_item
 end
 local namesum,skip=meta_Hash(relative_path)
@@ -3842,10 +3832,10 @@ end
 end
 directory:close()
 elseif type(directory)=="string"then
-if directory:find(compare.absolute_path)~=1 then
-error("Incorrect Usage: Second Argument - "..compare.absolute_path.." - Must Be a PreFix of First Argument - "..directory.."!")
+if directory:find(compare.root_path)~=1 then
+error("Incorrect Usage: Second Argument - "..compare.root_path.." - Must Be a PreFix of First Argument - "..directory.."!")
 end
-local relative_path=directory:match("^"..compare.absolute_path.."(.+)$")
+local relative_path=directory:match("^"..compare.root_path.."(.+)$")
 local namesum,skip=meta_Hash(relative_path)
 if os.getenv("ANDROID_ROOT")=="/system"then
 skip=io.popen('find "'..directory..'" -type d 2>/dev/null'):read()
@@ -3869,14 +3859,14 @@ print([===[Process Finished - Here You Are:
 ]===]..sum)
 return sum,compare
 end
-local function init_Dbg(object,inverse_map_key,traversed,path_track,uniform_metatable)
-traversed,path_track,uniform_metatable=traversed or{[debug]=true,[io]=true,[package]=true,[table]=true},path_track or{},uniform_metatable or{}
+local function init_Dbg(object,traversed,path_track,across_recursion)
+traversed,path_track,across_recursion=traversed or{[debug]=true,[io]=true,[package]=true,[table]=true},path_track or{},across_recursion or{}
 if type(object)=="function"and not rawequal(object,next)and not rawequal(object,print)and not rawequal(object,xpcall)and not rawequal(object,init_Dbg)then
-local isclass,snapshot=path_track[#path_track]=='["__index"]'or path_track[#path_track]=='["__newindex"]',table.concat(path_track)
-if isclass or not uniform_metatable.cache__call then
-uniform_metatable.__call=function(self,...)
+local isclass,snapshot,__call_precursor=path_track[#path_track]=='["__index"]'or path_track[#path_track]=='["__newindex"]',table.concat(path_track)
+if isclass or not across_recursion.cache__call then
+__call_precursor=function(self,...)
 local call_stacks
-if not uniform_metatable.stack_delve_depth then
+if not across_recursion.stack_delve_depth then
 call_stacks={}
 debug.sethook(function(event,line_number)
 if event~="tail call"then
@@ -3887,29 +3877,29 @@ end
 end
 end,"c")
 end
-uniform_metatable.stack_delve_depth=1+(uniform_metatable.stack_delve_depth or 0)
-print("About to Call Function: ",isclass and snapshot or self.name)
+across_recursion.stack_delve_depth=1+(across_recursion.stack_delve_depth or 0)
+print("About to Call Function: ",isclass and snapshot or tostring(self))
 local packed_args=isclass and table.pack(self,...)or table.pack(...)
-local call_results=table.pack(xpcall(isclass and object or self.func,function(errobj)
-return serialise(errobj,"\t").."\n"..debug.traceback(uniform_metatable.stack_delve_depth.."\t"..(isclass and snapshot or self.name),3)
+local call_results=table.pack(xpcall(isclass and object or rawget(debug.getmetatable(self),"__func"),function(errobj)
+return serialise(errobj,"\t").."\n"..debug.traceback(across_recursion.stack_delve_depth.."\t"..(isclass and snapshot or tostring(self)),3)
 end,table.unpack(packed_args,1,packed_args.n)))
-print("Exited from Function: ",isclass and snapshot or self.name)
-uniform_metatable.stack_delve_depth=uniform_metatable.stack_delve_depth-1
+print("Exited from Function: ",isclass and snapshot or tostring(self))
+across_recursion.stack_delve_depth=across_recursion.stack_delve_depth-1
 if call_results[1]then
-if call_stacks and uniform_metatable.stack_delve_depth<=0 then
+if call_stacks and across_recursion.stack_delve_depth<=0 then
 debug.sethook()
-uniform_metatable.stack_delve_depth=nil
+across_recursion.stack_delve_depth=nil
 end
 return table.unpack(call_results,2,call_results.n)
 else
-if call_stacks and uniform_metatable.stack_delve_depth<=0 then
+if call_stacks and across_recursion.stack_delve_depth<=0 then
 debug.sethook()
 local new_stacks={}
 for _,v in next,call_stacks do
 new_stacks[1+#new_stacks]=v
 end
 call_stacks,new_stacks=new_stacks,nil
-call_stacks[1+#call_stacks]=debug.getinfo(isclass and object or self.func,"S")
+call_stacks[1+#call_stacks]=debug.getinfo(isclass and object or rawget(debug.getmetatable(self),"__func"),"S")
 local line_number=0
 io.output(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
 for code_line in io.input(find_self):lines()do
@@ -3923,43 +3913,44 @@ end
 end
 io.input():close()
 io.output():close()
-uniform_metatable.stack_delve_depth=nil
+across_recursion.stack_delve_depth=nil
 end
 error(call_results[2],0)
 end
 end
 if not isclass then
-uniform_metatable.cache__call=uniform_metatable.__call
+across_recursion.cache__call=__call_precursor
 end
 else
-uniform_metatable.__call=uniform_metatable.cache__call
+__call_precursor=across_recursion.cache__call
 end
 if isclass then
-return uniform_metatable.__call
+return __call_precursor
 end
-return debug.setmetatable({name=snapshot,func=object},uniform_metatable)
-elseif type(object)=="table"then
+local decorated={__name=snapshot,__func=object,__call=__call_precursor}
+return debug.setmetatable(decorated,decorated)
+elseif type(object)=="table"or(type(object)=="userdata"and tostring(object):find("dual_Capable_Map")==1)then
 if traversed[object]then
-return tostring(object).." - loophole patch"
+return nil
 else
 traversed[object]=true
 end
-for k,v in next,object do
-if type(k)=="table"then
-path_track[1+#path_track]=type(object[inverse_map_key])=="table"and"["..(type(inverse_map_key)=="string"and("%q"):format(inverse_map_key)or tostring(inverse_map_key)).."].merged["..(type(object[inverse_map_key].inverse[k])=="string"and("%q"):format(object[inverse_map_key].inverse[k])or tostring(object[inverse_map_key].inverse[k])).."]"or"["..tostring(k).."]"
-init_Dbg(k,inverse_map_key,traversed,path_track,uniform_metatable)
+for k,v in pairs(object)do
+if type(k)=="table"or(type(k)=="userdata"and tostring(k):find("dual_Capable_Map")==1)then
+local key
+if type(object)=="userdata"and tostring(object):find("dual_Capable_Map")==1 then
+key=object:lookUp(v)
+end
+path_track[1+#path_track]=type(object)=="table"and"["..tostring(k).." key]"or"["..(type(v)=="string"and("%q"):format(v)or tostring(v)).."]"..(type(key)=="table"and key[select(2,object())]=="merged_keys"and"["..key.inverse_merged_keys[k].."]"or"")
+init_Dbg(k,traversed,path_track,across_recursion)
 path_track[#path_track]=nil
 end
-if type(v)=="function"then
+if type(v)=="function"or type(v)=="table"or(type(v)=="userdata"and tostring(v):find("dual_Capable_Map")==1)then
 path_track[1+#path_track]="["..(type(k)=="string"and("%q"):format(k)or tostring(k)).."]"
-local decorated=init_Dbg(v,inverse_map_key,traversed,path_track,uniform_metatable)
+local decorated=init_Dbg(v,traversed,path_track,across_recursion)
 if decorated then
-rawset(object,k,decorated)
+object[k]=decorated
 end
-path_track[#path_track]=nil
-elseif type(v)=="table"then
-path_track[1+#path_track]="["..(type(k)=="string"and("%q"):format(k)or tostring(k)).."]"
-init_Dbg(v,inverse_map_key,traversed,path_track,uniform_metatable)
 path_track[#path_track]=nil
 end
 end
@@ -4035,8 +4026,8 @@ end
 end
 package.path=cache_package_path
 return module_instance]===]):gsub("\n","n\\\n"),("%q"):format([===[if math.type(task_serial)=='integer'then
-::relocated::
-print('Task #'..task_serial..': Please Enter Directory to Relocate or Globals to Serialise, Either to Proceed UnDisrupted or QUIT to Opt Out...')
+::redirected::
+print('Task #'..task_serial..': Please Enter Directory to Redirect to or Globals to Serialise, Either to Proceed UnDisrupted or QUIT to Opt Out...')
 local directives,quit,handle=io.input(io.stdin):read()
 if directives=='QUIT'then
 quit=true
@@ -4059,8 +4050,8 @@ end
 end
 if redirectory then
 require(module_name).c_UpBinds.chdir(redirectory)
-print('Working Directory Relocated at '..redirectory..'!')
-goto relocated
+print('Working Directory Redirected to '..redirectory..'!')
+goto redirected
 end
 end
 for token in directives:gmatch('%S+')do
@@ -4144,9 +4135,9 @@ io.output(where..keystone(interface.version,interface.renewed)..keystone(interfa
 lua_pop(L,1);\
 goto LABEL;\
 }while(0)
-#define RAISE_APPROPRIATE_LUA_ERROR(OPTIONAL_FSTR) do{\
+#define RAISE_APPROPRIATE_LUA_ERROR(OCCASIONAL_FMSTR) do{\
 if(lua_isstring(L,-1))\
-luaL_error(L,OPTIONAL_FSTR,luaL_checkstring(L,-1));\
+luaL_error(L,OCCASIONAL_FMSTR,lua_tostring(L,-1));\
 else \
 lua_error(L);\
 }while(0)
@@ -4154,15 +4145,17 @@ lua_error(L);\
 lua_settop(L,HIND_TOP);\
 continue;\
 })
-#define PCALL_ERRH(NARGS,NRESULTS,ERRH,PREPEND_FSTR,ON_ERR,DICTATION) ({\
+#define PCALL_ERRH(NARGS,NRESULTS,ERRH,PREPEND_FMSTR,ON_ERR,DICTATION) ({\
 if(lua_pcall(L,NARGS,NRESULTS,ERRH)!=LUA_OK){\
-printf(PREPEND_FSTR,lua_isstring(L,-1)?luaL_checkstring(L,-1):luaL_typename(L,-1));\
+if(!lua_isstring(L,-1))\
+fprintf(stderr,PREPEND_FMSTR,luaL_typename(L,-1));\
 ON_ERR(DICTATION);\
 }\
 })
-#define DOSTR_ERRH(SCRIPT,PREPEND_FSTR,ON_ERR,DICTATION) ({\
+#define DOSTR_ERRH(SCRIPT,PREPEND_FMSTR,ON_ERR,DICTATION) ({\
 if(luaL_dostring(L,SCRIPT)!=LUA_OK){\
-printf(PREPEND_FSTR,lua_isstring(L,-1)?luaL_checkstring(L,-1):luaL_typename(L,-1));\
+if(!lua_isstring(L,-1))\
+fprintf(stderr,PREPEND_FMSTR,luaL_typename(L,-1));\
 ON_ERR(DICTATION);\
 }\
 })
@@ -4172,351 +4165,204 @@ int ref;
 int ivrs_ref;
 };
 
-int deFragment(lua_State *L){
-lua_settop(L,2);
-lua_pushvalue(L,lua_upvalueindex(1));
-lua_rawget(L,-3);
-lua_createtable(L,luaL_optinteger(L,-2,lua_rawlen(L,-3)),5);
-lua_pushnil(L);
-while(lua_next(L,-5)){
-if(lua_isinteger(L,-2))
-lua_rawseti(L,-3,1+lua_rawlen(L,-3));
-else
-lua_pop(L,1);
-}
-lua_pushinteger(L,lua_rawlen(L,-1));
-if(!lua_isnil(L,-4)&& !lua_rawequal(L,-4,-1))
-printf("Internal Inconsistency Occurred between Total Element Counts %lld Recorded and %lld Actual!",luaL_optinteger(L,-4,lua_rawlen(L,-5)),luaL_optinteger(L,-1,lua_rawlen(L,-2)));
-lua_setfield(L,-2,"t");
-lua_pushvalue(L,lua_upvalueindex(1));
-lua_rotate(L,-3,-1);
-lua_rawset(L,-3);
-lua_pushinteger(L,1);
-lua_setfield(L,-2,"m");
-lua_pushinteger(L,1+lua_rawlen(L,-1));
-lua_setfield(L,-2,"p");
-lua_pushinteger(L,lua_rawlen(L,-1));
-lua_setfield(L,-2,"n");
-return 1;
-}
-
 int set_Field(lua_State *L){
+if(lua_rawequal(L,lua_upvalueindex(1),1))
+goto dummy_userdata;
 lua_settop(L,3);
 struct ref_couple *refs=luaL_checkudata(L,1,"dual_Capable_Map");
 lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ref);
 lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ivrs_ref);
-if(lua_pushvalue(L,2),lua_rawget(L,-3),!lua_rawequal(L,-1,-4)){
+if(lua_pushvalue(L,2),lua_rawget(L,-3),!lua_rawequal(L,-4,-1)){
+_Bool recurse=1;
 if(lua_isnil(L,-1)){
 lua_pop(L,1);
 goto clean_is_unnecessary;
-}else if((lua_pushvalue(L,-1),lua_rawget(L,5))==LUA_TTABLE &&(lua_pushvalue(L,lua_upvalueindex(1)),lua_rawget(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"merged_keys"),lua_rawequal(L,-2,-1))){
-lua_getfield(L,-3,"m");
-lua_Integer m=luaL_optinteger(L,-1,1);
-lua_getfield(L,-4,"p");
-lua_Integer p=luaL_optinteger(L,-1,1+lua_rawlen(L,-5));
-lua_getfield(L,-5,"t");
-lua_Integer t=luaL_optinteger(L,-1,lua_rawlen(L,-6));
-lua_getfield(L,-6,"n");
-lua_Integer n=luaL_optinteger(L,-1,lua_rawlen(L,-7));
-t--;
-for(int idx=m;idx<=n;idx++){
-lua_rawgeti(L,-7,idx);
-if(!lua_isnil(L,-1)){
-if(t>1?lua_rawequal(L,-1,2):!lua_rawequal(L,-1,2)){
-if(t>1){
-lua_pushnil(L);
-lua_rawseti(L,-9,idx);
-if(idx<=m){
-m=1+idx;
-lua_pushinteger(L,m);
-lua_setfield(L,-9,"m");
-}
-if(idx<p){
-p=idx;
-lua_pushinteger(L,p);
-lua_setfield(L,-9,"p");
-}
-if(idx>=n){
-n=idx-1;
-lua_pushinteger(L,n);
-lua_setfield(L,-9,"n");
-}
-}
-break;
-}
-}
-lua_pop(L,1);
-}
-if(n>=27 && t<=0.65*n){
-lua_settop(L,7);
-lua_pushvalue(L,-2);
-lua_getfield(L,1,"deFragment");
-lua_rotate(L,-3,-1);
-lua_pushinteger(L,t);
-PCALL_ERRH(2,1,0,"Error Consolidating Merge Table: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Consolidating Merge Table: %s!");
-lua_rawset(L,5);
-}else if(t>1){
-lua_settop(L,7);
-lua_pushinteger(L,t);
-lua_setfield(L,-2,"t");
-lua_pop(L,1);
-}else{
-lua_copy(L,6,-2);
-lua_rawset(L,5);
-lua_settop(L,6);
-}
-}else{
-lua_settop(L,6);
-lua_pushvalue(L,-1);
-lua_pushnil(L);
-lua_rawset(L,5);
-}
-if(lua_istable(L,-1)|| luaL_testudata(L,-1,"dual_Capable_Map")|| lua_istable(L,2)|| luaL_testudata(L,2,"dual_Capable_Map")){
-lua_pushvalue(L,lua_upvalueindex(1));
-lua_replace(L,-2);
-if((lua_pushvalue(L,-1),lua_rawget(L,4))==LUA_TTABLE &&(lua_pushvalue(L,-2),lua_rawget(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"collected_nodes"),lua_rawequal(L,-2,-1))){
-lua_getfield(L,-3,"m");
-lua_Integer m=luaL_optinteger(L,-1,1);
-lua_getfield(L,-4,"p");
-lua_Integer p=luaL_optinteger(L,-1,1+lua_rawlen(L,-5));
-lua_getfield(L,-5,"t");
-lua_Integer t=luaL_optinteger(L,-1,lua_rawlen(L,-6));
-lua_getfield(L,-6,"n");
-lua_Integer n=luaL_optinteger(L,-1,lua_rawlen(L,-7));
-t--;
-for(int idx=m;idx<=n;idx++){
-lua_rawgeti(L,-7,idx);
-if(!lua_isnil(L,-1)){
-if(t>1?lua_rawequal(L,-1,2):!lua_rawequal(L,-1,2)){
-if(t>1){
-lua_pushnil(L);
-lua_rawseti(L,-9,idx);
-if(idx<=m){
-m=1+idx;
-lua_pushinteger(L,m);
-lua_setfield(L,-9,"m");
-}
-if(idx<p){
-p=idx;
-lua_pushinteger(L,p);
-lua_setfield(L,-9,"p");
-}
-if(idx>=n){
-n=idx-1;
-lua_pushinteger(L,n);
-lua_setfield(L,-9,"n");
-}
-}
-break;
-}
-}
-lua_pop(L,1);
-}
-if(n>=27 && t<=0.65*n){
-lua_settop(L,7);
-lua_getfield(L,1,"deFragment");
+}else if((lua_pushvalue(L,-1),lua_rawget(L,5))==LUA_TTABLE &&(lua_pushvalue(L,lua_upvalueindex(2)),lua_rawget(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"merged_keys"),lua_rawequal(L,-2,-1))){
+lua_pushliteral(L,"inverse_");
 lua_insert(L,-2);
-lua_pushinteger(L,t);
-PCALL_ERRH(2,1,0,"Error Consolidating Jump Table: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Consolidating Jump Table: %s!");
-lua_rawset(L,4);
-}else if(t>1){
-lua_settop(L,7);
-lua_pushinteger(L,t);
-lua_setfield(L,-2,"t");
-}else{
+lua_concat(L,2);
+lua_rawget(L,-3);
+lua_pushvalue(L,2);
+lua_rawget(L,-2);
+lua_pushvalue(L,2);
+lua_pushnil(L);
+lua_rawset(L,-4);
+lua_pushnil(L);
+lua_next(L,-3);
+lua_copy(L,-2,-1);
+if(!lua_next(L,-4)){
 lua_copy(L,6,-2);
-lua_rawset(L,4);
-}
+lua_rawset(L,5);
+}else
+luaL_unref(L,7,luaL_checkinteger(L,-4));
 }else{
+lua_pushnil(L);
+lua_copy(L,6,-2);
+lua_rawset(L,5);
+}
+if((lua_pushvalue(L,lua_upvalueindex(2)),lua_gettable(L,1))==LUA_TSTRING &&(lua_pushliteral(L,"collected_nodes"),lua_rawequal(L,-2,-1)))
+recurse=0;
 lua_settop(L,6);
+if(recurse &&(lua_istable(L,-1)|| luaL_testudata(L,-1,"dual_Capable_Map")|| lua_istable(L,2)|| luaL_testudata(L,2,"dual_Capable_Map"))){
+if((lua_pushvalue(L,lua_upvalueindex(2)),lua_rawget(L,4))==LUA_TUSERDATA && luaL_testudata(L,-1,"dual_Capable_Map")&&(lua_pushvalue(L,lua_upvalueindex(2)),lua_gettable(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"collected_nodes"),lua_rawequal(L,-2,-1))){
+lua_pushvalue(L,2);
+lua_pushnil(L);
+lua_settable(L,-5);
+lua_getglobal(L,"pairs");
+lua_rotate(L,-4,-1);
+PCALL_ERRH(1,3,0,"Error Invoking Generator Factory: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Invoking Generator Factory: %s!");
+PCALL_ERRH(2,1,0,"Error Invoking Generator Function: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Invoking Generator Function: %s!");
+if(lua_isnil(L,-1)){
+lua_pushvalue(L,lua_upvalueindex(2));
 lua_pushnil(L);
 lua_rawset(L,4);
+}
 }
 }
 lua_settop(L,5);
 clean_is_unnecessary:
 if(!lua_isnil(L,3)){
-lua_pushvalue(L,lua_upvalueindex(1));
-if((lua_pushvalue(L,3),lua_rawget(L,5))==LUA_TTABLE &&(lua_pushvalue(L,-2),lua_rawget(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"merged_keys"),lua_rawequal(L,-2,-1))){
-lua_getfield(L,-3,"m");
-lua_Integer m=luaL_optinteger(L,-1,1);
-lua_getfield(L,-4,"p");
-lua_Integer p=luaL_optinteger(L,-1,1+lua_rawlen(L,-5));
-lua_getfield(L,-5,"t");
-lua_Integer t=luaL_optinteger(L,-1,lua_rawlen(L,-6));
-lua_getfield(L,-6,"n");
-lua_Integer n=luaL_optinteger(L,-1,lua_rawlen(L,-7));
-for(int idx=p;idx<=1+n;idx++){
-lua_rawgeti(L,-7,idx);
-if(lua_isnil(L,-1)){
-lua_pushvalue(L,2);
-lua_rawseti(L,-9,idx);
-if(idx<m){
-m=idx;
-lua_pushinteger(L,m);
-lua_setfield(L,-9,"m");
-}
-if(idx<=p){
-p=1+idx;
-lua_pushinteger(L,p);
-lua_setfield(L,-9,"p");
-}
-if(idx>n){
-n=idx;
-lua_pushinteger(L,n);
-lua_setfield(L,-9,"n");
-}
-break;
-}
-lua_pop(L,1);
-}
-lua_settop(L,7);
-t++;
-if(n>=27 && t<=0.65*n){
-lua_getfield(L,1,"deFragment");
+if((lua_pushvalue(L,3),lua_rawget(L,5))==LUA_TTABLE &&(lua_pushvalue(L,lua_upvalueindex(2)),lua_rawget(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"merged_keys"),lua_rawequal(L,-2,-1))){
+lua_pushliteral(L,"inverse_");
 lua_insert(L,-2);
-lua_pushinteger(L,t);
-PCALL_ERRH(2,1,0,"Error Consolidating Merge Table: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Consolidating Merge Table: %s!");
-lua_pushvalue(L,3);
-lua_insert(L,-2);
-lua_rawset(L,5);
-}else{
-lua_pushinteger(L,t);
-lua_setfield(L,-2,"t");
-lua_pop(L,1);
-}
-}else{
-lua_settop(L,7);
-lua_pushvalue(L,3);
-if(lua_isnil(L,-2)){
+lua_concat(L,2);
+lua_rawget(L,-3);
 lua_pushvalue(L,2);
-}else{
-lua_createtable(L,2,5);
-lua_pushvalue(L,6);
-lua_pushliteral(L,"merged_keys");
+lua_pushvalue(L,-1);
+lua_pushinteger(L,luaL_ref(L,6));
 lua_rawset(L,-3);
-lua_rotate(L,7,-1);
-lua_rawseti(L,-2,1);
+}else{
+lua_settop(L,6);
+lua_pushvalue(L,3);
+if(lua_isnil(L,-2))
 lua_pushvalue(L,2);
-lua_rawseti(L,-2,2);
-lua_pushinteger(L,1);
-lua_setfield(L,-2,"m");
-lua_pushinteger(L,3);
-lua_setfield(L,-2,"p");
-lua_pushinteger(L,2);
-lua_setfield(L,-2,"t");
-lua_pushinteger(L,2);
-lua_setfield(L,-2,"n");
+else{
+lua_createtable(L,3,2);
+lua_pushvalue(L,lua_upvalueindex(2));
+lua_pushliteral(L,"merged_keys");
+lua_pushliteral(L,"inverse_");
+lua_pushvalue(L,-2);
+lua_concat(L,2);
+lua_insert(L,-3);
+lua_rawset(L,-4);
+lua_createtable(L,0,2);
+lua_rotate(L,6,-1);
+lua_pushvalue(L,-1);
+lua_pushinteger(L,luaL_ref(L,-5));
+lua_rawset(L,-3);
+lua_pushvalue(L,2);
+lua_pushvalue(L,-1);
+lua_pushinteger(L,luaL_ref(L,-5));
+lua_rawset(L,-3);
+lua_rawset(L,-3);
 }
 lua_rawset(L,5);
-lua_settop(L,6);
 }
-if(lua_istable(L,3)|| luaL_testudata(L,3,"dual_Capable_Map")|| lua_istable(L,2)|| luaL_testudata(L,2,"dual_Capable_Map")){
-if((lua_pushvalue(L,-1),lua_rawget(L,4))==LUA_TTABLE &&(lua_pushvalue(L,-2),lua_rawget(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"collected_nodes"),lua_rawequal(L,-2,-1))){
-lua_getfield(L,-3,"m");
-lua_Integer m=luaL_optinteger(L,-1,1);
-lua_getfield(L,-4,"p");
-lua_Integer p=luaL_optinteger(L,-1,1+lua_rawlen(L,-5));
-lua_getfield(L,-5,"t");
-lua_Integer t=luaL_optinteger(L,-1,lua_rawlen(L,-6));
-lua_getfield(L,-6,"n");
-lua_Integer n=luaL_optinteger(L,-1,lua_rawlen(L,-7));
-for(int idx=p;idx<=1+n;idx++){
-lua_rawgeti(L,-7,idx);
-if(lua_isnil(L,-1)){
 lua_pushvalue(L,2);
-lua_rawseti(L,-9,idx);
-if(idx<m){
-m=idx;
-lua_pushinteger(L,m);
-lua_setfield(L,-9,"m");
-}
-if(idx<=p){
-p=1+idx;
-lua_pushinteger(L,p);
-lua_setfield(L,-9,"p");
-}
-if(idx>n){
-n=idx;
-lua_pushinteger(L,n);
-lua_setfield(L,-9,"n");
-}
-break;
-}
-lua_pop(L,1);
-}
-lua_settop(L,7);
-t++;
-if(n>=27 && t<=0.65*n){
-lua_getfield(L,1,"deFragment");
-lua_insert(L,-2);
-lua_pushinteger(L,t);
-PCALL_ERRH(2,1,0,"Error Consolidating Jump Table: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Consolidating Jump Table: %s!");
+lua_pushvalue(L,3);
 lua_rawset(L,4);
+if(recurse &&(lua_pushvalue(L,lua_upvalueindex(2)),lua_gettable(L,1))==LUA_TSTRING &&(lua_pushliteral(L,"collected_nodes"),lua_rawequal(L,-2,-1)))
+recurse=0;
+lua_settop(L,5);
+if(recurse &&(lua_istable(L,3)|| luaL_testudata(L,3,"dual_Capable_Map")|| lua_istable(L,2)|| luaL_testudata(L,2,"dual_Capable_Map"))){
+if((lua_pushvalue(L,lua_upvalueindex(2)),lua_rawget(L,4))==LUA_TUSERDATA && luaL_testudata(L,-1,"dual_Capable_Map")&&(lua_pushvalue(L,lua_upvalueindex(2)),lua_gettable(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"collected_nodes"),lua_rawequal(L,-2,-1))){
+lua_rotate(L,2,-2);
+lua_settable(L,-5);
 }else{
-lua_pushinteger(L,t);
-lua_setfield(L,-2,"t");
-}
-}else{
-lua_settop(L,7);
-if(lua_isnil(L,-1)){
-lua_pushvalue(L,2);
-lua_replace(L,-2);
-}else{
-lua_createtable(L,2,5);
-lua_pushvalue(L,6);
+lua_pushvalue(L,lua_upvalueindex(2));
+lua_pushvalue(L,1);
+lua_createtable(L,0,1);
+lua_pushvalue(L,-3);
 lua_pushliteral(L,"collected_nodes");
 lua_rawset(L,-3);
-lua_rotate(L,7,-1);
-lua_rawseti(L,-2,1);
-lua_pushvalue(L,2);
-lua_rawseti(L,-2,2);
-lua_pushinteger(L,1);
-lua_setfield(L,-2,"m");
-lua_pushinteger(L,3);
-lua_setfield(L,-2,"p");
-lua_pushinteger(L,2);
-lua_setfield(L,-2,"t");
-lua_pushinteger(L,2);
-lua_setfield(L,-2,"n");
-}
-lua_rawset(L,4);
+PCALL_ERRH(1,1,0,"Error Creating Dual Capable Map: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Creating Dual Capable Map: %s!");
+lua_rotate(L,2,-2);
+lua_settable(L,-3);
+lua_rawset(L,2);
 }
 }
-}
-lua_settop(L,5);
+}else{
 lua_rotate(L,-4,2);
 lua_rawset(L,-4);
 }
+}
+dummy_userdata:
 return 0;
 }
 
 int natural_LookUp(lua_State *L){
+if(lua_rawequal(L,lua_upvalueindex(1),1))
+return 0;
 lua_settop(L,2);
 struct ref_couple *refs=luaL_checkudata(L,-2,"dual_Capable_Map");
 lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ref);
 lua_pushvalue(L,-2);
 lua_rawget(L,-2);
-if(lua_istable(L,-1)&& lua_rawequal(L,lua_upvalueindex(1),-3)&&(lua_rotate(L,-3,-1),lua_rawget(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"collected_nodes"),lua_rawequal(L,-2,-1))){
-lua_getfield(L,-5,"deFragment");
-lua_rotate(L,-4,-1);
-PCALL_ERRH(1,1,0,"Error Consolidating Jump Table: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Consolidating Jump Table: %s!");
+if(lua_rawequal(L,lua_upvalueindex(2),-3)&& luaL_testudata(L,-1,"dual_Capable_Map")&&(lua_pushvalue(L,-3),lua_gettable(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"collected_nodes"),lua_rawequal(L,-2,-1))){
+lua_rotate(L,1,-1);
+lua_createtable(L,0,1);
+lua_rotate(L,1,-1);
+lua_pushliteral(L,"collected_nodes");
+lua_rawset(L,-3);
+PCALL_ERRH(1,1,0,"Error Creating Dual Capable Map: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Creating Dual Capable Map: %s!");
+lua_getglobal(L,"pairs");
+lua_rotate(L,-5,-1);
+PCALL_ERRH(1,3,0,"Error Invoking Generator Factory: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Invoking Generator Factory: %s!");
+lua_pushvalue(L,-3);
+lua_pushvalue(L,-3);
+lua_rotate(L,-3,-1);
+next_pair:
+PCALL_ERRH(2,2,0,"Error Invoking Generator Function: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Invoking Generator Function: %s!");
+if(!lua_isnil(L,-2)){
+lua_pushvalue(L,-2);
+lua_insert(L,-2);
+lua_settable(L,-6);
+lua_pushvalue(L,-3);
+lua_pushvalue(L,-3);
+lua_rotate(L,-3,-1);
+goto next_pair;
+}
+lua_pop(L,4);
 return 1;
 }
 lua_settop(L,4);
 return 1;
 }
 
-int LookUp(lua_State *L){
+int lookUp(lua_State *L){
+if(lua_rawequal(L,lua_upvalueindex(1),1))
+return 0;
 lua_settop(L,2);
 struct ref_couple *refs=luaL_checkudata(L,-2,"dual_Capable_Map");
 lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ivrs_ref);
 lua_insert(L,-2);
 lua_rawget(L,-2);
-if(lua_istable(L,-1)&&(lua_pushvalue(L,lua_upvalueindex(1)),lua_rawget(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"merged_keys"),lua_rawequal(L,-2,-1))){
-lua_getfield(L,-5,"deFragment");
-lua_rotate(L,-4,-1);
-PCALL_ERRH(1,1,0,"Error Consolidating Merge Table: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Consolidating Merge Table: %s!");
+if(lua_istable(L,-1)&&(lua_pushvalue(L,lua_upvalueindex(2)),lua_rawget(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"merged_keys"),lua_rawequal(L,-2,-1))){
+int sequence_length;
+lua_createtable(L,sequence_length=lua_rawlen(L,-3),1);
+for(int idx=sequence_length;idx>=1;idx--){
+lua_rawgeti(L,-4,idx);
+lua_rawseti(L,-2,idx);
+}
+lua_pushliteral(L,"inverse_");
+lua_pushvalue(L,lua_upvalueindex(2));
+lua_pushvalue(L,-1);
+lua_rawget(L,-7);
+lua_pushvalue(L,-1);
+lua_insert(L,-3);
+lua_rawset(L,-5);
+lua_concat(L,2);
+lua_pushvalue(L,-1);
+lua_rawget(L,-6);
+lua_createtable(L,0,3);
+lua_pushnil(L);
+while(lua_next(L,-3)){
+lua_pushvalue(L,-2);
+lua_insert(L,-2);
+lua_rawset(L,-4);
+}
+lua_replace(L,-2);
+lua_rawset(L,-3);
 return 1;
 }
 lua_settop(L,3);
@@ -4526,10 +4372,10 @@ return 1;
 int generator_Function(lua_State *L){
 lua_settop(L,2);
 skip_upvalue:
-if(lua_next(L,-2)){
-int idx=0;
-while(!lua_isnil(L,lua_upvalueindex(++idx))){
-if(lua_rawequal(L,lua_upvalueindex(idx),-2)){
+if(lua_next(L,lua_upvalueindex(1))){
+int idx=1;
+while(!lua_isnoneornil(L,lua_upvalueindex(++idx))){
+if(lua_rawequal(L,lua_upvalueindex(idx),-2)|| lua_rawequal(L,lua_upvalueindex(idx),-1)){
 lua_pop(L,1);
 goto skip_upvalue;
 }
@@ -4542,10 +4388,16 @@ return 1;
 }
 
 int generator_Factory(lua_State *L){
+if(lua_rawequal(L,lua_upvalueindex(1),1))
+return 0;
 lua_settop(L,2);
 struct ref_couple *refs=luaL_checkudata(L,-2,"dual_Capable_Map");
-lua_getfield(L,-2,"gen_func");
 lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ref);
+int idx=0;
+while(!lua_isnoneornil(L,lua_upvalueindex(++idx)))
+lua_pushvalue(L,lua_upvalueindex(idx));
+lua_pushcclosure(L,generator_Function,idx);
+lua_pushboolean(L,0);
 lua_rotate(L,-3,-1);
 return 3;
 }
@@ -4554,7 +4406,7 @@ int create_Dual_Capable_Map(lua_State *L){
 luaL_checkudata(L,1,"dual_Capable_Map");
 if(lua_gettop(L)==1){
 int idx=0;
-while(!lua_isnil(L,lua_upvalueindex(++idx)))
+while(!lua_isnoneornil(L,lua_upvalueindex(++idx)))
 lua_pushvalue(L,lua_upvalueindex(idx));
 return idx-1;
 }
@@ -4603,19 +4455,22 @@ return lua_gettop(L)-1;
 }
 
 int get_Field(lua_State *L){
+_Bool dummy_encountered=0;
+if(lua_rawequal(L,lua_upvalueindex(1),1))
+dummy_encountered=1;
 lua_settop(L,2);
 lua_getmetatable(L,-2);
 if(luaL_getmetatable(L,"dual_Capable_Map")==LUA_TTABLE && lua_rawequal(L,-2,-1)){
 lua_pushvalue(L,-3);
 lua_rawget(L,-2);
-if(lua_isnil(L,-1)){
+if(lua_isnil(L,-1)&& !dummy_encountered){
 lua_pushliteral(L,"nLookUp");
 lua_rawget(L,-3);
 lua_pushvalue(L,-6);
 lua_pushvalue(L,-6);
 PCALL_ERRH(2,1,0,"Error Performing Ordinary LookUp: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Performing Ordinary LookUp: %s!");
 if(lua_isnil(L,-1)){
-lua_pushliteral(L,"LookUp");
+lua_pushliteral(L,"lookUp");
 lua_rawget(L,-4);
 lua_rotate(L,-7,-2);
 PCALL_ERRH(2,1,0,"Error Performing Inverse LookUp: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Performing Inverse LookUp: %s!");
@@ -4631,6 +4486,8 @@ return 0;
 }
 
 int get_Length(lua_State *L){
+if(lua_rawequal(L,lua_upvalueindex(1),1))
+return 0;
 lua_settop(L,1);
 struct ref_couple *refs=luaL_checkudata(L,-1,"dual_Capable_Map");
 lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ref);
@@ -4639,6 +4496,8 @@ return 1;
 }
 
 int inspect(lua_State *L){
+if(lua_rawequal(L,lua_upvalueindex(1),1))
+goto dummy_userdata;
 lua_settop(L,3);
 struct ref_couple *refs=luaL_checkudata(L,1,"dual_Capable_Map");
 lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ivrs_ref);
@@ -4659,26 +4518,29 @@ PCALL_ERRH(3,LUA_MULTRET,0,"Error Serialising Result: %s!",RAISE_APPROPRIATE_LUA
 int nrets;
 if((nrets=4+lua_gettop(L)-ctop)>0)
 return nrets;
-else
+else{
+dummy_userdata:
 return 0;
+}
 }
 
 int unbind_Tables(lua_State *L){
+if(lua_rawequal(L,lua_upvalueindex(1),1))
+goto dummy_userdata;
 lua_settop(L,2);
 struct ref_couple *refs=luaL_checkudata(L,-2,"dual_Capable_Map");
-luaL_unref(L,-2,refs->ivrs_ref);
-luaL_unref(L,-2,refs->ref);
+luaL_unref(L,LUA_REGISTRYINDEX,refs->ivrs_ref);
+luaL_unref(L,LUA_REGISTRYINDEX,refs->ref);
 lua_pushnil(L);
 lua_setmetatable(L,-3);
+dummy_userdata:
 return 0;
 }
 
 const luaL_Reg dual_Capable_Map[]={
-{"deFragment",deFragment},
 {"__newindex",set_Field},
 {"nLookUp",natural_LookUp},
-{"LookUp",LookUp},
-{"gen_func",generator_Function},
+{"lookUp",lookUp},
 {"__pairs",generator_Factory},
 {"__call",create_Dual_Capable_Map},
 {"__index",get_Field},
@@ -4860,7 +4722,7 @@ lua_pop(L,2);
 }
 }else{
 lua_remove(L,4);
-printf("Invalid Directive @Parameter #%d!",idx1);
+fprintf(stderr,"Invalid Directive @Parameter #%d!",idx1);
 }
 }
 return lua_gettop(L)-3;
@@ -4914,7 +4776,7 @@ lua_pushlstring(L,luaL_checkinteger(L,-3)+string_itself,string_length-luaL_check
 lua_concat(L,3);
 lua_seti(L,-4,2);
 }else
-luaL_error(L,"Invalid Subscript!");
+luaL_error(L,"Invalid Subscript of Type %s!",luaL_typename(L,-2));
 return 0;
 }
 
@@ -4931,13 +4793,13 @@ lua_rawset(L,-3);\
 luaL_getsubtable(L,-2,"c_UpBinds");\
 lua_insert(L,-3);\
 lua_pop(L,2);\
+lua_newuserdatauv(L,0,0);\
 luaL_newmetatable(L,"dual_Capable_Map");\
+lua_pushvalue(L,-2);\
+lua_pushlightuserdata(L,(int**)&collective_signals);\
 lua_pushlightuserdata(L,&renewed_action);\
 lua_pushlightuserdata(L,&current_action);\
-lua_pushnil(L);\
-luaL_setfuncs(L,dual_Capable_Map,3);\
-lua_newuserdatauv(L,0,0);\
-lua_insert(L,-2);\
+luaL_setfuncs(L,dual_Capable_Map,4);\
 lua_setmetatable(L,-2);\
 lua_setfield(L,-2,"dual_Capable_Map");\
 int idx=-1;\
@@ -4947,6 +4809,8 @@ lua_setfield(L,-2,c_UpBinds[idx].name);\
 }\
 lua_pop(L,1);\
 }while(0)
+
+const int collective_signals[]={SIGINT,SIGABRT,SIGSEGV,SIGBUS,SIGILL,SIGFPE};
 
 struct sigaction renewed_action;
 struct sigaction current_action;
@@ -5181,12 +5045,10 @@ nrets=lua_gettop(L)-ctop;
 }else if(states->tracks[strlen(states->tracks)-1]==1 || states->tracks[strlen(states->tracks)-1]==2){
 char *global_route=(char*)"";
 if(replica){
-global_route=strtok(replica,".[](");
-free(replica);
-}
+global_route=strtok_r(replica,".[](",&replica);
 if(lua_getglobal(L,global_route)==LUA_TTABLE){
 char temp[3+strlen(replica)];
-while((global_route=strtok(NULL,".[]("))){
+while((global_route=strtok_r(NULL,".[](",&replica))){
 memset(temp,0,3+strlen(replica));
 temp[0]='[';
 if(strstr(replica,strcat(strcat(temp,global_route),"]")))
@@ -5196,6 +5058,8 @@ lua_pushstring(L,global_route);
 lua_gettable(L,-2);
 lua_remove(L,-2);
 }
+}
+free(replica);
 }
 if(lua_isnil(L,-1))
 luaL_error(L,"To-be-called Object Unfound!");
@@ -5364,8 +5228,6 @@ sig_atomic_t signal_counter=0;
 
 sigjmp_buf context_for_jump;
 
-const int collective_signals[]={SIGINT,SIGABRT,SIGSEGV,SIGBUS,SIGILL,SIGFPE};
-
 void interpreter_Count_Hook_Function(lua_State *L,lua_Debug *hook_arg){
 if(hook_arg->event==LUA_HOOKCOUNT && signal_counter<3 && signal_counter>0){
 signal_counter=0;
@@ -5386,9 +5248,9 @@ char **stack_traceback;
 stack_depth=backtrace(preliminary_info,27);
 stack_traceback=backtrace_symbols(preliminary_info,stack_depth);
 if(stack_traceback){
-printf("Trace Back to Stack Depth #%d:\n",stack_depth);
+fprintf(stderr,"Trace Back to Stack Depth #%d:\n",stack_depth);
 for(int idx=0;idx<stack_depth;idx++)
-printf("%d\t%s\n",idx,stack_traceback[idx]);
+fprintf(stderr,"%d\t%s\n",idx,stack_traceback[idx]);
 free(stack_traceback);
 }
 renewed_action.sa_handler=SIG_DFL;
@@ -5400,7 +5262,7 @@ raise(signum);
 int errMsg_Handler(lua_State *L){
 lua_settop(L,1);
 lua_getglobal(L,"module_name");
-luaL_requiref(L,luaL_checkstring(L,-1),NULL,0);
+luaL_requiref(L,luaL_optstring(L,-1,"]===],required_name,[===["),NULL,0);
 lua_getfield(L,-1,"serialise");
 lua_insert(L,1);
 lua_pop(L,2);
@@ -5419,7 +5281,12 @@ char stack_dump[1024*1024];
 char *tail=stack_dump;
 
 int main(int n,char *args[]){
-struct proto_states *states=(struct proto_states*)]===],os.getenv("ANDROID_ROOT")=="/system"and""or"_",[===[alloca(sizeof(struct proto_states));
+int segment=0;
+for(int idx=0;idx<n;idx++){
+if(idx<n-1 && idx>1 && *args[idx]=='|'&& strlen(args[idx])==1)
+segment++;
+}
+int segmentation[1+segment][2];
 L=luaL_newstate();
 luaL_openlibs(L);
 char script[]===],3+script_len,"]=",script1,[===[;
@@ -5428,6 +5295,18 @@ REG;
 memset(script,0,sizeof script);
 strcpy(script,]===],script2,[===[);
 memset(stack_dump,0,sizeof stack_dump);
+segment=0;
+for(int idx=0;idx<n;idx++){
+if(idx<n-1 && idx>1 && *args[idx]=='|'&& strlen(args[idx])==1){
+segmentation[segment][1]=idx-1;
+segmentation[segment][0]=segment>0?2+segmentation[segment-1][1]:1;
+segment++;
+}
+}
+segmentation[segment][1]=n-1;
+segmentation[segment][0]=segment>0?2+segmentation[segment-1][1]:1;
+segment=0;
+struct proto_states *states=(struct proto_states*)]===],os.getenv("ANDROID_ROOT")=="/system"and""or"_",[===[alloca(sizeof(struct proto_states));
 do{
 lua_sethook(L,NULL,0,0);
 states->progress=0;
@@ -5475,9 +5354,10 @@ lua_pushliteral(L,"\t");
 lua_rotate(L,1,3);
 lua_pop(L,3);
 }
+int ctop;
 if(lua_isfunction(L,-1)){
 lua_insert(L,4);
-int ctop=lua_gettop(L);
+ctop=lua_gettop(L);
 if(parse_console_command_options(n,args,states)->traversal[0]==-1)
 goto premature_end;
 if((ctop=lua_gettop(L)-ctop)>0)
@@ -5488,20 +5368,38 @@ lua_sethook(L,interpreter_Count_Hook_Function,LUA_MASKCOUNT,27000);
 PCALL_ERRH(lua_gettop(L)-5,LUA_MULTRET,4,"Error within Script File: %s!",CLEAR_STACK,3);
 lua_sethook(L,NULL,0,0);
 lua_remove(L,4);
-if((ctop=lua_gettop(L))>3){
-for(int idx=4;idx<=ctop;idx++){
+ctop=3;
+}else{
+_Bool script_file_unfound=lua_isboolean(L,-1)&& !lua_toboolean(L,-1),script_file_syntactic_error=lua_isstring(L,-1)&& !lua_toboolean(L,-2);
+if(!script_file_unfound && !script_file_syntactic_error)
+CLEAR_STACK(3);
+else{
+if(script_file_unfound)
+lua_pop(L,1);
+else if(script_file_syntactic_error){
+fprintf(stderr,"Syntactic Error within Script File: %s!",luaL_checkstring(L,-1));
+lua_pop(L,2);
+}
+ctop=lua_gettop(L);
+if(parse_console_command_options(n,args,states)->traversal[0]==-1)
+goto premature_end;
+}
+}
+int idx1=1+ctop;
+if((ctop=lua_gettop(L))>=idx1){
+for(;idx1<=ctop;idx1++){
 luaL_checkstack(L,27,"Unable to Allocate Memory for the Extra Stack Space!");
 lua_pushvalue(L,1);
-lua_pushvalue(L,idx);
+lua_pushvalue(L,idx1);
 lua_pushvalue(L,2);
 lua_pushvalue(L,3);
 int bret=lua_gettop(L);
 PCALL_ERRH(3,LUA_MULTRET,0,"Error Serialising Individual Result: %s!",CUSTOM_GOTO,premature_end);
 if(lua_gettop(L)-bret>1){
-for(int idx=lua_gettop(L);idx>bret;idx--){
+for(int idx2=lua_gettop(L);idx2>bret;idx2--){
 luaL_checkstack(L,3,"Unable to Allocate Memory for the Extra Stack Space!");
 lua_pushliteral(L,"\n");
-lua_insert(L,idx);
+lua_insert(L,idx2);
 }
 }
 lua_pushliteral(L,"\n");
@@ -5525,21 +5423,19 @@ if(tail<sizeof stack_dump+stack_dump)
 tail+=result_length;
 lua_pop(L,1);
 }
-}else{
-_Bool script_file_unfound=lua_isboolean(L,-1)&& !lua_toboolean(L,-1),script_file_syntactic_error=lua_isstring(L,-1)&& !lua_toboolean(L,-2);
-if(!script_file_unfound && !script_file_syntactic_error)
-CLEAR_STACK(3);
-else{
-if(script_file_unfound)
-lua_pop(L,1);
-else if(script_file_syntactic_error){
-printf("Syntactic Error within Script File: %s!",luaL_checkstring(L,-1));
-lua_pop(L,2);
-}
-if(parse_console_command_options(n,args,states)->traversal[0]==-1)
-goto premature_end;
+if(lua_getglobal(L,"segment")==LUA_TNUMBER){
+segment=lua_tointeger(L,-1);
+for(idx1=lua_gettop(L);idx1>=1;idx1--){
+if(lua_isstring(L,idx1)&& !lua_isnumber(L,idx1)&&(!strcmp(lua_tostring(L,idx1),"dead")||(!strcmp(lua_tostring(L,idx1),"cannot resume dead coroutine")&& lua_isboolean(L,idx1-1)&& !lua_toboolean(L,idx1-1)))){
+lua_settop(L,3);
+segment=1+segment%(sizeof segmentation/sizeof segmentation[0]);
+break;
 }
 }
+}else
+segment=1;
+lua_pushinteger(L,segment);
+lua_setglobal(L,"segment");
 }while(lua_gettop(L)<LUA_MINSTACK-3 || lua_checkstack(L,5));
 premature_end:
 lua_close(L);
@@ -5551,7 +5447,7 @@ goto not_bother
 end
 os.execute("rm -rvf $PREFIX/local/c_M")
 os.execute("mkdir -v -m +rwx $PREFIX/local/c_M")
-if os.execute('clang -x c "'..where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version)..'" -fPIC -ggdb -O0 -ffp-contract=fast -Wall -o $PREFIX/local/c_M/lua_Console -L$PREFIX/local/lib -llua -L$PREFIX/lib -landroid-execinfo -pthread -lm')then
+if os.execute('clang -x c "'..where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version)..'" -fPIC -fdata-sections -ffunction-sections -Wl,--gc-sections,--as-needed -ffp-contract=fast -ggdb -O0 -Wall -o $PREFIX/local/c_M/lua_Console -L$PREFIX/local/lib -llua -L$PREFIX/lib -landroid-execinfo -pthread -lm')then
 os.execute([===[export "PATH=$PREFIX/bin"
 unset LUA_INIT
 unset LUA_INIT_]===].._VERSION:match("%f[%s%.%d][%s%.%w]*"):gsub("%s",""):gsub("%.","_").."\n"..[===[cat > ~/.bashrc << EOF
@@ -5601,7 +5497,7 @@ if ranges[bracket_number]and line_number>=math.min(ranges[bracket_number][keysto
 goto skip_line
 end
 if code_line:find("%s-local%s-status%s-=%s-\"%s-.-%s-\"%s-;%s-$")==1 then
-io.write('local status="'..status..'";',next_line and"\n"or"")
+io.write('local status="',status,'";',next_line and"\n"or"")
 elseif code_line:find("%s-local%s-digest%s-=%s-.-%s-;%s-$")==1 then
 io.write("local digest=0;",next_line and"\n"or"")
 else
@@ -5653,11 +5549,11 @@ if ranges[bracket_number]and line_number>=math.min(ranges[bracket_number][keysto
 goto skip_line
 end
 if code_line:find("%s-version%s-=%s-.-%s-,%s-$")==1 then
-io.write("version="..interface.version..",",next_line and"\n"or"")
+io.write("version=",interface.version,",",next_line and"\n"or"")
 elseif code_line:find("%s-renewed%s-=%s-.-%s-,%s-$")==1 then
-io.write("renewed="..interface.renewed..",",next_line and"\n"or"")
+io.write("renewed=",interface.renewed,",",next_line and"\n"or"")
 elseif code_line:find("%s-local%s-status%s-=%s-\"%s-.-%s-\"%s-;%s-$")==1 then
-io.write('local status="'..status..'";',next_line and"\n"or"")
+io.write('local status="',status,'";',next_line and"\n"or"")
 elseif code_line:find("%s-local%s-digest%s-=%s-.-%s-;%s-$")==1 then
 io.write("local digest=0;",next_line and"\n"or"")
 else
@@ -5690,13 +5586,13 @@ repeat
 local next_line=io.input():read()
 if code_line then
 if code_line:find("%s-version%s-=%s-.-%s-,%s-$")==1 then
-io.write("version="..interface.version..",",next_line and"\n"or"")
+io.write("version=",interface.version,",",next_line and"\n"or"")
 elseif code_line:find("%s-renewed%s-=%s-.-%s-,%s-$")==1 then
-io.write("renewed="..interface.renewed..",",next_line and"\n"or"")
+io.write("renewed=",interface.renewed,",",next_line and"\n"or"")
 elseif code_line:find("%s-local%s-status%s-=%s-\"%s-.-%s-\"%s-;%s-$")==1 then
-io.write('local status="'..status..'";',next_line and"\n"or"")
+io.write('local status="',status,'";',next_line and"\n"or"")
 elseif code_line:find("%s-local%s-digest%s-=%s-.-%s-;%s-$")==1 then
-io.write("local digest="..household_sum..";",next_line and"\n"or"")
+io.write("local digest=",household_sum,";",next_line and"\n"or"")
 else
 io.write(code_line,next_line and"\n"or"")
 end
