@@ -3343,8 +3343,8 @@ debug.setmetatable(consolidate_File,consolidate_File)
 
 
 local interface={
-version=1.3828125,
-renewed=20261007,
+version=1.4140625,
+renewed=20261015,
 ["Pointers in Practice"]="Deeming certain parameters tables or refering to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-invoke time.",
 replicate=replicate,
 zip=zip,
@@ -3373,7 +3373,7 @@ consolidate_File=consolidate_File
 --a few declarations:
 do
 local status="ready for run";
-local digest=4215989936413940436;
+local digest=2347118952320643336;
 local required_name,find_self,where=...
 if os.getenv("ANDROID_ROOT")=="/system"then
 where=find_self:match("^(.-/)[^/]+$")
@@ -4088,7 +4088,7 @@ return loadfile(script_path and i or v)
 end
 end
 end
-warn('No Valid Script File Found: Either among BootStrapped Files or within Current Working Directory - ',io.popen('pwd'):read(),' - Please Try Again!')
+warn('No Valid Script File Found: Either among BootStrapped Files or under Current Working Directory - ',io.popen('pwd'):read(),' - Please Try Again!')
 end
 return false
 elseif os.getenv('OS')=='Windows_NT'then
@@ -4110,7 +4110,7 @@ return loadfile(script_path and i or v)
 end
 end
 end
-warn('No Valid Script File Found within Current Working Directory - ',io.popen('cd'):read(),' - Please Try Again!')
+warn('No Valid Script File Found under Current Working Directory - ',io.popen('cd'):read(),' - Please Try Again!')
 end
 return false
 end]===]):gsub("\n","n\\\n")
@@ -4147,15 +4147,13 @@ continue;\
 })
 #define PCALL_ERRH(NARGS,NRESULTS,ERRH,PREPEND_FMSTR,ON_ERR,DICTATION) ({\
 if(lua_pcall(L,NARGS,NRESULTS,ERRH)!=LUA_OK){\
-if(!lua_isstring(L,-1))\
-fprintf(stderr,PREPEND_FMSTR,luaL_typename(L,-1));\
+printf(PREPEND_FMSTR,lua_isstring(L,-1)?lua_tostring(L,-1):luaL_typename(L,-1));\
 ON_ERR(DICTATION);\
 }\
 })
 #define DOSTR_ERRH(SCRIPT,PREPEND_FMSTR,ON_ERR,DICTATION) ({\
 if(luaL_dostring(L,SCRIPT)!=LUA_OK){\
-if(!lua_isstring(L,-1))\
-fprintf(stderr,PREPEND_FMSTR,luaL_typename(L,-1));\
+printf(PREPEND_FMSTR,lua_isstring(L,-1)?lua_tostring(L,-1):luaL_typename(L,-1));\
 ON_ERR(DICTATION);\
 }\
 })
@@ -4378,6 +4376,15 @@ while(!lua_isnoneornil(L,lua_upvalueindex(++idx))){
 if(lua_rawequal(L,lua_upvalueindex(idx),-2)|| lua_rawequal(L,lua_upvalueindex(idx),-1)){
 lua_pop(L,1);
 goto skip_upvalue;
+}else if(lua_istable(L,lua_upvalueindex(idx))){
+lua_pushnil(L);
+while(lua_next(L,lua_upvalueindex(idx))){
+if(lua_rawequal(L,-1,-3)|| lua_rawequal(L,-1,-4)|| lua_rawequal(L,-2,-3)|| lua_rawequal(L,-2,-4)){
+lua_pop(L,3);
+goto skip_upvalue;
+}
+lua_pop(L,1);
+}
 }
 }
 return 2;
@@ -4835,7 +4842,7 @@ lua_setglobal(L,"c_thread");
 struct array_of_arrays *results=NULL;
 char script[]===],3+script_len,"]=",script1,[===[;
 pthread_mutex_lock(&lock);
-DOSTR_ERRH(script,"Error within Module-Search Script: %s!",CUSTOM_GOTO,premature_end);
+DOSTR_ERRH(script,"Error Executing Module-Search Script: %s!",CUSTOM_GOTO,premature_end);
 pthread_mutex_unlock(&lock);
 REG;
 int ctop=lua_gettop(L);
@@ -4907,321 +4914,457 @@ return 1;
 
 lua_State *L;
 
+#define BINARY_STACK_MANIPULATION(AFTER_DICTATION,STACK_OPERATION) do{\
+long specs[2]={0,0};\
+int idx2=0;\
+char *probe=AFTER_DICTATION+(char*)args[idx1];\
+for(;idx2<sizeof specs;idx2++){\
+while(++probe<strlen(args[idx1])+args[idx1]&&(specs[idx2]=strtol(probe,&spec_tailptr,0),spec_tailptr==probe));\
+if(probe>=strlen(args[idx1])+args[idx1])\
+break;\
+probe=spec_tailptr;\
+}\
+if(idx2>=2)\
+STACK_OPERATION(L,specs[0],specs[1]);\
+}while(0)
+
+#define UNARY_STACK_MANIPULATION(AFTER_DICTATION,STACK_OPERATION) do{\
+long spec=0;\
+char *probe=AFTER_DICTATION+(char*)args[idx1];\
+while(++probe<strlen(args[idx1])+args[idx1]&&(spec=strtol(probe,&spec_tailptr,0),spec_tailptr==probe));\
+if(spec)\
+STACK_OPERATION(L,spec);\
+}while(0)
+
+#define RECURSIVE_BREAKDOWN(STAGE_DIVE) do{\
+enum jump_table delve_into=STAGE_DIVE;\
+if(parse_console_command_options(range_in_turn,(const char**)digest_in_turn,states,delve_into)<0){\
+fprintf(stderr,"Erroneous Return from %s:\n"\
+"Depth en Parse - %lu;\n"\
+"Category - %s;\n"\
+"Frame on Stack - %d.",jump_to_stage[delve_into],strlen(states->tracks),track_categories[strlen(states->tracks)>0?states->tracks[strlen(states->tracks)-1]:0],strlen(states->frames)>0?states->frames[strlen(states->frames)-1]:0);\
+goto premature_end;\
+}\
+}while(0)
+
+#define CLEANUP_AFTERMATH(CURRENT_OR_LAST,RECORDED_STACK_FRAME) do{\
+if(states->tracks[strlen(states->tracks)-CURRENT_OR_LAST]==1){\
+int ctopx=lua_gettop(L);\
+lua_rawgeti(L,LUA_REGISTRYINDEX,LUA_RIDX_GLOBALS);\
+for(int idx2=ctopx;idx2>=RECORDED_STACK_FRAME;idx2--){\
+lua_pushvalue(L,states->frames[strlen(states->frames)-CURRENT_OR_LAST]+idx2-ctopx);\
+lua_pushvalue(L,idx2);\
+lua_rawset(L,-3);\
+}\
+lua_pop(L,1);\
+}else if(states->tracks[strlen(states->tracks)-CURRENT_OR_LAST]>3 && states->tracks[strlen(states->tracks)-CURRENT_OR_LAST]<7){\
+int idx2=lua_gettop(L);\
+if(RECORDED_STACK_FRAME<idx2){\
+for(idx2-=states->tracks[strlen(states->tracks)-CURRENT_OR_LAST]==6?1:0;idx2>RECORDED_STACK_FRAME;idx2--){\
+if(!lua_checkstack(L,3)){\
+fprintf(stderr,"Unable to Allocate Memory for the Extra Stack Space!");\
+goto premature_end;\
+}\
+lua_pushnil(L);\
+lua_insert(L,idx2);\
+}\
+}\
+}else if(states->tracks[strlen(states->tracks)-CURRENT_OR_LAST]>6){\
+for(int idx2=lua_gettop(L);idx2>=RECORDED_STACK_FRAME;idx2--){\
+if(!lua_checkstack(L,3)){\
+fprintf(stderr,"Unable to Allocate Memory for the Extra Stack Space!");\
+goto premature_end;\
+}\
+lua_pushfstring(L,"evaluated_console_command%d",states->tracks[strlen(states->tracks)-CURRENT_OR_LAST]);\
+if(idx2>RECORDED_STACK_FRAME)\
+lua_pushliteral(L,",");\
+lua_pushvalue(L,idx2>RECORDED_STACK_FRAME?-2:-1);\
+lua_rotate(L,RECORDED_STACK_FRAME,-1);\
+lua_rawset(L,states->frames[strlen(states->frames)-CURRENT_OR_LAST]);\
+states->tracks[strlen(states->tracks)-CURRENT_OR_LAST]++;\
+}\
+lua_concat(L,1+lua_gettop(L)-RECORDED_STACK_FRAME);\
+}\
+}while(0)
+
+#define DEPTH 13
+
 struct proto_states{
-int progress;
-int associative;
-int depth;
-char tracks[10];
-signed char traversal[11];
+char tracks[DEPTH];
+char frames[DEPTH];
 };
 
-struct proto_states *parse_console_command_options(int nargs,char **args,struct proto_states *states){
-if(states->traversal[1+strlen(states->tracks)])
-goto successive_delve;
-while(++states->progress,states->progress<nargs){
-if(strlen(args[states->progress])==10 && !strcmp(args[states->progress],"DUMP STACK")){
-printf("------\n");
-for(int idx=lua_gettop(L);idx>0;idx--)
-printf("%d %s\n",idx,luaL_typename(L,idx));
-printf("------\n");
-goto do_nothing;
-}else if(strlen(args[states->progress])>10 && !strncmp(args[states->progress],"DUP FRAME ",10)){
-lua_pushvalue(L,atoll(&args[states->progress][10]));
-goto do_nothing;
+enum jump_table{parsing_assignment=1,before_tokenising=2,tokenised=3,last_stage=4};
+const char *jump_to_stage[]={[1]="Parsing Assignment",[2]="Before Tokenising",[3]="Tokenised",[4]="Last Stage"};
+const char *track_categories[]={"Null Category","Assignment","Function Call","Mult-Ret Function Call","Table Construction",[5 ... 6]="Associative Table Construction",[7 ... 255]="Command-InLine Scripting"};
+
+int parse_console_command_options(const int range[static const 2],const char *args[const],struct proto_states *states,const enum jump_table whence){
+for(int idx1=range[0];idx1<=range[1];idx1++){
+switch(whence){
+case parsing_assignment:
+goto parsing_assignment;
+case before_tokenising:
+goto before_tokenising;
+case tokenised:
+goto tokenised;
+case last_stage:
+goto last_stage;
+default:{
+if(strlen(states->tracks)>0 && states->tracks[strlen(states->tracks)-1]>4 && states->tracks[strlen(states->tracks)-1]<7)
+states->tracks[strlen(states->tracks)-1]--;
 }
-if(states->associative>0){
-states->associative--;
-if(states->associative==1 && lua_isnil(L,-2))
-lua_remove(L,-2);
 }
-_Bool script_concluded=0,new_script=0;
-int first_assignment=strlen(args[states->progress]);
-for(int idx=strlen(args[states->progress])-1;idx>=0;idx--){
-if(idx<=0 && args[states->progress][idx]=='=')
-first_assignment=idx;
-else if(!new_script && args[states->progress][idx]=='<'&&(idx<=0 || args[states->progress][idx-1]=='('|| args[states->progress][idx-1]=='{'|| args[states->progress][idx-1]=='=')){
-new_script=1;
-first_assignment=strlen(args[states->progress]);
-}else if(args[states->progress][idx-1]!='<'&& args[states->progress][idx-1]!='!'&& args[states->progress][idx-1]!='='&& args[states->progress][idx]=='='&& args[states->progress][1+idx]!='='){
-if(!script_concluded){
-first_assignment=idx;
-if(args[states->progress][idx-1]=='>'&& args[states->progress][1+idx]=='<')
+char *spec_tailptr=NULL;
+if(strlen(args[idx1])>5 && !strncmp(args[idx1],"COPY ",5))
+BINARY_STACK_MANIPULATION(4,lua_copy);
+else if(strlen(args[idx1])>8 && !strncmp(args[idx1],"REPLACE ",8))
+UNARY_STACK_MANIPULATION(7,lua_replace);
+else if(strlen(args[idx1])>7 && !strncmp(args[idx1],"INSERT ",7))
+UNARY_STACK_MANIPULATION(6,lua_insert);
+else if(strlen(args[idx1])>7 && !strncmp(args[idx1],"REMOVE ",7))
+UNARY_STACK_MANIPULATION(6,lua_remove);
+else if(strlen(args[idx1])>7 && !strncmp(args[idx1],"ROTATE ",7))
+BINARY_STACK_MANIPULATION(6,lua_rotate);
+else if(strlen(args[idx1])>11 && !strncmp(args[idx1],"PUSH VALUE ",11))
+UNARY_STACK_MANIPULATION(10,lua_pushvalue);
+else if(strlen(args[idx1])>8 && !strncmp(args[idx1],"SET TOP ",8))
+UNARY_STACK_MANIPULATION(7,lua_settop);
+else if(strlen(args[idx1])==11 && !strcmp(args[idx1],"PRINT STACK")){
+printf("------\n");
+for(int idx2=lua_gettop(L);idx2>0;idx2--){
+if(lua_isinteger(L,idx2))
+printf("%d %lld\n",idx2,lua_tointeger(L,idx2));
+else if(lua_isnumber(L,idx2))
+printf("%d %Lf\n",idx2,lua_tonumber(L,idx2));
+else if(lua_isboolean(L,idx2))
+printf("%d %s\n",idx2,lua_toboolean(L,idx2)?"true":"false");
+else if(lua_isstring(L,idx2))
+printf("%d %s\n",idx2,lua_tostring(L,idx2));
+else
+printf("%d %s\n",idx2,luaL_typename(L,idx2));
+}
+printf("------\n");
+}else{
+_Bool script_concluded=0,script_initiated=0;
+int assignment_operator=strlen(args[idx1]),count_assignments=0;
+for(int idx2=strlen(args[idx1])-1;idx2>0;idx2--){
+if(!script_concluded && args[idx1][idx2]=='>'){
+if(script_initiated)
+break;
 script_concluded=1;
+}else if(!script_concluded && args[idx1][idx2-1]!='='&& args[idx1][idx2-1]!='<'&& args[idx1][idx2-1]!='~'&& args[idx1][idx2]=='='&&(1+idx2>=strlen(args[idx1])|| args[idx1][1+idx2]!='=')){
+if(assignment_operator==strlen(args[idx1]))
+assignment_operator=idx2;
+count_assignments++;
+if(script_initiated && count_assignments>1)
+break;
+}else if(!script_initiated&&(args[idx1][idx2-1]=='('|| args[idx1][idx2-1]=='{'|| args[idx1][idx2-1]=='=')&& args[idx1][idx2]=='<'){
+assignment_operator=strlen(args[idx1]);
+count_assignments=0;
+script_concluded=0;
+script_initiated=1;
 }
 }
+if(count_assignments+(args[idx1][0]=='=')>1){
+fprintf(stderr,"%d More than 1 Assignment Operators within 1 Expression!",count_assignments+(args[idx1][0]=='=')-1);
+goto premature_end;
 }
-if(strrchr(args[states->progress],'>')){
-int regress=strlen(args[states->progress]);
-while(regress--,regress>=0 &&(args[states->progress][regress]==')'|| args[states->progress][regress]=='}'));
-if(regress>=0 && args[states->progress][regress]=='>'&& states->tracks[strlen(states->tracks)-1]>3)
-first_assignment=strlen(args[states->progress]);
-}
-char *key=NULL;
-if(first_assignment<strlen(args[states->progress])){
-states->associative++;
-if(first_assignment>0 && first_assignment<strlen(args[states->progress])){
-key=]===],os.getenv("ANDROID_ROOT")=="/system"and""or"_",[===[alloca(3+first_assignment);
-memset(key,0,3+first_assignment);
-strncpy(key,args[states->progress],first_assignment);
-args[states->progress-1]=key;
-memset(args[states->progress],0,1+first_assignment);
-args[states->progress]+=1+first_assignment;
-if(!strchr(args[states->progress],'{')||(strrchr(args[states->progress],'{')>strchr(args[states->progress],'{')))
-states->associative++;
-states->progress--;
-}else if(first_assignment==0){
+parsing_assignment:
+if(args[idx1][0]=='='){
+if(strlen(states->tracks)>0 && states->tracks[strlen(states->tracks)-1]>3 && states->tracks[strlen(states->tracks)-1]<6){
+states->tracks[strlen(states->tracks)-1]++;
 if(lua_isnil(L,-2))
 lua_remove(L,-2);
-args[states->progress][0]=0;
-args[states->progress]++;
+}else if(1+strlen(states->tracks)<DEPTH){
+states->tracks[strlen(states->tracks)]=1;
+states->frames[strlen(states->frames)]=lua_gettop(L);
+}else{
+fprintf(stderr,"Excessive Nesting of Expressions - Maximum %d!",DEPTH-1);
+goto premature_end;
+}
+if(strlen(args[idx1])<=1){
+if(strlen(states->tracks)>0 && states->tracks[strlen(states->tracks)-1]>3 && states->tracks[strlen(states->tracks)-1]<6)
+states->tracks[strlen(states->tracks)-1]++;
+continue;
+}
+char *digest_in_turn[1];
+char digest1[2+strlen(args[idx1])];
+memset(digest1,0,sizeof digest1);
+strcpy(digest1,1+args[idx1]);
+digest_in_turn[0]=digest1;
+int range_in_turn[2]={0,0};
+RECURSIVE_BREAKDOWN(2);
+}else if(whence<1 &&(count_assignments>0 || args[idx1][strlen(args[idx1])-1]=='=')){
+char *digest_in_turn[2];
+char digest1[count_assignments>0?3+assignment_operator:2+strlen(args[idx1])];
+memset(digest1,0,sizeof digest1);
+strncpy(digest1,args[idx1],count_assignments>0?assignment_operator:strlen(args[idx1])-1);
+digest_in_turn[0]=digest1;
+char digest2[count_assignments>0?3+strlen(args[idx1])-assignment_operator:3+1];
+memset(digest2,0,sizeof digest2);
+strcpy(digest2,(count_assignments>0?assignment_operator:strlen(args[idx1])-1)+args[idx1]);
+digest_in_turn[1]=digest2;
+int range_in_turn[2]={0,1};
+RECURSIVE_BREAKDOWN(1);
+}else{
+before_tokenising:;
+int last_initiator=-1,last_anti_angle_bracket=-1,first_terminator=strlen(args[idx1]),first_angle_bracket=strlen(args[idx1]),count_parenthetic_initiators=0,count_elements=0,cache_count_elements=1;
+_Bool garbage_among_initiators=0,past_terminators=0,consecutiveness=1;
+for(int idx2=strlen(args[idx1])-1;idx2>=0;idx2--){
+if(args[idx1][idx2]=='('|| args[idx1][idx2]=='{'|| args[idx1][idx2]=='<'|| args[idx1][idx2]==')'|| args[idx1][idx2]=='}'|| args[idx1][idx2]=='>'){
+count_elements++;
+if(args[idx1][idx2]=='('|| args[idx1][idx2]=='{'){
+if(last_initiator==-1)
+last_initiator=idx2;
+if(args[idx1][idx2]=='(')
+count_parenthetic_initiators++;
+else if(count_parenthetic_initiators==1)
+consecutiveness=0;
+}else if(args[idx1][idx2]=='<'){
+count_elements=cache_count_elements;
+first_angle_bracket=idx2;
+last_initiator=-1;
+count_parenthetic_initiators=0;
+garbage_among_initiators=0;
+consecutiveness=1;
+}else if(args[idx1][idx2]==')'|| args[idx1][idx2]=='}'){
+if(past_terminators){
+fprintf(stderr,"Garbage Among Terminators!");
+goto premature_end;
+}
+if(last_anti_angle_bracket==-1)
+first_terminator=idx2;
+}else if(args[idx1][idx2]=='>'&& last_anti_angle_bracket==-1){
+cache_count_elements=count_elements;
+if(past_terminators){
+fprintf(stderr,"Garbage Among Terminators!");
+goto premature_end;
+}
+last_anti_angle_bracket=idx2;
+}
+}else{
+if(first_angle_bracket<strlen(args[idx1])||(last_initiator>-1 && count_parenthetic_initiators!=1))
+garbage_among_initiators=1;
+if(first_terminator<strlen(args[idx1])&& !past_terminators)
+past_terminators=1;
 }
 }
-double_evaluation:
-luaL_checkstack(L,3,"Unable to Allocate Memory for the Extra Stack Space!");
-if((!strrchr(args[states->progress],'>')||(strrchr(args[states->progress],'<')&& args[states->progress]<strchr(args[states->progress],'<')&& args[states->progress][strlen(args[states->progress])-1]=='>'))&&(strrchr(args[states->progress],'(')|| strrchr(args[states->progress],'{'))){
-int count_total=0,count_parentheses=0,last_parenthesis=-1,last_brace=-1,first_brace=strlen(args[states->progress]);
-for(int idx=0;idx<strlen(args[states->progress]);idx++){
-if(args[states->progress][idx]=='<')
-break;
-else if(args[states->progress][idx]=='('){
-count_parentheses++;
-if(count_parentheses<=1){
-count_total++;
-if(count_total+strlen(states->tracks)>3*states->depth)
-luaL_error(L,"Excessive Nesting of Expressions!");
-}else if(count_parentheses>2)
-luaL_error(L,"Too Many Parentheses at Once!");
-last_parenthesis=idx;
-if(idx<=0)
-states->traversal[count_total+strlen(states->tracks)]=1;
-else if(count_parentheses<=1)
-states->traversal[count_total+strlen(states->tracks)]=2;
-}else if(args[states->progress][idx]=='{'){
-count_total++;
-if(count_total+strlen(states->tracks)>3*states->depth)
-luaL_error(L,"Excessive Nesting of Expressions!");
-last_brace=idx;
-first_brace=idx<first_brace?idx:first_brace;
-states->traversal[count_total+strlen(states->tracks)]=3;
+if(last_initiator>=first_terminator){
+fprintf(stderr,"Intermixed Initiators and Terminators within 1 Expression!");
+goto premature_end;
+}else if(last_anti_angle_bracket==-1 && first_angle_bracket==strlen(args[idx1])&& 1+last_initiator<first_terminator)
+count_elements++;
+if(last_anti_angle_bracket>-1 && first_angle_bracket<strlen(args[idx1])&& last_anti_angle_bracket<=first_angle_bracket){
+fprintf(stderr,"Script Terminator Ahead of Script Initiator!");
+goto premature_end;
+}
+if(last_initiator>=first_angle_bracket || last_anti_angle_bracket>=first_terminator){
+fprintf(stderr,"Program Self-Check: Command-InLine Script Must Reside within Other Elements!");
+goto premature_end;
+}
+if(!consecutiveness || count_parenthetic_initiators>2){
+fprintf(stderr,"Conventions Concerned with Function Call Violated!");
+goto premature_end;
+}else if(count_parenthetic_initiators==2)
+count_elements--;
+if(garbage_among_initiators){
+fprintf(stderr,"Garbage Among Initiators!");
+goto premature_end;
+}
+{
+int scan=count_elements;
+_Bool center_scanned=0,call_met=0,past_call=0;
+char *digest_in_turn[count_elements],*prepare_call;
+for(int idx2=strlen(args[idx1])-1;idx2>=0;idx2--){
+if(idx2>=first_terminator){
+char *element=]===],os.getenv("ANDROID_ROOT")=="/system"and""or"_",[===[alloca(2);
+memset(element,0,2);
+element[0]=args[idx1][idx2];
+digest_in_turn[--scan]=element;
+}else if(!center_scanned && idx2<first_terminator && idx2>last_initiator && 1+last_initiator<first_terminator){
+char *element=]===],os.getenv("ANDROID_ROOT")=="/system"and""or"_",[===[alloca(2+first_terminator-last_initiator);
+memset(element,0,2+first_terminator-last_initiator);
+strncpy(element,1+last_initiator+args[idx1],first_terminator-last_initiator-1);
+digest_in_turn[--scan]=element;
+center_scanned=1;
+}else if(idx2<=last_initiator){
+if((!call_met && args[idx1][idx2]!='(')|| past_call || args[idx1][idx2]=='{'){
+char *element=]===],os.getenv("ANDROID_ROOT")=="/system"and""or"_",[===[alloca(2);
+memset(element,0,2);
+element[0]=args[idx1][idx2];
+digest_in_turn[--scan]=element;
+}else{
+if(!call_met){
+prepare_call=]===],os.getenv("ANDROID_ROOT")=="/system"and""or"_",[===[alloca(4+idx2);
+memset(prepare_call,0,4+idx2);
+}
+prepare_call[idx2]=args[idx1][idx2];
+if(idx2<=0){
+digest_in_turn[--scan]=prepare_call;
+continue;
+}else if(args[idx1][idx2-1]=='{'|| args[idx1][idx2-1]=='('){
+if(!call_met){
+fprintf(stderr,"Function Name Required!");
+goto premature_end;
+}
+if(args[idx1][idx2-1]=='(')
+prepare_call[idx2-1]=args[idx1][idx2-1];
+prepare_call+=idx2-1;
+digest_in_turn[--scan]=prepare_call;
+past_call=1;
+}
+if(!call_met)
+call_met=1;
 }
 }
-if(last_parenthesis>=first_brace)
-luaL_error(L,"Function Calls Require at Least 1 Argument Ahead!");
-char *replica=NULL;
-if(last_parenthesis>0){
-replica=malloc(3+last_parenthesis);
-memset(replica,0,3+last_parenthesis);
-strncpy(replica,args[states->progress],last_parenthesis);
 }
-if((last_brace>last_parenthesis?last_brace:last_parenthesis)<strlen(args[states->progress])-1){
-memset(args[states->progress],0,1+(last_brace>last_parenthesis?last_brace:last_parenthesis));
-args[states->progress]+=1+(last_brace>last_parenthesis?last_brace:last_parenthesis);
-states->progress--;
+int range_in_turn[2]={0,sizeof digest_in_turn/sizeof digest_in_turn[0]-1};
+RECURSIVE_BREAKDOWN(3);
+continue;
 }
-successive_delve:
-states->tracks[strlen(states->tracks)]=states->traversal[1+strlen(states->tracks)];
-states->traversal[strlen(states->tracks)]=0;
-int ctop,nrets;
-if(states->tracks[strlen(states->tracks)-1]==3){
-if(!states->associative && states->tracks[strlen(states->tracks)-2]==3)
+tokenised:
+if(args[idx1][strlen(args[idx1])-1]=='('){
+if(idx1>0 || strcmp(args[idx1],"(")){
+char *digest_in_turn[1];
+char digest1[(args[idx1][0]=='('?1:2)+strlen(args[idx1])];
+memset(digest1,0,sizeof digest1);
+strncpy(digest1,(args[idx1][0]=='('?1:0)+args[idx1],strlen(args[idx1])-(args[idx1][0]=='('?2:1));
+digest_in_turn[0]=digest1;
+int range_in_turn[2]={0,0};
+RECURSIVE_BREAKDOWN(4);
+}
+if(1+strlen(states->tracks)>=DEPTH){
+fprintf(stderr,"Excessive Nesting of Expressions - Maximum %d!",DEPTH-1);
+goto premature_end;
+}
+states->tracks[strlen(states->tracks)]=((idx1<=0 && !strcmp(args[idx1],"("))|| args[idx1][0]!='(')?3:2;
+states->frames[strlen(states->frames)]=lua_gettop(L);
+}else if(!strcmp(args[idx1],"{")){
+if(strlen(states->tracks)>0 && states->tracks[strlen(states->tracks)-1]==4)
 lua_pushnil(L);
 lua_newtable(L);
-ctop=lua_gettop(L);
-if(parse_console_command_options(nargs,args,states)->traversal[strlen(states->tracks)]<0)
-luaL_error(L,"Erroneous Return!");
-else{
-int idx1=0,idx2=0;
-while(++idx1,2*idx1-1<=lua_gettop(L)-ctop){
-if(lua_isnil(L,2*idx1-1+ctop)){
-idx2++;
-lua_pushinteger(L,idx2+luaL_len(L,ctop));
-lua_replace(L,2*idx1-1+ctop);
+if(1+strlen(states->tracks)>=DEPTH){
+fprintf(stderr,"Excessive Nesting of Expressions - Maximum %d!",DEPTH-1);
+goto premature_end;
 }
-}
-while(lua_gettop(L)>ctop)
-lua_settable(L,ctop);
-nrets=lua_gettop(L)-ctop;
-}
-}else if(states->tracks[strlen(states->tracks)-1]==1 || states->tracks[strlen(states->tracks)-1]==2){
-char *global_route=(char*)"";
-if(replica){
-global_route=strtok_r(replica,".[](",&replica);
-if(lua_getglobal(L,global_route)==LUA_TTABLE){
-char temp[3+strlen(replica)];
-while((global_route=strtok_r(NULL,".[](",&replica))){
-memset(temp,0,3+strlen(replica));
-temp[0]='[';
-if(strstr(replica,strcat(strcat(temp,global_route),"]")))
-lua_pushinteger(L,atoll(global_route));
-else
-lua_pushstring(L,global_route);
-lua_gettable(L,-2);
-lua_remove(L,-2);
-}
-}
-free(replica);
-}
-if(lua_isnil(L,-1))
-luaL_error(L,"To-be-called Object Unfound!");
-else{
-lua_insert(L,-2);
-ctop=lua_gettop(L);
-if(parse_console_command_options(nargs,args,states)->traversal[strlen(states->tracks)]<0)
-luaL_error(L,"Erroneous Return!");
-else{
-if(lua_pcall(L,1+lua_gettop(L)-ctop,states->tracks[strlen(states->tracks)-1]>1?LUA_MULTRET:states->tracks[strlen(states->tracks)-1],0)!=LUA_OK){
-printf("%s",lua_isstring(L,-1)?luaL_checkstring(L,-1):"Non-String Error Object!");
-lua_pop(L,1);
-goto premature;
-}
-nrets=2+lua_gettop(L)-ctop;
-}
-}
-}else
-luaL_error(L,"System Error!");
-states->traversal[strlen(states->tracks)]=0;
-states->tracks[strlen(states->tracks)-1]=0;
-if(!states->associative && states->tracks[strlen(states->tracks)-1]==3){
-for(int idx=-nrets;idx<-1;idx++){
-lua_pushnil(L);
-lua_insert(L,idx);
-}
-}else if(states->tracks[strlen(states->tracks)-1]>3){
-int cache_progress=states->tracks[strlen(states->tracks)-1];
-while(++states->tracks[strlen(states->tracks)-1],states->tracks[strlen(states->tracks)-1]-cache_progress<=nrets){
-int serial_len=snprintf(NULL,0,"%d",nrets+1+2*cache_progress-states->tracks[strlen(states->tracks)-1]);
-char serial[3+serial_len];
-memset(serial,0,3+serial_len);
-if(serial_len!=sprintf(serial,"%d",nrets+1+2*cache_progress-states->tracks[strlen(states->tracks)-1]))
-luaL_error(L,"System Error!");
-char global[25+serial_len];
-memset(global,0,25+serial_len);
-strcpy(global,"evaluated_console_command");
-lua_setglobal(L,strcat(global,serial));
-}
-states->tracks[strlen(states->tracks)-1]--;
-while(++cache_progress,cache_progress<=states->tracks[strlen(states->tracks)-1]){
-int serial_len=snprintf(NULL,0,"%d",cache_progress);
-char serial[3+serial_len];
-memset(serial,0,3+serial_len);
-if(serial_len!=sprintf(serial,"%d",cache_progress))
-luaL_error(L,"System Error!");
-luaL_checkstack(L,3,"Unable to Allocate Memory for the Extra Stack Space!");
-lua_pushliteral(L,"evaluated_console_command");
-lua_pushstring(L,serial);
-if(cache_progress<states->tracks[strlen(states->tracks)-1])
-lua_pushliteral(L,",");
-}
-}
-}else if(args[states->progress][strlen(args[states->progress])-1]==')'|| args[states->progress][strlen(args[states->progress])-1]=='}'){
-int regress=strlen(args[states->progress])-1;
-while(regress--,regress>=0 &&(args[states->progress][regress]==')'|| args[states->progress][regress]=='}'));
-int cache_regress=regress++;
-for(int idx=strlen(states->tracks)-1;idx>=-1;idx--){
-if(regress>strlen(args[states->progress])-1)
-break;
-else if(states->tracks[idx]>0 && states->tracks[idx]<=2 && args[states->progress][regress]==')'){
-regress++;
-if(states->tracks[idx]==1){
-if(args[states->progress][regress]==')')
-regress++;
-else
-luaL_error(L,"Imbalanced Parentheses!");
-}
-states->traversal[1+idx]=states->tracks[idx];
-}else if(states->tracks[idx]==3 && args[states->progress][regress]=='}'){
-regress++;
-states->traversal[1+idx]=states->tracks[idx];
-}else if(states->tracks[idx]>3)
-continue;
-else if(idx<0)
-luaL_error(L,"More Terminators than Necessary!");
-}
-if(cache_regress>=0){
-for(int idx=1+cache_regress;idx<strlen(args[states->progress]);idx++)
-args[states->progress][idx]=0;
-goto double_evaluation;
-}
-}else{
-if(!states->associative && states->tracks[strlen(states->tracks)-1]==3)
-lua_pushnil(L);
-if(args[states->progress][0]=='<'){
-if(args[states->progress][strlen(args[states->progress])-1]=='>'){
-const char *script=lua_pushlstring(L,1+args[states->progress],strlen(args[states->progress])-2);
-int ctop=lua_gettop(L);
-DOSTR_ERRH(script,"Error within Command-Line Script: %s!",CUSTOM_GOTO,premature);
-if(!states->associative && states->tracks[strlen(states->tracks)-1]==3){
-for(int idx=ctop-lua_gettop(L);idx<-1;idx++){
-lua_pushnil(L);
-lua_insert(L,idx);
-}
-}
-lua_remove(L,ctop);
-}else if(strlen(states->tracks)<3*states->depth){
-int ctop=lua_gettop(L);
-lua_pushstring(L,1+args[states->progress]);
 states->tracks[strlen(states->tracks)]=4;
-if(parse_console_command_options(nargs,args,states)->traversal[strlen(states->tracks)]<0)
-luaL_error(L,"Erroneous Return!");
-else{
-lua_concat(L,lua_gettop(L)-ctop);
-const char *script=lua_tostring(L,-1);
-ctop=lua_gettop(L);
-DOSTR_ERRH(script,"Error within Command-Line Script: %s!",CUSTOM_GOTO,premature);
-if(!states->associative && states->tracks[strlen(states->tracks)-2]==3){
-for(int idx=ctop-lua_gettop(L);idx<-1;idx++){
+states->frames[strlen(states->frames)]=lua_gettop(L);
+}else if(args[idx1][0]=='<'){
+if(strlen(states->tracks)>0 && states->tracks[strlen(states->tracks)-1]==4)
 lua_pushnil(L);
-lua_insert(L,idx);
-}
-}
-lua_remove(L,ctop);
-for(int idx=4;idx<=states->tracks[strlen(states->tracks)-1];idx++){
-int serial_len=snprintf(NULL,0,"%d",idx);
-char serial[3+serial_len];
-memset(serial,0,3+serial_len);
-if(serial_len!=sprintf(serial,"%d",idx))
-luaL_error(L,"System Error!");
-char global[25+serial_len];
-memset(global,0,25+serial_len);
-strcpy(global,"evaluated_console_command");
-lua_pushnil(L);
-lua_setglobal(L,strcat(global,serial));
-}
-states->traversal[strlen(states->tracks)]=0;
-states->tracks[strlen(states->tracks)-1]=0;
-}
-}else
-luaL_error(L,"Excessive Nesting of Expressions!");
-}else if(args[states->progress][strlen(args[states->progress])-1]=='>'){
-if(states->tracks[strlen(states->tracks)-1]<4)
-luaL_error(L,"Imbalanced Terminators - Script Concluded before Nested Evaluations Return!");
-states->traversal[strlen(states->tracks)]=states->tracks[strlen(states->tracks)-1];
-lua_pushlstring(L,args[states->progress],strlen(args[states->progress])-1);
+if(args[idx1][strlen(args[idx1])-1]=='>'){
+luaL_loadbuffer(L,1+args[idx1],strlen(args[idx1])-2,"Inert Eval");
+int ctop=lua_gettop(L);
+CLEANUP_AFTERMATH(1,ctop);
 }else{
-char *int_tailptr=NULL;
-char *float_tailptr=NULL;
-if(strtoll(args[states->progress],&int_tailptr,0),*int_tailptr=='\0')
-lua_pushinteger(L,atoll(args[states->progress]));
-else if((getenv("ANDROID_ROOT")&& !strncmp(getenv("ANDROID_ROOT"),"/system",strlen(getenv("ANDROID_ROOT"))))?strtold(args[states->progress],&float_tailptr):strtod(args[states->progress],&float_tailptr),*float_tailptr=='\0')
-lua_pushnumber(L,(getenv("ANDROID_ROOT")&& !strncmp(getenv("ANDROID_ROOT"),"/system",strlen(getenv("ANDROID_ROOT"))))?strtold(args[states->progress],NULL):strtod(args[states->progress],NULL));
-else if(strlen(args[states->progress])==4 && !strcmp(args[states->progress],"true"))
-lua_pushboolean(L,1);
-else if(strlen(args[states->progress])==5 && !strcmp(args[states->progress],"false"))
-lua_pushboolean(L,0);
-else if((strlen(args[states->progress])==3 && !strcmp(args[states->progress],"nil"))||(strlen(args[states->progress])==1 && !strcmp(args[states->progress],"_")))
+lua_newtable(L);
+if(1+strlen(states->tracks)>=DEPTH){
+fprintf(stderr,"Excessive Nesting of Expressions - Maximum %d!",DEPTH-1);
+goto premature_end;
+}
+states->tracks[strlen(states->tracks)]=7;
+states->frames[strlen(states->frames)]=lua_gettop(L);
+lua_pushstring(L,1+args[idx1]);
+}
+}else if(!strcmp(args[idx1],")")){
+if(!strcmp(args[idx1-1],")"))
+continue;
+else if(strlen(states->tracks)<=0 || states->tracks[strlen(states->tracks)-1]!=((1+idx1<=range[1]&& !strcmp(args[1+idx1],")"))?2:3)){
+fprintf(stderr,"Terminator MisMatch - %s Found where %s Expected!",track_categories[(1+idx1<=range[1]&& !strcmp(args[1+idx1],")"))?2:3],track_categories[strlen(states->tracks)>0?states->tracks[strlen(states->tracks)-1]:0]);
+goto premature_end;
+}
+PCALL_ERRH(lua_gettop(L)-states->frames[strlen(states->frames)-1],states->tracks[strlen(states->tracks)-1]==2?1:LUA_MULTRET,0,"Error Invoking Specified Function: %s!",CUSTOM_GOTO,premature_end);
+CLEANUP_AFTERMATH(2,states->frames[strlen(states->frames)-1]);
+states->tracks[strlen(states->tracks)-1]=0;
+states->frames[strlen(states->frames)-1]=0;
+}else if(!strcmp(args[idx1],"}")){
+if(strlen(states->tracks)<=0 ||(states->tracks[strlen(states->tracks)-1]!=4 && states->tracks[strlen(states->tracks)-1]!=5)){
+fprintf(stderr,"Terminator MisMatch - %s Found where %s Expected!",track_categories[4],track_categories[strlen(states->tracks)>0?states->tracks[strlen(states->tracks)-1]:0]);
+goto premature_end;
+}
+while(lua_gettop(L)>states->frames[strlen(states->frames)-1]){
+if(lua_isnil(L,1+states->frames[strlen(states->frames)-1])){
+lua_pushinteger(L,1+lua_rawlen(L,states->frames[strlen(states->frames)-1]));
+lua_replace(L,1+states->frames[strlen(states->frames)-1]);
+}
+lua_rotate(L,1+states->frames[strlen(states->frames)-1],-2);
+lua_rawset(L,states->frames[strlen(states->frames)-1]);
+}
+CLEANUP_AFTERMATH(2,states->frames[strlen(states->frames)-1]);
+states->tracks[strlen(states->tracks)-1]=0;
+states->frames[strlen(states->frames)-1]=0;
+}else if(args[idx1][strlen(args[idx1])-1]=='>'){
+if(strlen(states->tracks)<=0 || states->tracks[strlen(states->tracks)-1]<7){
+fprintf(stderr,"Terminator MisMatch - %s Found where %s Expected!",track_categories[7],track_categories[strlen(states->tracks)>0?states->tracks[strlen(states->tracks)-1]:0]);
+goto premature_end;
+}
+lua_pushlstring(L,args[idx1],strlen(args[idx1])-1);
+lua_concat(L,lua_gettop(L)-states->frames[strlen(states->frames)-1]);
+lua_getglobal(L,"load");
+lua_insert(L,states->frames[strlen(states->frames)-1]);
+lua_pushliteral(L,"Immediate Eval");
 lua_pushnil(L);
+lua_rotate(L,-4,-1);
+PCALL_ERRH(4,LUA_MULTRET,0,"Syntactic Error within Command-InLine Script: %s!",CUSTOM_GOTO,premature_end);
+PCALL_ERRH(0,LUA_MULTRET,0,"Error Executing Command-InLine Script: %s!",CUSTOM_GOTO,premature_end);
+CLEANUP_AFTERMATH(2,states->frames[strlen(states->frames)-1]);
+states->tracks[strlen(states->tracks)-1]=0;
+states->frames[strlen(states->frames)-1]=0;
+}else{
+last_stage:
+if(strlen(states->tracks)>0 && states->tracks[strlen(states->tracks)-1]==4)
+lua_pushnil(L);
+char replica[3+strlen(args[idx1])],*internal_state,*global_route;
+memset(replica,0,sizeof replica);
+strcpy(replica,args[idx1]);
+if(lua_getglobal(L,strtok_r(replica,".[]",&internal_state))==LUA_TTABLE || luaL_testudata(L,-1,"dual_Capable_Map")){
+while((global_route=strtok_r(NULL,".[]",&internal_state))){
+char temp[3+strlen(global_route)];
+memset(temp,0,sizeof temp);
+temp[0]='[';
+long index;
+char *route_tailptr=NULL;
+if(strstr(args[idx1],strcat(strcat(temp,global_route),"]"))&&(index=strtol(global_route,&route_tailptr,0),global_route<route_tailptr))
+lua_geti(L,-1,index);
 else
-lua_pushstring(L,args[states->progress]);
-}
-}
-if(states->traversal[strlen(states->tracks)]>0)
+lua_getfield(L,-1,global_route);
+lua_remove(L,-2);
+if(lua_isnil(L,-1))
 break;
-do_nothing:;
 }
-return states;
-premature:
-states->traversal[strlen(states->tracks)]=-1;
-return states;
+}
+if(lua_isnil(L,-1)){
+lua_pop(L,1);
+if(strlen(states->tracks)>0 && states->tracks[strlen(states->tracks)-1]>6){
+lua_pushstring(L,args[idx1]);
+lua_replace(L,-2);
+}else{
+char *literal_tailptr=NULL;
+long long integer_number;
+long double float_point_number;
+if((integer_number=strtoll(args[idx1],&literal_tailptr,0),args[idx1]<literal_tailptr)&&(*literal_tailptr=='\0'|| *literal_tailptr!='.'))
+lua_pushinteger(L,integer_number);
+else if(float_point_number=strtold(args[idx1],&literal_tailptr),args[idx1]<literal_tailptr)
+lua_pushnumber(L,float_point_number);
+else if(strlen(args[idx1])==3 && !strcmp(args[idx1],"nil"))
+lua_pushnil(L);
+else if(strlen(args[idx1])==4 && !strcmp(args[idx1],"true"))
+lua_pushboolean(L,1);
+else if(strlen(args[idx1])==5 && !strcmp(args[idx1],"false"))
+lua_pushboolean(L,0);
+else
+lua_pushstring(L,args[idx1]);
+int ctop=lua_gettop(L);
+CLEANUP_AFTERMATH(1,ctop);
+}
+}
+}
+}
+}
+}
+return 0;
+premature_end:
+return -1;
 }
 
 sig_atomic_t signal_counter=0;
@@ -5267,14 +5410,16 @@ lua_getfield(L,-1,"serialise");
 lua_insert(L,1);
 lua_pop(L,2);
 lua_pushliteral(L,"\t");
-PCALL_ERRH(2,1,0,"Error Serialising Object: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Serialising Object: %s!");
+PCALL_ERRH(2,1,0,"Error Serialising Object: %s!",CUSTOM_GOTO,premature_end);
 lua_getglobal(L,"debug");
 lua_getfield(L,-1,"traceback");
 lua_insert(L,1);
 lua_pushinteger(L,2);
 lua_replace(L,-2);
-PCALL_ERRH(2,1,0,"Error Performing TraceBack: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Performing TraceBack: %s!");
+PCALL_ERRH(2,1,0,"Error Performing TraceBack: %s!",CUSTOM_GOTO,premature_end);
 return 1;
+premature_end:
+return 0;
 }
 
 char stack_dump[1024*1024];
@@ -5290,7 +5435,7 @@ int segmentation[1+segment][2];
 L=luaL_newstate();
 luaL_openlibs(L);
 char script[]===],3+script_len,"]=",script1,[===[;
-DOSTR_ERRH(script,"Error within Module-Search Script: %s!",CUSTOM_GOTO,premature_end);
+DOSTR_ERRH(script,"Error Executing Module-Search Script: %s!",CUSTOM_GOTO,premature_end);
 REG;
 memset(script,0,sizeof script);
 strcpy(script,]===],script2,[===[);
@@ -5306,14 +5451,11 @@ segment++;
 segmentation[segment][1]=n-1;
 segmentation[segment][0]=segment>0?2+segmentation[segment-1][1]:1;
 segment=0;
-struct proto_states *states=(struct proto_states*)]===],os.getenv("ANDROID_ROOT")=="/system"and""or"_",[===[alloca(sizeof(struct proto_states));
+struct proto_states states;
 do{
 lua_sethook(L,NULL,0,0);
-states->progress=0;
-states->associative=0;
-states->depth=3;
-memset(states->tracks,0,1+3*states->depth);
-memset(states->traversal,0,2+3*states->depth);
+memset(states.tracks,0,sizeof states.tracks);
+memset(states.frames,0,sizeof states.frames);
 signal_counter=0;
 memset(&renewed_action,0,sizeof renewed_action);
 renewed_action.sa_handler=versatile_SigHandler;
@@ -5346,8 +5488,11 @@ lua_setglobal(L,"task_serial");
 }else{
 lua_pushinteger(L,2);
 lua_setglobal(L,"task_serial");
-lua_getglobal(L,"module_name");
-luaL_requiref(L,luaL_checkstring(L,-1),NULL,0);
+if(lua_getglobal(L,"module_name")!=LUA_TSTRING){
+fprintf(stderr,"Global Storing Module Name Expired and Now Becomes %s!",luaL_typename(L,-1));
+goto premature_end;
+}
+luaL_requiref(L,lua_tostring(L,-1),NULL,0);
 lua_getfield(L,-1,"serialise");
 lua_pushboolean(L,1);
 lua_pushliteral(L,"\t");
@@ -5358,14 +5503,14 @@ int ctop;
 if(lua_isfunction(L,-1)){
 lua_insert(L,4);
 ctop=lua_gettop(L);
-if(parse_console_command_options(n,args,states)->traversal[0]==-1)
+if(parse_console_command_options(segmentation[segment],(const char**)args,&states,0)==-1)
 goto premature_end;
 if((ctop=lua_gettop(L)-ctop)>0)
 lua_rotate(L,5,ctop);
 lua_pushcfunction(L,errMsg_Handler);
 lua_insert(L,4);
 lua_sethook(L,interpreter_Count_Hook_Function,LUA_MASKCOUNT,27000);
-PCALL_ERRH(lua_gettop(L)-5,LUA_MULTRET,4,"Error within Script File: %s!",CLEAR_STACK,3);
+PCALL_ERRH(lua_gettop(L)-5,LUA_MULTRET,4,"Error Executing Script File: %s!",CLEAR_STACK,3);
 lua_sethook(L,NULL,0,0);
 lua_remove(L,4);
 ctop=3;
@@ -5377,18 +5522,21 @@ else{
 if(script_file_unfound)
 lua_pop(L,1);
 else if(script_file_syntactic_error){
-fprintf(stderr,"Syntactic Error within Script File: %s!",luaL_checkstring(L,-1));
+fprintf(stderr,"Syntactic Error within Script File: %s!",lua_tostring(L,-1));
 lua_pop(L,2);
 }
 ctop=lua_gettop(L);
-if(parse_console_command_options(n,args,states)->traversal[0]==-1)
+if(parse_console_command_options(segmentation[segment],(const char**)args,&states,0)==-1)
 goto premature_end;
 }
 }
 int idx1=1+ctop;
 if((ctop=lua_gettop(L))>=idx1){
 for(;idx1<=ctop;idx1++){
-luaL_checkstack(L,27,"Unable to Allocate Memory for the Extra Stack Space!");
+if(!lua_checkstack(L,27)){
+fprintf(stderr,"Unable to Allocate Memory for the Extra Stack Space!");
+goto premature_end;
+}
 lua_pushvalue(L,1);
 lua_pushvalue(L,idx1);
 lua_pushvalue(L,2);
@@ -5397,7 +5545,10 @@ int bret=lua_gettop(L);
 PCALL_ERRH(3,LUA_MULTRET,0,"Error Serialising Individual Result: %s!",CUSTOM_GOTO,premature_end);
 if(lua_gettop(L)-bret>1){
 for(int idx2=lua_gettop(L);idx2>bret;idx2--){
-luaL_checkstack(L,3,"Unable to Allocate Memory for the Extra Stack Space!");
+if(!lua_checkstack(L,3)){
+fprintf(stderr,"Unable to Allocate Memory for the Extra Stack Space!");
+goto premature_end;
+}
 lua_pushliteral(L,"\n");
 lua_insert(L,idx2);
 }
@@ -5405,11 +5556,11 @@ lua_insert(L,idx2);
 lua_pushliteral(L,"\n");
 }
 lua_getglobal(L,"task_serial");
-lua_pushfstring(L,"--finish line of stack dump for task #%d\n",luaL_checkinteger(L,-1)-1);
+lua_pushfstring(L,"--finish line of stack dump for task #%d\n",luaL_optinteger(L,-1,0)-1);
 lua_remove(L,-2);
 lua_concat(L,lua_gettop(L)-ctop);
 size_t result_length;
-const char *result_string=luaL_checklstring(L,-1,&result_length);
+const char *result_string=lua_tolstring(L,-1,&result_length);
 if(result_length>=sizeof stack_dump)
 memcpy(stack_dump,result_string,sizeof stack_dump);
 else{
@@ -5424,7 +5575,8 @@ tail+=result_length;
 lua_pop(L,1);
 }
 if(lua_getglobal(L,"segment")==LUA_TNUMBER){
-segment=lua_tointeger(L,-1);
+segment=luaL_optinteger(L,-1,1);
+lua_pop(L,1);
 for(idx1=lua_gettop(L);idx1>=1;idx1--){
 if(lua_isstring(L,idx1)&& !lua_isnumber(L,idx1)&&(!strcmp(lua_tostring(L,idx1),"dead")||(!strcmp(lua_tostring(L,idx1),"cannot resume dead coroutine")&& lua_isboolean(L,idx1-1)&& !lua_toboolean(L,idx1-1)))){
 lua_settop(L,3);
@@ -5432,10 +5584,12 @@ segment=1+segment%(sizeof segmentation/sizeof segmentation[0]);
 break;
 }
 }
-}else
+}else{
 segment=1;
 lua_pushinteger(L,segment);
+lua_replace(L,-2);
 lua_setglobal(L,"segment");
+}
 }while(lua_gettop(L)<LUA_MINSTACK-3 || lua_checkstack(L,5));
 premature_end:
 lua_close(L);
@@ -5445,18 +5599,24 @@ io.output():close()
 if os.getenv("ANDROID_ROOT")~="/system"then
 goto not_bother
 end
+if not io.popen("find $PREFIX/local -type d 2>/dev/null"):read()then
+os.execute("mkdir -v $PREFIX/local")
+end
 os.execute("rm -rvf $PREFIX/local/c_M")
 os.execute("mkdir -v -m +rwx $PREFIX/local/c_M")
 if os.execute('clang -x c "'..where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version)..'" -fPIC -fdata-sections -ffunction-sections -Wl,--gc-sections,--as-needed -ffp-contract=fast -ggdb -O0 -Wall -o $PREFIX/local/c_M/lua_Console -L$PREFIX/local/lib -llua -L$PREFIX/lib -landroid-execinfo -pthread -lm')then
-os.execute([===[export "PATH=$PREFIX/bin"
-unset LUA_INIT
-unset LUA_INIT_]===].._VERSION:match("%f[%s%.%d][%s%.%w]*"):gsub("%s",""):gsub("%.","_").."\n"..[===[cat > ~/.bashrc << EOF
+os.execute([===[unset LUA_INIT
+unset LUA_INIT_]===].._VERSION:match("%f[%s%.%d][%s%.%w]*"):gsub("%s",""):gsub("%.","_").."\n"..[===[export "PATH=$PREFIX/bin"
+cat > ~/.bashrc << EOF
 $(luarocks path)
 EOF
-source ~/.bashrc
 echo 'export "PATH=$PREFIX/local/bin:$PREFIX/local/c_M:$PATH"' >> ~/.bashrc
 echo 'export "LUA_INIT_]===].._VERSION:match("%f[%s%.%d][%s%.%w]*"):gsub("%s",""):gsub("%.","_")..[===[=@/sdcard/Download/Codes/lua_StandAlone"' >> ~/.bashrc
-source ~/.bashrc]===])
+cat > ~/.inputrc << EOF
+TAB: menu-complete
+set show-all-if-ambiguous on
+set menu-complete-display-prefix on
+EOF]===])
 print("Main Program Ready for Run!")
 end
 os.remove(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
