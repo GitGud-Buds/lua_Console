@@ -3343,8 +3343,8 @@ debug.setmetatable(consolidate_File,consolidate_File)
 
 
 local interface={
-version=1.4140625,
-renewed=20261015,
+version=1.4296875,
+renewed=20261017,
 ["Pointers in Practice"]="Deeming certain parameters tables or refering to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-invoke time.",
 replicate=replicate,
 zip=zip,
@@ -3373,7 +3373,7 @@ consolidate_File=consolidate_File
 --a few declarations:
 do
 local status="ready for run";
-local digest=2347118952320643336;
+local digest=264535011743144472;
 local required_name,find_self,where=...
 if os.getenv("ANDROID_ROOT")=="/system"then
 where=find_self:match("^(.-/)[^/]+$")
@@ -4028,7 +4028,12 @@ package.path=cache_package_path
 return module_instance]===]):gsub("\n","n\\\n"),("%q"):format([===[if math.type(task_serial)=='integer'then
 ::redirected::
 print('Task #'..task_serial..': Please Enter Directory to Redirect to or Globals to Serialise, Either to Proceed UnDisrupted or QUIT to Opt Out...')
-local directives,quit,handle=io.input(io.stdin):read()
+local quit,directives,handle=pcall(io.input().read,io.input())
+if quit then
+quit=nil
+else
+directives=io.input(io.stdin):read()
+end
 if directives=='QUIT'then
 quit=true
 goto cut_short
@@ -4069,7 +4074,7 @@ handle:close()
 end
 ::cut_short::
 if quit then
-error('Quiting Main Loop...')
+error('Making Exit...')
 end
 end
 if os.getenv('ANDROID_ROOT')=='/system'then
@@ -4367,6 +4372,37 @@ lua_settop(L,3);
 return 1;
 }
 
+int get_Field(lua_State *L){
+_Bool dummy_encountered=0;
+if(lua_rawequal(L,lua_upvalueindex(1),1))
+dummy_encountered=1;
+lua_settop(L,2);
+lua_getmetatable(L,-2);
+if(luaL_getmetatable(L,"dual_Capable_Map")==LUA_TTABLE && lua_rawequal(L,-2,-1)){
+lua_pushvalue(L,-3);
+lua_rawget(L,-2);
+if(lua_isnil(L,-1)&& !dummy_encountered){
+lua_pushliteral(L,"nLookUp");
+lua_rawget(L,-3);
+lua_pushvalue(L,-6);
+lua_pushvalue(L,-6);
+PCALL_ERRH(2,1,0,"Error Performing Ordinary LookUp: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Performing Ordinary LookUp: %s!");
+if(lua_isnil(L,-1)){
+lua_pushliteral(L,"lookUp");
+lua_rawget(L,-4);
+lua_rotate(L,-7,-2);
+PCALL_ERRH(2,1,0,"Error Performing Inverse LookUp: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Performing Inverse LookUp: %s!");
+if(!lua_isnil(L,-1))
+return 1;
+}else
+return 1;
+}else
+return 1;
+}else
+luaL_error(L,"Associated MetaTable Has Been Tampered!");
+return 0;
+}
+
 int generator_Function(lua_State *L){
 lua_settop(L,2);
 skip_upvalue:
@@ -4419,7 +4455,7 @@ return idx-1;
 }
 for(int idx=lua_gettop(L);idx>1;idx--){
 luaL_checkstack(L,6,"Unable to Allocate Memory for the Extra Stack Space!");
-struct ref_couple *refs=(struct ref_couple*)lua_newuserdatauv(L,sizeof(struct ref_couple),0);
+struct ref_couple *refs=(struct ref_couple*)lua_newuserdatauv(L,sizeof(struct ref_couple),2);
 lua_newtable(L);
 refs->ref=luaL_ref(L,LUA_REGISTRYINDEX);
 lua_newtable(L);
@@ -4461,35 +4497,25 @@ lua_replace(L,idx);
 return lua_gettop(L)-1;
 }
 
-int get_Field(lua_State *L){
-_Bool dummy_encountered=0;
+int set_Attribute_Index(lua_State *L){
 if(lua_rawequal(L,lua_upvalueindex(1),1))
-dummy_encountered=1;
-lua_settop(L,2);
-lua_getmetatable(L,-2);
-if(luaL_getmetatable(L,"dual_Capable_Map")==LUA_TTABLE && lua_rawequal(L,-2,-1)){
-lua_pushvalue(L,-3);
-lua_rawget(L,-2);
-if(lua_isnil(L,-1)&& !dummy_encountered){
-lua_pushliteral(L,"nLookUp");
-lua_rawget(L,-3);
-lua_pushvalue(L,-6);
-lua_pushvalue(L,-6);
-PCALL_ERRH(2,1,0,"Error Performing Ordinary LookUp: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Performing Ordinary LookUp: %s!");
-if(lua_isnil(L,-1)){
-lua_pushliteral(L,"lookUp");
-lua_rawget(L,-4);
-lua_rotate(L,-7,-2);
-PCALL_ERRH(2,1,0,"Error Performing Inverse LookUp: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Performing Inverse LookUp: %s!");
-if(!lua_isnil(L,-1))
-return 1;
-}else
-return 1;
-}else
-return 1;
-}else
-luaL_error(L,"Associated MetaTable Has Been Tampered!");
+goto dummy_userdata;
+lua_settop(L,3);
+luaL_checkudata(L,-3,"dual_Capable_Map");
+lua_Integer index=luaL_checkinteger(L,-2);
+lua_setiuservalue(L,-3,1+(index-1)%2);
+dummy_userdata:
 return 0;
+}
+
+int get_Attribute_Index(lua_State *L){
+if(lua_rawequal(L,lua_upvalueindex(1),1))
+return 0;
+lua_settop(L,2);
+luaL_checkudata(L,-2,"dual_Capable_Map");
+lua_Integer index=luaL_checkinteger(L,-1);
+lua_getiuservalue(L,-2,1+(index-1)%2);
+return 1;
 }
 
 int get_Length(lua_State *L){
@@ -4548,9 +4574,11 @@ const luaL_Reg dual_Capable_Map[]={
 {"__newindex",set_Field},
 {"nLookUp",natural_LookUp},
 {"lookUp",lookUp},
+{"__index",get_Field},
 {"__pairs",generator_Factory},
 {"__call",create_Dual_Capable_Map},
-{"__index",get_Field},
+{"setI_Attr",set_Attribute_Index},
+{"getI_Attr",get_Attribute_Index},
 {"__len",get_Length},
 {"inspect",inspect},
 {"__gc",unbind_Tables},
@@ -4806,7 +4834,8 @@ lua_pushvalue(L,-2);\
 lua_pushlightuserdata(L,(int**)&collective_signals);\
 lua_pushlightuserdata(L,&renewed_action);\
 lua_pushlightuserdata(L,&current_action);\
-luaL_setfuncs(L,dual_Capable_Map,4);\
+lua_newtable(L);\
+luaL_setfuncs(L,dual_Capable_Map,5);\
 lua_setmetatable(L,-2);\
 lua_setfield(L,-2,"dual_Capable_Map");\
 int idx=-1;\
@@ -5065,6 +5094,10 @@ script_concluded=0;
 script_initiated=1;
 }
 }
+if(args[idx1][0]=='<'){
+assignment_operator=strlen(args[idx1]);
+count_assignments=0;
+}
 if(count_assignments+(args[idx1][0]=='=')>1){
 fprintf(stderr,"%d More than 1 Assignment Operators within 1 Expression!",count_assignments+(args[idx1][0]=='=')-1);
 goto premature_end;
@@ -5094,13 +5127,13 @@ strcpy(digest1,1+args[idx1]);
 digest_in_turn[0]=digest1;
 int range_in_turn[2]={0,0};
 RECURSIVE_BREAKDOWN(2);
-}else if(whence<1 &&(count_assignments>0 || args[idx1][strlen(args[idx1])-1]=='=')){
+}else if(whence<1 && count_assignments>0){
 char *digest_in_turn[2];
 char digest1[count_assignments>0?3+assignment_operator:2+strlen(args[idx1])];
 memset(digest1,0,sizeof digest1);
 strncpy(digest1,args[idx1],count_assignments>0?assignment_operator:strlen(args[idx1])-1);
 digest_in_turn[0]=digest1;
-char digest2[count_assignments>0?3+strlen(args[idx1])-assignment_operator:3+1];
+char digest2[3+(count_assignments>0?strlen(args[idx1])-assignment_operator:1)];
 memset(digest2,0,sizeof digest2);
 strcpy(digest2,(count_assignments>0?assignment_operator:strlen(args[idx1])-1)+args[idx1]);
 digest_in_turn[1]=digest2;
@@ -5109,16 +5142,18 @@ RECURSIVE_BREAKDOWN(1);
 }else{
 before_tokenising:;
 int last_initiator=-1,last_anti_angle_bracket=-1,first_terminator=strlen(args[idx1]),first_angle_bracket=strlen(args[idx1]),count_parenthetic_initiators=0,count_elements=0,cache_count_elements=1;
-_Bool garbage_among_initiators=0,past_terminators=0,consecutiveness=1;
+_Bool garbage_among_initiators=0,garbage_among_terminators=0,past_terminators=0,garbage_among_consecutive=0,consecutiveness=1;
 for(int idx2=strlen(args[idx1])-1;idx2>=0;idx2--){
 if(args[idx1][idx2]=='('|| args[idx1][idx2]=='{'|| args[idx1][idx2]=='<'|| args[idx1][idx2]==')'|| args[idx1][idx2]=='}'|| args[idx1][idx2]=='>'){
 count_elements++;
 if(args[idx1][idx2]=='('|| args[idx1][idx2]=='{'){
 if(last_initiator==-1)
 last_initiator=idx2;
-if(args[idx1][idx2]=='(')
+if(args[idx1][idx2]=='('){
 count_parenthetic_initiators++;
-else if(count_parenthetic_initiators==1)
+if(!consecutiveness)
+garbage_among_consecutive=1;
+}else if(count_parenthetic_initiators==1)
 consecutiveness=0;
 }else if(args[idx1][idx2]=='<'){
 count_elements=cache_count_elements;
@@ -5126,28 +5161,36 @@ first_angle_bracket=idx2;
 last_initiator=-1;
 count_parenthetic_initiators=0;
 garbage_among_initiators=0;
+garbage_among_consecutive=0;
 consecutiveness=1;
 }else if(args[idx1][idx2]==')'|| args[idx1][idx2]=='}'){
-if(past_terminators){
-fprintf(stderr,"Garbage Among Terminators!");
-goto premature_end;
-}
-if(last_anti_angle_bracket==-1)
+if(last_anti_angle_bracket==-1){
+if(past_terminators)
+garbage_among_terminators=1;
 first_terminator=idx2;
+}
 }else if(args[idx1][idx2]=='>'&& last_anti_angle_bracket==-1){
 cache_count_elements=count_elements;
-if(past_terminators){
-fprintf(stderr,"Garbage Among Terminators!");
-goto premature_end;
-}
+if(past_terminators)
+garbage_among_terminators=1;
 last_anti_angle_bracket=idx2;
 }
 }else{
-if(first_angle_bracket<strlen(args[idx1])||(last_initiator>-1 && count_parenthetic_initiators!=1))
+if((first_angle_bracket<strlen(args[idx1])|| last_initiator>-1)&&(count_parenthetic_initiators!=1 || !consecutiveness))
 garbage_among_initiators=1;
-if(first_terminator<strlen(args[idx1])&& !past_terminators)
+if(!past_terminators)
 past_terminators=1;
 }
+}
+if(last_anti_angle_bracket>-1 && first_angle_bracket==strlen(args[idx1])){
+count_elements=cache_count_elements;
+last_initiator=-1;
+count_parenthetic_initiators=0;
+garbage_among_initiators=0;
+garbage_among_consecutive=0;
+}else if(last_anti_angle_bracket==-1 && first_angle_bracket<strlen(args[idx1])){
+first_terminator=strlen(args[idx1]);
+garbage_among_terminators=0;
 }
 if(last_initiator>=first_terminator){
 fprintf(stderr,"Intermixed Initiators and Terminators within 1 Expression!");
@@ -5162,13 +5205,13 @@ if(last_initiator>=first_angle_bracket || last_anti_angle_bracket>=first_termina
 fprintf(stderr,"Program Self-Check: Command-InLine Script Must Reside within Other Elements!");
 goto premature_end;
 }
-if(!consecutiveness || count_parenthetic_initiators>2){
-fprintf(stderr,"Conventions Concerned with Function Call Violated!");
+if(count_parenthetic_initiators>2){
+fprintf(stderr,"%d More than 2 Parenthetic Initiators within 1 Expression!",count_parenthetic_initiators-2);
 goto premature_end;
 }else if(count_parenthetic_initiators==2)
 count_elements--;
-if(garbage_among_initiators){
-fprintf(stderr,"Garbage Among Initiators!");
+if(garbage_among_terminators || garbage_among_initiators || garbage_among_consecutive){
+fprintf(stderr,"Garbage among %s%s%s!",garbage_among_terminators?"Terminators":"",garbage_among_initiators?(garbage_among_terminators?(garbage_among_consecutive?", Initiators":" and Initiators"):"Initiators"):"",garbage_among_consecutive?((garbage_among_terminators || garbage_among_initiators)?" and Consecutive Single-Return Function-Call Initiators":"Consecutive Single-Return Function-Call Initiators"):"");
 goto premature_end;
 }
 {
@@ -5209,8 +5252,10 @@ goto premature_end;
 }
 if(args[idx1][idx2-1]=='(')
 prepare_call[idx2-1]=args[idx1][idx2-1];
-prepare_call+=idx2-1;
+prepare_call+=args[idx1][idx2-1]=='('?idx2-1:idx2;
 digest_in_turn[--scan]=prepare_call;
+if(args[idx1][idx2-1]=='(')
+idx2--;
 past_call=1;
 }
 if(!call_met)
@@ -5224,20 +5269,20 @@ continue;
 }
 tokenised:
 if(args[idx1][strlen(args[idx1])-1]=='('){
-if(idx1>0 || strcmp(args[idx1],"(")){
-char *digest_in_turn[1];
-char digest1[(args[idx1][0]=='('?1:2)+strlen(args[idx1])];
-memset(digest1,0,sizeof digest1);
-strncpy(digest1,(args[idx1][0]=='('?1:0)+args[idx1],strlen(args[idx1])-(args[idx1][0]=='('?2:1));
-digest_in_turn[0]=digest1;
-int range_in_turn[2]={0,0};
-RECURSIVE_BREAKDOWN(4);
-}
 if(1+strlen(states->tracks)>=DEPTH){
 fprintf(stderr,"Excessive Nesting of Expressions - Maximum %d!",DEPTH-1);
 goto premature_end;
 }
 states->tracks[strlen(states->tracks)]=((idx1<=0 && !strcmp(args[idx1],"("))|| args[idx1][0]!='(')?3:2;
+if(idx1>0 || strcmp(args[idx1],"(")){
+char *digest_in_turn[1];
+char digest1[(args[idx1][0]=='('?1:2)+strlen(args[idx1])];
+memset(digest1,0,sizeof digest1);
+strncpy(digest1,args[idx1][0]=='('?1+args[idx1]:args[idx1],strlen(args[idx1])-(args[idx1][0]=='('?2:1));
+digest_in_turn[0]=digest1;
+int range_in_turn[2]={0,0};
+RECURSIVE_BREAKDOWN(4);
+}
 states->frames[strlen(states->frames)]=lua_gettop(L);
 }else if(!strcmp(args[idx1],"{")){
 if(strlen(states->tracks)>0 && states->tracks[strlen(states->tracks)-1]==4)
@@ -5267,7 +5312,7 @@ states->frames[strlen(states->frames)]=lua_gettop(L);
 lua_pushstring(L,1+args[idx1]);
 }
 }else if(!strcmp(args[idx1],")")){
-if(!strcmp(args[idx1-1],")"))
+if(idx1>0 && !strcmp(args[idx1-1],")"))
 continue;
 else if(strlen(states->tracks)<=0 || states->tracks[strlen(states->tracks)-1]!=((1+idx1<=range[1]&& !strcmp(args[1+idx1],")"))?2:3)){
 fprintf(stderr,"Terminator MisMatch - %s Found where %s Expected!",track_categories[(1+idx1<=range[1]&& !strcmp(args[1+idx1],")"))?2:3],track_categories[strlen(states->tracks)>0?states->tracks[strlen(states->tracks)-1]:0]);
@@ -5337,7 +5382,7 @@ if(lua_isnil(L,-1)){
 lua_pop(L,1);
 if(strlen(states->tracks)>0 && states->tracks[strlen(states->tracks)-1]>6){
 lua_pushstring(L,args[idx1]);
-lua_replace(L,-2);
+continue;
 }else{
 char *literal_tailptr=NULL;
 long long integer_number;
@@ -5354,10 +5399,10 @@ else if(strlen(args[idx1])==5 && !strcmp(args[idx1],"false"))
 lua_pushboolean(L,0);
 else
 lua_pushstring(L,args[idx1]);
+}
+}
 int ctop=lua_gettop(L);
 CLEANUP_AFTERMATH(1,ctop);
-}
-}
 }
 }
 }
@@ -5734,8 +5779,9 @@ if database_location and database_path:find(database_location)==1 then
 io.write("local database_snapshot=[",("="):rep(15),"[",io.input(database_path):read("a"),"]",("="):rep(15),"]\n")
 io.input():close()
 elseif type(database_finder)=="table"then
+io.write("local database_snapshots={")
 for idx=1,#database_finder//3 do
-io.write("local database_snapshot",idx,"=[",("="):rep(15),"[",io.input(database_finder[3*idx-1]):read("a"),"]",("="):rep(15),"]\n")
+io.write("[",idx,"]=[",("="):rep(15),"[",io.input(database_finder[3*idx-1]):read("a"),"]",("="):rep(15),3*(1+idx)>#database_finder and"]}\n"or"],\n")
 io.input():close()
 end
 end
