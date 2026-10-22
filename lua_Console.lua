@@ -3343,8 +3343,8 @@ debug.setmetatable(consolidate_File,consolidate_File)
 
 
 local interface={
-version=1.4296875,
-renewed=20261017,
+version=1.4453125,
+renewed=20261020,
 ["Pointers in Practice"]="Deeming certain parameters tables or refering to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-invoke time.",
 replicate=replicate,
 zip=zip,
@@ -3373,7 +3373,7 @@ consolidate_File=consolidate_File
 --a few declarations:
 do
 local status="ready for run";
-local digest=264535011743144472;
+local digest=-3093898117119151720;
 local required_name,find_self,where=...
 if os.getenv("ANDROID_ROOT")=="/system"then
 where=find_self:match("^(.-/)[^/]+$")
@@ -4587,48 +4587,50 @@ const luaL_Reg dual_Capable_Map[]={
 
 int chdir_Conveyed(lua_State *L){
 lua_settop(L,1);
+int error_number=errno;
 if(chdir(luaL_checkstring(L,-1))){
 lua_pushboolean(L,0);
 lua_pushstring(L,strerror(errno));
+errno=error_number;
 return 2;
-}else{
+}
 lua_pushboolean(L,1);
 return 1;
-}
 }
 
 int sleep_Conveyed(lua_State *L){
 lua_settop(L,2);
-lua_Integer seconds=lua_isnumber(L,-1)?lua_tonumber(L,-2):lua_tonumber(L,-2)/1000;
-lua_Integer nanoseconds=lua_isnumber(L,-1)?1000000*lua_tonumber(L,-1):1000000*(lua_tonumber(L,-2)-1000*seconds);
+lua_Integer seconds=luaL_checknumber(L,-2);
+lua_Integer nanoseconds=lua_isnumber(L,-1)?lua_tonumber(L,-1):1000000000*(lua_tonumber(L,-2)-seconds);
+if(nanoseconds<0 || nanoseconds>=1000000000){
+seconds+=nanoseconds/1000000000;
+nanoseconds%=1000000000;
 if(nanoseconds<0){
 seconds--;
 nanoseconds+=1000000000;
 }
+}
 struct timespec request={(time_t)seconds,(long)nanoseconds};
 if(lua_isnumber(L,-1)){
+struct timespec remain;
+int error_number;
+if((error_number=clock_nanosleep(CLOCK_MONOTONIC,0,&request,&remain))){
+lua_pushboolean(L,0);
+lua_pushstring(L,strerror(error_number));
+lua_pushnumber(L,remain.tv_sec+remain.tv_nsec/1000000000.0);
+return 3;
+}
+lua_pushboolean(L,1);
+return 1;
+}
 int error_number;
 if((error_number=clock_nanosleep(CLOCK_REALTIME,TIMER_ABSTIME,&request,NULL))){
 lua_pushboolean(L,0);
 lua_pushstring(L,strerror(error_number));
 return 2;
-}else{
+}
 lua_pushboolean(L,1);
 return 1;
-}
-}else{
-struct timespec remain;
-int error_number;
-if((error_number=clock_nanosleep(CLOCK_REALTIME,0,&request,&remain))){
-lua_pushboolean(L,0);
-lua_pushstring(L,strerror(error_number));
-lua_pushnumber(L,remain.tv_sec+remain.tv_nsec/1000000000.0);
-return 3;
-}else{
-lua_pushboolean(L,1);
-return 1;
-}
-}
 }
 
 int primality(lua_State *L){
@@ -4661,13 +4663,13 @@ lua_insert(L,1);
 return 3;
 }
 
-int thread_Consolidator(lua_State *L);
+int multithread_Initiator(lua_State *L);
 
 const luaL_Reg c_UpBinds[]={
-{"thread_Consolidator",thread_Consolidator},
 {"chdir",chdir_Conveyed},
 {"sleep",sleep_Conveyed},
 {"prime_Generator",prime_Generator},
+{"multithread_Initiator",multithread_Initiator},
 {NULL,NULL}
 };
 
@@ -4851,94 +4853,440 @@ const int collective_signals[]={SIGINT,SIGABRT,SIGSEGV,SIGBUS,SIGILL,SIGFPE};
 struct sigaction renewed_action;
 struct sigaction current_action;
 
-pthread_mutex_t lock=PTHREAD_MUTEX_INITIALIZER;
+int errMsg_Handler(lua_State *L){
+lua_settop(L,1);
+lua_getglobal(L,"module_name");
+luaL_requiref(L,luaL_optstring(L,-1,"]===],required_name,[===["),NULL,0);
+lua_getfield(L,-1,"serialise");
+lua_insert(L,1);
+lua_pop(L,2);
+lua_pushliteral(L,"\t");
+PCALL_ERRH(2,1,0,"Error Serialising Object: %s!",CUSTOM_GOTO,premature_end);
+lua_getglobal(L,"debug");
+lua_getfield(L,-1,"traceback");
+lua_insert(L,1);
+lua_pushinteger(L,2);
+lua_replace(L,-2);
+PCALL_ERRH(2,1,0,"Error Performing TraceBack: %s!",CUSTOM_GOTO,premature_end);
+return 1;
+premature_end:
+return 0;
+}
 
-struct variable_lengthed_array{
-int length;
-char *array;
+pthread_mutex_t module_search_lock=PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t task_queue_lock=PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t outcome_queue_lock=PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t await_task=PTHREAD_COND_INITIALIZER;
+pthread_cond_t task_queue_full;
+pthread_cond_t await_outcome;
+pthread_cond_t outcome_queue_full=PTHREAD_COND_INITIALIZER;
+
+struct multithread_task_cyclic_queue{
+_Bool resize_next_window;
+int queue_size;
+int start;
+int end;
+char **tasks;
+}task_queue;
+
+struct array_of_results{
+lua_Integer thread_serial_in_case_of_error;
+int array_size;
+char *results[];
 };
 
-struct array_of_arrays{
-int length;
-struct variable_lengthed_array array[];
-};
+struct multithread_outcome_cyclic_queue{
+_Bool resize_next_window;
+int queue_size;
+int start;
+int end;
+struct array_of_results **outcomes;
+}outcome_queue;
+
+_Bool upcome;
 
 void* individual_Thread(void *arg){
 lua_State *L=(lua_State*)arg;
 luaL_openlibs(L);
 lua_pushboolean(L,0);
 lua_setglobal(L,"c_thread");
-struct array_of_arrays *results=NULL;
+struct array_of_results *results=NULL;
 char script[]===],3+script_len,"]=",script1,[===[;
-pthread_mutex_lock(&lock);
-DOSTR_ERRH(script,"Error Executing Module-Search Script: %s!",CUSTOM_GOTO,premature_end);
-pthread_mutex_unlock(&lock);
+pthread_mutex_lock(&module_search_lock);
+if(luaL_dostring(L,script)==LUA_OK)
+pthread_mutex_unlock(&module_search_lock);
+else{
+pthread_mutex_unlock(&module_search_lock);
+results=malloc(sizeof(struct array_of_results));
+results->thread_serial_in_case_of_error=lua_tointeger(L,1);
+lua_pushfstring(L,"Error Executing Module-Search Script: %s!",lua_tostring(L,-1));
+lua_replace(L,-2);
+goto premature_end;
+}
 REG;
-int ctop=lua_gettop(L);
-PCALL_ERRH(0,LUA_MULTRET,0,"Error Executing Task Script: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Executing Task Script: %s!");
-luaL_checkstack(L,3,"Unable to Allocate Memory for the Extra Stack Space!");
 lua_getglobal(L,"module_name");
-luaL_requiref(L,luaL_checkstring(L,-1),NULL,0);
+luaL_requiref(L,luaL_optstring(L,-1,"]===],required_name,[===["),NULL,0);
 lua_getfield(L,-1,"serialise");
-lua_insert(L,ctop);
-lua_pop(L,2);
-results=malloc(sizeof(int)+(lua_gettop(L)-ctop)*sizeof(struct variable_lengthed_array));
-results->length=lua_gettop(L)-ctop;
-int count_up=-1;
-for(int idx=ctop-lua_gettop(L);idx<=-1;idx++){
-luaL_checkstack(L,3,"Unable to Allocate Memory for the Extra Stack Space!");
-lua_pushvalue(L,ctop);
-lua_pushvalue(L,idx-1);
+lua_pushboolean(L,1);
 lua_pushliteral(L,"\t");
-PCALL_ERRH(2,1,0,"Error Serialising Result: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Serialising Result: %s!");
-size_t len;
-const char *cache_result=lua_tolstring(L,-1,&len);
-results->array[++count_up].array=malloc(len);
-results->array[count_up].length=len;
-memset(results->array[count_up].array,0,len);
-strncpy(results->array[count_up].array,cache_result,len);
-lua_pop(L,1);
+lua_pushcfunction(L,errMsg_Handler);
+lua_rotate(L,1,-2);
+lua_pop(L,2);
+another:
+pthread_mutex_lock(&task_queue_lock);
+while(upcome && task_queue.start==task_queue.end && task_queue.tasks[task_queue.start-1<0?task_queue.queue_size-1:task_queue.start-1]==NULL && task_queue.tasks[1+task_queue.end<task_queue.queue_size?1+task_queue.end:0]==NULL)
+pthread_cond_wait(&await_task,&task_queue_lock);
+if(!upcome){
+pthread_mutex_unlock(&task_queue_lock);
+return NULL;
+}else if(luaL_loadstring(L,task_queue.tasks[task_queue.start])!=LUA_OK){
+results=malloc(sizeof(struct array_of_results));
+results->thread_serial_in_case_of_error=lua_tointeger(L,1);
+lua_pushfstring(L,"Syntaxtic Error within Task Script: %s!",lua_tostring(L,-1));
+lua_replace(L,-2);
+free(task_queue.tasks[task_queue.start]);
+task_queue.tasks[task_queue.start]=NULL;
+task_queue.start=(1+task_queue.start)%task_queue.queue_size;
+pthread_cond_signal(&task_queue_full);
+pthread_mutex_unlock(&task_queue_lock);
+goto premature_end;
+}
+free(task_queue.tasks[task_queue.start]);
+task_queue.tasks[task_queue.start]=NULL;
+task_queue.start=(1+task_queue.start)%task_queue.queue_size;
+pthread_cond_signal(&task_queue_full);
+pthread_mutex_unlock(&task_queue_lock);
+if(lua_pcall(L,0,LUA_MULTRET,-2)!=LUA_OK){
+results=malloc(sizeof(struct array_of_results));
+results->thread_serial_in_case_of_error=lua_tointeger(L,1);
+lua_pushfstring(L,"Error Executing Task Script: %s!",lua_tostring(L,-1));
+lua_replace(L,-2);
+goto premature_end;
+}
+int idx1=lua_gettop(L);
+if(idx1>5){
+results=malloc(sizeof(struct array_of_results)+(idx1-5)*sizeof(char*));
+results->thread_serial_in_case_of_error=-1;
+results->array_size=idx1-5;
+for(;idx1>5;idx1--){
+if(!lua_checkstack(L,27)){
+results=realloc(results,sizeof(struct array_of_results));
+results->thread_serial_in_case_of_error=lua_tointeger(L,1);
+lua_pushliteral(L,"Unable to Allocate Memory for the Extra Stack Space!");
+goto premature_end;
+}
+lua_pushvalue(L,2);
+lua_insert(L,-2);
+lua_pushvalue(L,3);
+lua_pushvalue(L,4);
+if(lua_pcall(L,3,LUA_MULTRET,5)!=LUA_OK){
+results=realloc(results,sizeof(struct array_of_results));
+results->thread_serial_in_case_of_error=lua_tointeger(L,1);
+lua_pushfstring(L,"Error Serialising Individual Result: %s!",lua_tostring(L,-1));
+lua_replace(L,-2);
+goto premature_end;
+}
+int idx2=lua_gettop(L);
+if(idx2>idx1){
+for(;idx2>idx1;idx2--){
+if(!lua_checkstack(L,3)){
+results=realloc(results,sizeof(struct array_of_results));
+results->thread_serial_in_case_of_error=lua_tointeger(L,1);
+lua_pushliteral(L,"Unable to Allocate Memory for the Extra Stack Space!");
+goto premature_end;
+}
+lua_pushliteral(L,"\n");
+lua_insert(L,idx2);
+}
+lua_pushliteral(L,"\n");
+lua_concat(L,1+lua_gettop(L)-idx1);
+}
+size_t length_of_result;
+const char *cache_result=lua_tolstring(L,-1,&length_of_result);
+char *result=calloc(3+length_of_result,1);
+strcpy(result,cache_result);
+results->results[idx1-6]=result;
+}
+pthread_mutex_lock(&outcome_queue_lock);
+while(outcome_queue.start==outcome_queue.end && outcome_queue.outcomes[outcome_queue.start-1<0?outcome_queue.queue_size-1:outcome_queue.start-1]!=NULL && outcome_queue.outcomes[1+outcome_queue.end<outcome_queue.queue_size?1+outcome_queue.end:0]!=NULL){
+if(!outcome_queue.resize_next_window)
+outcome_queue.resize_next_window=1;
+pthread_cond_wait(&outcome_queue_full,&outcome_queue_lock);
+}
+pthread_mutex_unlock(&outcome_queue_lock);
 }
 premature_end:
-if(!results)
-pthread_mutex_unlock(&lock);
+pthread_mutex_lock(&outcome_queue_lock);
+if(outcome_queue.resize_next_window ||(outcome_queue.start<outcome_queue.end && outcome_queue.end-outcome_queue.start>=3*outcome_queue.queue_size/4)){
+outcome_queue.outcomes=realloc(outcome_queue.outcomes,3*outcome_queue.queue_size/2*sizeof(char*));
+outcome_queue.resize_next_window=0;
+}
+outcome_queue.outcomes[outcome_queue.end]=results;
+outcome_queue.end=(1+outcome_queue.end)%outcome_queue.queue_size;
+if(outcome_queue.queue_size>27 && outcome_queue.start<outcome_queue.end && outcome_queue.end-outcome_queue.start<=outcome_queue.queue_size/4)
+outcome_queue.outcomes=realloc(outcome_queue.outcomes,outcome_queue.queue_size/2*sizeof(char*));
+pthread_cond_signal(&await_outcome);
+if(upcome && results->thread_serial_in_case_of_error<0){
+pthread_mutex_unlock(&outcome_queue_lock);
+goto another;
+}
+pthread_mutex_unlock(&outcome_queue_lock);
+if(results->thread_serial_in_case_of_error>-1){
+size_t length_of_error_message;
+const char *cache_error_message=lua_tolstring(L,-1,&length_of_error_message);
+char *error_message=calloc(3+length_of_error_message,1);
+strcpy(error_message,cache_error_message);
 lua_close(L);
-return results;
+return error_message;
+}
+return NULL;
 }
 
-int thread_Consolidator(lua_State *L){
+#define COLLECT_OUTCOMES(OUTCOME_QUEUE,SUPPLEMENT_WITH_NEW) do{\
+if(outcome_queue.outcomes[outcome_queue.start]->thread_serial_in_case_of_error>-1){\
+if(SUPPLEMENT_WITH_NEW){\
+char *error_message;\
+pthread_join(mt_ctx->mt_ctx_thrds->threads[outcome_queue.outcomes[outcome_queue.start]->thread_serial_in_case_of_error],(void**)&error_message);\
+lua_pushstring(L,error_message);\
+lua_seti(L,OUTCOME_QUEUE,1+luaL_len(L,OUTCOME_QUEUE));\
+free(error_message);\
+mt_ctx->mt_ctx_stts->states[outcome_queue.outcomes[outcome_queue.start]->thread_serial_in_case_of_error]=luaL_newstate();\
+lua_pushinteger(mt_ctx->mt_ctx_stts->states[outcome_queue.outcomes[outcome_queue.start]->thread_serial_in_case_of_error],outcome_queue.outcomes[outcome_queue.start]->thread_serial_in_case_of_error);\
+pthread_create(&mt_ctx->mt_ctx_thrds->threads[outcome_queue.outcomes[outcome_queue.start]->thread_serial_in_case_of_error],NULL,individual_Thread,mt_ctx->mt_ctx_stts->states[outcome_queue.outcomes[outcome_queue.start]->thread_serial_in_case_of_error]);\
+}\
+}else if(outcome_queue.outcomes[outcome_queue.start]->array_size>1){\
+lua_createtable(L,outcome_queue.outcomes[outcome_queue.start]->array_size,outcome_queue.outcomes[outcome_queue.start]->array_size-1);\
+for(int idx=outcome_queue.outcomes[outcome_queue.start]->array_size-1;idx>=0;idx--){\
+lua_pushstring(L,outcome_queue.outcomes[outcome_queue.start]->results[idx]);\
+free(outcome_queue.outcomes[outcome_queue.start]->results[idx]);\
+lua_rawseti(L,-2,1+idx);\
+}\
+lua_seti(L,OUTCOME_QUEUE,1+luaL_len(L,OUTCOME_QUEUE));\
+}else{\
+lua_pushstring(L,outcome_queue.outcomes[outcome_queue.start]->results[0]);\
+free(outcome_queue.outcomes[outcome_queue.start]->results[0]);\
+lua_seti(L,OUTCOME_QUEUE,1+luaL_len(L,OUTCOME_QUEUE));\
+}\
+pthread_cond_signal(&outcome_queue_full);\
+outcomes_collected++;\
+}while(free(outcome_queue.outcomes[outcome_queue.start]),outcome_queue.outcomes[outcome_queue.start]=NULL,(outcome_queue.start=(1+outcome_queue.start)%outcome_queue.queue_size)!=outcome_queue.end)
+
+struct multithread_context_of_states{
+int context_size;
+lua_State *states[];
+};
+
+struct multithread_context_of_threads{
+int context_size;
+pthread_t threads[];
+};
+
+struct multithread_context{
+struct multithread_context_of_states *mt_ctx_stts;
+struct multithread_context_of_threads *mt_ctx_thrds;
+};
+
+int tasks_assigned=0;
+int outcomes_collected=0;
+
+int multithread_Terminator(lua_State *L,int status,lua_KContext ctx){
+struct multithread_context *mt_ctx=(struct multithread_context*)ctx;
 lua_settop(L,1);
-luaL_checktype(L,-1,LUA_TTABLE);
-pthread_t threads[luaL_len(L,-1)];
-lua_State *states[luaL_len(L,-1)];
-for(int idx=0;idx<luaL_len(L,-1);idx++){
-lua_geti(L,-1,1+idx);
-states[idx]=luaL_newstate();
-if(luaL_loadstring(states[idx],luaL_checkstring(L,-1))!=LUA_OK)
-luaL_error(L,"Error Loading Task Script: %s",luaL_checkstring(states[idx],-1));
-pthread_create(&threads[idx],NULL,individual_Thread,states[idx]);
+if(status==LUA_YIELD){
+pthread_cond_broadcast(&await_task);
+sleep(9);
+pthread_mutex_lock(&outcome_queue_lock);
+COLLECT_OUTCOMES(-1,0);
+pthread_mutex_unlock(&outcome_queue_lock);
+sleep(9);
+pthread_mutex_lock(&outcome_queue_lock);
+COLLECT_OUTCOMES(-1,0);
+pthread_mutex_unlock(&outcome_queue_lock);
+sleep(9);
+pthread_mutex_lock(&outcome_queue_lock);
+if(outcome_queue.start!=outcome_queue.end ||(outcome_queue.outcomes[outcome_queue.start-1<0?outcome_queue.queue_size-1:outcome_queue.start-1]!=NULL && outcome_queue.outcomes[1+outcome_queue.end<outcome_queue.queue_size?1+outcome_queue.end:0]!=NULL))
+COLLECT_OUTCOMES(-1,0);
+pthread_mutex_unlock(&outcome_queue_lock);
+}
+for(int idx=mt_ctx->mt_ctx_thrds->context_size-1;idx>=0;idx--)
+pthread_detach(mt_ctx->mt_ctx_thrds->threads[idx]);
+if(status==LUA_OK || outcomes_collected==tasks_assigned){
+free(mt_ctx->mt_ctx_stts);
+free(mt_ctx->mt_ctx_thrds);
+free(mt_ctx);
+free(task_queue.tasks);
+pthread_cond_destroy(&task_queue_full);
+free(outcome_queue.outcomes);
+pthread_cond_destroy(&await_outcome);
+tasks_assigned=0;
+outcomes_collected=0;
+return 1;
+}
+lua_pushinteger(L,tasks_assigned);
+lua_pushinteger(L,outcomes_collected);
+return 3;
+}
+
+int multithread_Consolidator(lua_State *L,int status,lua_KContext ctx){
+struct multithread_context *mt_ctx=(struct multithread_context*)ctx;
+lua_settop(L,7);
+struct timespec wait_till;
+if(status==LUA_YIELD && lua_isboolean(L,-2)&& !lua_toboolean(L,-2)){
+upcome=0;
+goto collection_impossible;
+}else if(lua_isnumber(L,-2)){
+lua_Integer seconds=luaL_checknumber(L,-2);
+lua_Integer nanoseconds=lua_isnumber(L,-1)?lua_tonumber(L,-1):1000000000*(lua_tonumber(L,-2)-seconds);
+if(nanoseconds<0 || nanoseconds>=1000000000){
+seconds+=nanoseconds/1000000000;
+nanoseconds%=1000000000;
+if(nanoseconds<0){
+seconds--;
+nanoseconds+=1000000000;
+}
+}
+if(lua_isnumber(L,-1)){
+wait_till.tv_sec=(time_t)seconds;
+wait_till.tv_nsec=(long)nanoseconds;
+}else{
+clock_gettime(CLOCK_MONOTONIC,&wait_till);
+wait_till.tv_sec+=(time_t)seconds;
+wait_till.tv_nsec+=(long)nanoseconds;
+}
+}
+pthread_mutex_lock(&outcome_queue_lock);
+if(outcome_queue.start!=outcome_queue.end ||(outcome_queue.outcomes[outcome_queue.start-1<0?outcome_queue.queue_size-1:outcome_queue.start-1]!=NULL && outcome_queue.outcomes[1+outcome_queue.end<outcome_queue.queue_size?1+outcome_queue.end:0]!=NULL))
+COLLECT_OUTCOMES(-5,1);
+pthread_mutex_unlock(&outcome_queue_lock);
+pthread_mutex_lock(&task_queue_lock);
+if(lua_isnumber(L,-2)){
+while(luaL_len(L,-6)<=0 ||(task_queue.start==task_queue.end && task_queue.tasks[task_queue.start-1<0?task_queue.queue_size-1:task_queue.start-1]!=NULL && task_queue.tasks[1+task_queue.end<task_queue.queue_size?1+task_queue.end:0]!=NULL)){
+if(!task_queue.resize_next_window && task_queue.start==task_queue.end)
+task_queue.resize_next_window=1;
+pthread_cond_timedwait(&task_queue_full,&task_queue_lock,&wait_till);
+}
+}else if(luaL_len(L,-6)<=0 ||(task_queue.start==task_queue.end && task_queue.tasks[task_queue.start-1<0?task_queue.queue_size-1:task_queue.start-1]!=NULL && task_queue.tasks[1+task_queue.end<task_queue.queue_size?1+task_queue.end:0]!=NULL)){
+if(!task_queue.resize_next_window && task_queue.start==task_queue.end)
+task_queue.resize_next_window=1;
+pthread_mutex_unlock(&task_queue_lock);
+goto assignment_impossible;
+}
+if(task_queue.resize_next_window ||(task_queue.start<task_queue.end && task_queue.end-task_queue.start>=3*task_queue.queue_size/4)){
+task_queue.tasks=realloc(task_queue.tasks,3*task_queue.queue_size/2*sizeof(struct array_of_results*));
+task_queue.resize_next_window=0;
+}
+do{
+lua_pushvalue(L,-7);
+lua_pushvalue(L,-7);
+lua_pushvalue(L,-7);
+PCALL_ERRH(2,1,-4,"Error Acquiring Task from Start of the Queue: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Acquiring Task from Start of the Queue: %s!");
+size_t length_of_task_script;
+const char *cache_task_script=luaL_checklstring(L,-1,&length_of_task_script);
+char *task_script=calloc(3+length_of_task_script,1);
+strcpy(task_script,cache_task_script);
+task_queue.tasks[task_queue.end]=task_script;
+task_queue.end=(1+task_queue.end)%task_queue.queue_size;
+lua_pop(L,1);
+pthread_cond_signal(&await_task);
+tasks_assigned++;
+}while(luaL_len(L,-6)>0 &&(task_queue.end=(1+task_queue.end)%task_queue.queue_size)!=task_queue.start);
+if(task_queue.queue_size>27 && task_queue.start<task_queue.end && task_queue.end-task_queue.start<=task_queue.queue_size/4)
+task_queue.tasks=realloc(task_queue.tasks,task_queue.queue_size/2*sizeof(struct array_of_results*));
+pthread_mutex_unlock(&task_queue_lock);
+assignment_impossible:
+pthread_mutex_lock(&outcome_queue_lock);
+if(lua_isnumber(L,-2)){
+while(outcome_queue.start==outcome_queue.end && outcome_queue.outcomes[outcome_queue.start-1<0?outcome_queue.queue_size-1:outcome_queue.start-1]==NULL && outcome_queue.outcomes[1+outcome_queue.end<outcome_queue.queue_size?1+outcome_queue.end:0]==NULL)
+pthread_cond_timedwait(&await_outcome,&outcome_queue_lock,&wait_till);
+pthread_mutex_unlock(&outcome_queue_lock);
+sleep(9);
+}else{
+pthread_mutex_unlock(&outcome_queue_lock);
+sleep(9);
+pthread_mutex_lock(&outcome_queue_lock);
+if(outcome_queue.start==outcome_queue.end && outcome_queue.outcomes[outcome_queue.start-1<0?outcome_queue.queue_size-1:outcome_queue.start-1]==NULL && outcome_queue.outcomes[1+outcome_queue.end<outcome_queue.queue_size?1+outcome_queue.end:0]==NULL){
+pthread_mutex_unlock(&outcome_queue_lock);
+goto collection_impossible;
+}else
+pthread_mutex_unlock(&outcome_queue_lock);
+}
+pthread_mutex_lock(&outcome_queue_lock);
+COLLECT_OUTCOMES(-5,1);
+pthread_mutex_unlock(&outcome_queue_lock);
+collection_impossible:
+if(!upcome){
+lua_rotate(L,-7,-3);
+lua_pop(L,5);
+lua_copy(L,-2,-1);
+return lua_yieldk(L,1,(lua_KContext)mt_ctx,multithread_Terminator);
+}else if(outcomes_collected<tasks_assigned){
+lua_copy(L,-6,-2);
+lua_copy(L,-4,-1);
+return lua_yieldk(L,2,(lua_KContext)mt_ctx,multithread_Consolidator);
+}
+lua_rotate(L,-7,-3);
+lua_pop(L,6);
+return multithread_Terminator(L,LUA_OK,(lua_KContext)mt_ctx);
+}
+
+int multithread_Initiator(lua_State *L){
+lua_settop(L,4);
+if(!lua_istable(L,-4)&& !luaL_testudata(L,-4,"dual_Capable_Map"))
+luaL_error(L,"Array of Tasks Instead of %s Required!",luaL_typename(L,-4));
+if(!lua_istable(L,-3)&& !luaL_testudata(L,-3,"dual_Capable_Map")){
+lua_newtable(L);
+lua_replace(L,-4);
+}
+task_queue.tasks=calloc(luaL_len(L,-4),sizeof(char*));
+task_queue.queue_size=luaL_len(L,-4);
+task_queue.start=0;
+task_queue.end=0;
+outcome_queue.outcomes=calloc(luaL_len(L,-4),sizeof(struct array_of_results*));
+outcome_queue.queue_size=luaL_len(L,-4);
+outcome_queue.start=0;
+outcome_queue.end=0;
+struct multithread_context *mt_ctx=malloc(sizeof(struct multithread_context));
+mt_ctx->mt_ctx_stts=malloc(sizeof *mt_ctx->mt_ctx_stts+luaL_len(L,-4)*sizeof(lua_State*));
+memset(mt_ctx->mt_ctx_stts->states,0,luaL_len(L,-4)*sizeof(lua_State*));
+mt_ctx->mt_ctx_stts->context_size=luaL_len(L,-4);
+mt_ctx->mt_ctx_thrds=malloc(sizeof *mt_ctx->mt_ctx_thrds+luaL_len(L,-4)*sizeof(pthread_t));
+memset(mt_ctx->mt_ctx_thrds->threads,0,luaL_len(L,-4)*sizeof(pthread_t));
+mt_ctx->mt_ctx_thrds->context_size=luaL_len(L,-4);
+pthread_condattr_t attr;
+pthread_condattr_init(&attr);
+pthread_condattr_setclock(&attr,CLOCK_MONOTONIC);
+pthread_cond_init(&task_queue_full,&attr);
+pthread_cond_init(&await_outcome,&attr);
+pthread_condattr_destroy(&attr);
+upcome=1;
+lua_getglobal(L,"table");
+lua_getfield(L,-1,"remove");
+lua_insert(L,-6);
+lua_pushinteger(L,1);
+lua_insert(L,-5);
+lua_pushcfunction(L,errMsg_Handler);
+lua_replace(L,-2);
+for(int idx=luaL_len(L,-6)-1;idx>=0;idx--){
+lua_pushvalue(L,-7);
+lua_pushvalue(L,-7);
+lua_pushvalue(L,-7);
+PCALL_ERRH(2,1,-4,"Error Acquiring Task from Start of the Queue: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Acquiring Task from Start of the Queue: %s!");
+size_t length_of_task_script;
+const char *cache_task_script=luaL_checklstring(L,-1,&length_of_task_script);
+char *task_script=calloc(3+length_of_task_script,1);
+strcpy(task_script,cache_task_script);
+pthread_mutex_lock(&task_queue_lock);
+task_queue.tasks[task_queue.end]=task_script;
+task_queue.end=(1+task_queue.end)%task_queue.queue_size;
+pthread_mutex_unlock(&task_queue_lock);
+mt_ctx->mt_ctx_stts->states[idx]=luaL_newstate();
+lua_pushinteger(mt_ctx->mt_ctx_stts->states[idx],idx);
+pthread_create(&mt_ctx->mt_ctx_thrds->threads[idx],NULL,individual_Thread,mt_ctx->mt_ctx_stts->states[idx]);
 lua_pop(L,1);
 }
-struct array_of_arrays *cache_result[luaL_len(L,-1)];
-for(int idx=0;idx<luaL_len(L,-1);idx++){
-pthread_join(threads[idx],(void*)&cache_result[idx]);
-}
-lua_createtable(L,luaL_len(L,-1),0);
-for(int idx=0;idx<luaL_len(L,1);idx++){
-if(cache_result[idx]){
-luaL_checkstack(L,1+cache_result[idx]->length,"Unable to Allocate Memory for the Extra Stack Space!");
-int count_up=-1;
-lua_createtable(L,cache_result[idx]->length,0);
-while(++count_up<cache_result[idx]->length){
-lua_pushlstring(L,cache_result[idx]->array[count_up].array,cache_result[idx]->array[count_up].length);
-lua_seti(L,-2,1+luaL_len(L,-2));
-free(cache_result[idx]->array[count_up].array);
-}
-lua_seti(L,-2,1+luaL_len(L,-2));
-free(cache_result[idx]);
-}
-}
-return 1;
+tasks_assigned=task_queue.queue_size;
+lua_insert(L,-3);
+return multithread_Consolidator(L,LUA_OK,(lua_KContext)mt_ctx);
 }
 
 lua_State *L;
@@ -5056,8 +5404,14 @@ else if(strlen(args[idx1])>7 && !strncmp(args[idx1],"ROTATE ",7))
 BINARY_STACK_MANIPULATION(6,lua_rotate);
 else if(strlen(args[idx1])>11 && !strncmp(args[idx1],"PUSH VALUE ",11))
 UNARY_STACK_MANIPULATION(10,lua_pushvalue);
+else if(strlen(args[idx1])>4 && !strncmp(args[idx1],"POP ",4))
+UNARY_STACK_MANIPULATION(3,lua_pop);
 else if(strlen(args[idx1])>8 && !strncmp(args[idx1],"SET TOP ",8))
 UNARY_STACK_MANIPULATION(7,lua_settop);
+else if(strlen(args[idx1])>10 && !strncmp(args[idx1],"SET TABLE ",10))
+UNARY_STACK_MANIPULATION(9,lua_settable);
+else if(strlen(args[idx1])>10 && !strncmp(args[idx1],"GET TABLE ",10))
+UNARY_STACK_MANIPULATION(9,lua_gettable);
 else if(strlen(args[idx1])==11 && !strcmp(args[idx1],"PRINT STACK")){
 printf("------\n");
 for(int idx2=lua_gettop(L);idx2>0;idx2--){
@@ -5298,7 +5652,10 @@ states->frames[strlen(states->frames)]=lua_gettop(L);
 if(strlen(states->tracks)>0 && states->tracks[strlen(states->tracks)-1]==4)
 lua_pushnil(L);
 if(args[idx1][strlen(args[idx1])-1]=='>'){
-luaL_loadbuffer(L,1+args[idx1],strlen(args[idx1])-2,"Inert Eval");
+if(luaL_loadbuffer(L,1+args[idx1],strlen(args[idx1])-2,"Inert Eval")!=LUA_OK){
+fprintf(stderr,"Syntactic Error within Command-InLine Script: %s!",lua_tostring(L,-1));
+goto premature_end;
+}
 int ctop=lua_gettop(L);
 CLEANUP_AFTERMATH(1,ctop);
 }else{
@@ -5447,26 +5804,6 @@ raise(signum);
 }
 }
 
-int errMsg_Handler(lua_State *L){
-lua_settop(L,1);
-lua_getglobal(L,"module_name");
-luaL_requiref(L,luaL_optstring(L,-1,"]===],required_name,[===["),NULL,0);
-lua_getfield(L,-1,"serialise");
-lua_insert(L,1);
-lua_pop(L,2);
-lua_pushliteral(L,"\t");
-PCALL_ERRH(2,1,0,"Error Serialising Object: %s!",CUSTOM_GOTO,premature_end);
-lua_getglobal(L,"debug");
-lua_getfield(L,-1,"traceback");
-lua_insert(L,1);
-lua_pushinteger(L,2);
-lua_replace(L,-2);
-PCALL_ERRH(2,1,0,"Error Performing TraceBack: %s!",CUSTOM_GOTO,premature_end);
-return 1;
-premature_end:
-return 0;
-}
-
 char stack_dump[1024*1024];
 char *tail=stack_dump;
 
@@ -5583,13 +5920,14 @@ fprintf(stderr,"Unable to Allocate Memory for the Extra Stack Space!");
 goto premature_end;
 }
 lua_pushvalue(L,1);
+int bret=lua_gettop(L);
 lua_pushvalue(L,idx1);
 lua_pushvalue(L,2);
 lua_pushvalue(L,3);
-int bret=lua_gettop(L);
 PCALL_ERRH(3,LUA_MULTRET,0,"Error Serialising Individual Result: %s!",CUSTOM_GOTO,premature_end);
-if(lua_gettop(L)-bret>1){
-for(int idx2=lua_gettop(L);idx2>bret;idx2--){
+int idx2=lua_gettop(L);
+if(idx2>bret){
+for(;idx2>bret;idx2--){
 if(!lua_checkstack(L,3)){
 fprintf(stderr,"Unable to Allocate Memory for the Extra Stack Space!");
 goto premature_end;
@@ -5602,7 +5940,7 @@ lua_pushliteral(L,"\n");
 }
 lua_getglobal(L,"task_serial");
 lua_pushfstring(L,"--finish line of stack dump for task #%d\n",luaL_optinteger(L,-1,0)-1);
-lua_remove(L,-2);
+lua_replace(L,-2);
 lua_concat(L,lua_gettop(L)-ctop);
 size_t result_length;
 const char *result_string=lua_tolstring(L,-1,&result_length);
@@ -5649,7 +5987,7 @@ os.execute("mkdir -v $PREFIX/local")
 end
 os.execute("rm -rvf $PREFIX/local/c_M")
 os.execute("mkdir -v -m +rwx $PREFIX/local/c_M")
-if os.execute('clang -x c "'..where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version)..'" -fPIC -fdata-sections -ffunction-sections -Wl,--gc-sections,--as-needed -ffp-contract=fast -ggdb -O0 -Wall -o $PREFIX/local/c_M/lua_Console -L$PREFIX/local/lib -llua -L$PREFIX/lib -landroid-execinfo -pthread -lm')then
+if os.execute('clang -x c "'..where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version)..'" -fPIC -fdata-sections -ffunction-sections -Wl,--gc-sections,--as-needed -ffp-contract=fast -fsanitize=address,undefined -ggdb -O0 -Wall -o $PREFIX/local/c_M/lua_Console -L$PREFIX/local/lib -llua -L$PREFIX/lib -landroid-execinfo -pthread -lm')then
 os.execute([===[unset LUA_INIT
 unset LUA_INIT_]===].._VERSION:match("%f[%s%.%d][%s%.%w]*"):gsub("%s",""):gsub("%.","_").."\n"..[===[export "PATH=$PREFIX/bin"
 cat > ~/.bashrc << EOF
