@@ -1,19 +1,21 @@
-local function replicate(object,touched,layer)
-touched,layer=touched or{},layer or 1
-if type(object)~="table"then
-return object
-else
-if touched[object]and touched[object]<layer then
+local function replicate(object,reconstruct,delve_guard,replicated,depth)
+reconstruct,delve_guard,replicated,depth=math.tointeger(tonumber(reconstruct))or nil,math.tointeger(tonumber(delve_guard))or 1,type(replicated)=="table"and replicated or(type(delve_guard)=="table"and delve_guard or(type(reconstruct)=="table"and reconstruct or{})),math.tointeger(tonumber(depth)) or 1
+if(not reconstruct or reconstruct>=depth)and(type(object)=="table"or(type(object)=="userdata"and tostring(object):find("dual_Capable_Map")==1))then
+if replicated[object]and delve_guard+replicated[object]<depth then
 return tostring(object).." - loophole patch"
-else
-touched[object]=layer
+elseif not replicated[object]then
+replicated[object]=depth
 end
 local replica={}
-for k,v in next,object do
-replica[replicate(k,touched,1+layer)]=replicate(v,touched,1+layer)
+if type(object)=="userdata"and tostring(object):find("dual_Capable_Map")==1 then
+replica=require(module_name).c_UpBinds.dual_Capable_Map(replica)
+end
+for k,v in pairs(object)do
+replica[replicate(k,reconstruct,delve_guard,replicated,1+depth)]=replicate(v,reconstruct,delve_guard,replicated,1+depth)
 end
 return replica
 end
+return object
 end
 
 local function zip(lists,initial_params,params)
@@ -291,17 +293,17 @@ end
 if params.key_word then
 table.sort(keys,type(params.comp_func)=="function"and params.comp_func or comp_Factory())
 end
-if params.i~=nil and(math.type(params.i)~="integer"or params.i>#input_table)then
+if params.i~=nil and(not math.tointeger(tonumber(params.i))or params.i>#input_table)then
 params.i=type(params.i)~="table"and binary_Search(not params.key_word and keys or params.i,params.key_word and keys or params.i,type(params.comp_func)=="function"and params.comp_func)or params.i
 end
-if params.j~=nil and(math.type(params.j)~="integer"or params.j>#input_table)then
+if params.j~=nil and(not math.tointeger(tonumber(params.j))or params.j>#input_table)then
 params.j=type(params.j)~="table"and binary_Search(not params.key_word and keys or params.j,params.key_word and keys or params.j,type(params.comp_func)=="function"and params.comp_func)or params.j
 end
 local unfound_keys={}
-if params.i~=nil and math.type(params.i)~="integer"then
+if params.i~=nil and not math.tointeger(tonumber(params.i))then
 unfound_keys[1+#unfound_keys]=tostring(params.i)
 end
-if params.j~=nil and math.type(params.j)~="integer"then
+if params.j~=nil and not math.tointeger(tonumber(params.j))then
 unfound_keys[1+#unfound_keys]=tostring(params.j)
 end
 if #unfound_keys>0 then
@@ -2511,7 +2513,7 @@ do
 dispose,result=result and dispose or nil,result or dispose or self
 if self[debug.getmetatable(self)]=="excel"then
 local sequential,procedure,insertion
-if math.type(processor)=="integer"then
+if math.tointeger(tonumber(processor))then
 processor=1+(processor-1)%#self
 sequential,procedure=processor,require(module_name).meta_Hash
 elseif type(processor)=="function"then
@@ -2523,7 +2525,7 @@ for idx1=1,#processor do
 if type(processor[idx1])=="table"then
 local start,stop
 for idx2=1,#processor[idx1]do
-if math.type(processor[idx1][idx2])=="integer"then
+if math.tointeger(tonumber(processor[idx1][idx2]))then
 if not start then
 start=processor[idx1][idx2]
 elseif not stop then
@@ -2546,7 +2548,7 @@ stop=1+(stop-1)%#self
 for idx2=start,stop do
 sequential[idx2]=1+(sequential[idx2]or 0)
 end
-elseif math.type(processor[idx1])=="integer"then
+elseif math.tointeger(tonumber(processor[idx1]))then
 local row_num=1+(processor[idx1]-1)%#self
 sequential[row_num]=1+(sequential[row_num]or 0)
 end
@@ -2607,7 +2609,7 @@ table.move(self,insertion,#self,block.n+insertion,result)
 table.move(block,1,block.n,insertion,result)
 elseif self[debug.getmetatable(self)]=="text"then
 for token,metadata in next,self do
-if math.type(token)=="integer"and token>0 and token<=#self then
+if math.tointeger(tonumber(token))and token>0 and token<=#self then
 result[token]=result[token]or{}
 for section_token,section_token_metadata in next,metadata do
 if type(section_token_metadata)=="table"then
@@ -2852,7 +2854,7 @@ end
 return comp_func
 end
 for token,metadata in next,self do
-if math.type(token)=="integer"and token>0 and token<=#self then
+if math.tointeger(tonumber(token))and token>0 and token<=#self then
 result[token]=result[token]or{}
 for section_token,section_token_metadata in next,metadata do
 if section_token~="header"then
@@ -3301,7 +3303,7 @@ end
 if not split and(stats[section[idx2]][idx3]~=(stats[section[1+idx2]]or derived)[idx3])then
 split=true
 end
-if math.type(merge)=="integer"and idx3>=merge or(prepend and split)then
+if math.tointeger(tonumber(merge))and idx3>=merge or(prepend and split)then
 break
 end
 end
@@ -3312,7 +3314,7 @@ end
 end
 if prepend then
 prefix=prefix or{}
-for idx3=1,math.type(merge)=="integer"and merge or #stats[section[idx2]]do
+for idx3=1,math.tointeger(tonumber(merge))and merge or #stats[section[idx2]]do
 prefix[idx3]=tostring(stats[section[idx2]][idx3])
 end
 end
@@ -3343,8 +3345,8 @@ debug.setmetatable(consolidate_File,consolidate_File)
 
 
 local interface={
-version=1.4609375,
-renewed=20261022,
+version=1.4921875,
+renewed=20261026,
 ["Pointers in Practice"]="Deeming certain parameters tables or refering to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-invoke time.",
 replicate=replicate,
 zip=zip,
@@ -3373,7 +3375,7 @@ consolidate_File=consolidate_File
 --a few declarations:
 do
 local status="ready for run";
-local digest=-5208281916067237045;
+local digest=-869526715213786971;
 local required_name,find_self,where=...
 if os.getenv("ANDROID_ROOT")=="/system"then
 where=find_self:match("^(.-/)[^/]+$")
@@ -3394,9 +3396,9 @@ return math.floor((x*y)^(-4/7)*1e6)/1e6
 end
 elseif type(x)=="string"then
 if math.tointeger(y)then
-return table.concat(table.pack(("bbbbbbbb"):unpack(x)))//y
+return table.concat(table.pack((("b"):rep(#x)):unpack(x)))//y
 elseif not math.tointeger(y)then
-return table.concat(table.pack(("bbbbbbbb"):unpack(x)))..y
+return table.concat(table.pack((("b"):rep(#x)):unpack(x)))..y
 end
 end
 end
@@ -3565,7 +3567,7 @@ end
 end
 local id_gen=identifier_Generator()
 local function serialise(object,option,indent_char,delve_guard,serialised,assembler)
-indent_char,delve_guard,serialised,assembler=type(indent_char)=="string"and indent_char or(type(option)=="string"and option or""),math.type(delve_guard)=="integer"and delve_guard or(math.type(indent_char)=="integer"and indent_char or(math.type(option)=="integer"and option or 1)),serialised or{},assembler or{}
+indent_char,delve_guard,serialised,assembler=type(indent_char)=="string"and indent_char or(type(option)=="string"and option or""),math.tointeger(tonumber(delve_guard))or math.tointeger(tonumber(indent_char))or math.tointeger(tonumber(option))or 1,serialised or{},assembler or{}
 if type(option)~="boolean"then
 option=nil
 end
@@ -3704,7 +3706,7 @@ end
 return table.concat(assembler)
 end
 local function meta_Hash(object,delve_guard,hashed,depth,sum,nb,xy,imba)
-delve_guard,hashed,depth,sum=math.type(delve_guard)=="integer"and delve_guard or 1,type(hashed)=="table"and hashed or(type(delve_guard)=="table"and delve_guard or{}),depth or 1,sum or 0
+delve_guard,hashed,depth,sum=math.tointeger(tonumber(delve_guard))or 1,type(hashed)=="table"and hashed or(type(delve_guard)=="table"and delve_guard or{}),depth or 1,math.tointeger(tonumber(sum))or 0
 nb=nb or function(n,byte)return byte+n*(n+byte-1)end --before Hornor optimisation: n^2-n+n*byte+byte
 xy=xy or function(x,y)return x^2+y*(x+y*(x+y-1))end --before Hornor optimisation: y^3-y^2+x*y^2+x*y+x^2
 imba=imba or function(ref,content)
@@ -3977,7 +3979,7 @@ if success1 then
 module_name=']===]..required_name..[===['
 else
 function directory_Match(directory)
-]===]..dir_mat.."\nend\nlocal success2,module_finder,module_path,module_location=pcall(directory_Match,"..("%q"):format('"'..(os.getenv("ANDROID_ROOT")=="/system"and where:match("^(.-/)[^/]+/$")or io.popen('cd /D "'..where..'.." && cd'):read().."\\")..'"')..[===[)
+]===]..dir_mat.."\nend\nlocal success2,module_finder,module_path,module_location=pcall(directory_Match,"..("%q"):format('"'..(os.getenv("ANDROID_ROOT")=="/system"and where:match("^(.-/)[^/]+/$")..'" -type f'or io.popen('cd /D "'..where..'.." && cd'):read()..'\\" /A:-D'))..[===[)
 if success2 then
 local gen_func,invar_state,ctrl_var_init
 if module_finder then
@@ -4025,7 +4027,15 @@ end
 end
 end
 package.path=cache_package_path
-return module_instance]===]):gsub("\n","n\\\n"),("%q"):format([===[if math.type(task_serial)=='integer'then
+return module_instance]===]):gsub("\n","n\\\n"),("%q"):format([===[if math.tointeger(tonumber(task_serial))then
+local extra_globals={}
+for k,v in next,_ENV do
+if not rawequal(require(module_name).c_UpBinds.global_snapshot[k],v)then
+extra_globals[1+#extra_globals]=k
+end
+end
+print("The Following Non-Standard Globals Exist:")
+print(table.concat(extra_globals,"\t"))
 ::redirected::
 print('Task #'..task_serial..': Please Enter Directory to Redirect to or Globals to Serialise, Either to Proceed UnDisrupted or QUIT to Opt Out...')
 local quit,directives,handle=pcall(io.input().read,io.input())
@@ -4078,8 +4088,7 @@ error('Making Exit...')
 end
 end
 if os.getenv('ANDROID_ROOT')=='/system'then
-local success,script_finder,script_path,script_location=pcall(directory_Match or require(module_name).directory_Match,nil)
-if success and script_finder then
+local script_finder,script_path,script_location=(directory_Match or require(module_name).directory_Match)()
 local gen_func,invar_state,ctrl_var_init
 if script_location then
 return loadfile(script_path)
@@ -4088,35 +4097,32 @@ gen_func,invar_state,ctrl_var_init=ipairs(script_finder)
 end
 for i,v in script_path and script_finder:lines()or gen_func,not script_path and invar_state or nil,not script_path and ctrl_var_init or nil do
 if script_path or(i%3==2 and script_finder[1+i])then
-if(script_path and i or v):match('/script%.?[^/%.]-$')then
+if(script_path and i or v):match('/[^/%.]-script[^/%.]-%.?[^/%.]-$')then
 return loadfile(script_path and i or v)
 end
 end
 end
 warn('No Valid Script File Found: Either among BootStrapped Files or under Current Working Directory - ',io.popen('pwd'):read(),' - Please Try Again!')
-end
 return false
 elseif os.getenv('OS')=='Windows_NT'then
 local script_path=os.getenv('script_path')
 if script_path then
 return loadfile(script_path)
 end
-local success,script_finder,script_location
-success,script_finder,script_path,script_location=pcall(directory_Match or require(module_name).directory_Match,false)
-if success and script_finder then
+local script_finder,script_location
+script_finder,script_path,script_location=(directory_Match or require(module_name).directory_Match)(false)
 local gen_func,invar_state,ctrl_var_init
 if not script_path then
 gen_func,invar_state,ctrl_var_init=ipairs(script_finder)
 end
 for i,v in script_path and script_finder:lines()or gen_func,not script_path and invar_state or nil,not script_path and ctrl_var_init or nil do
 if script_path or(i%3==2 and script_finder[1+i])then
-if(script_path and i or v):match('\\script%.?[^\\%.]-$')then
+if(script_path and i or v):match('\\[^\\%.]-script[^\\%.]-%.?[^\\%.]-$')then
 return loadfile(script_path and i or v)
 end
 end
 end
-warn('No Valid Script File Found under Current Working Directory - ',io.popen('cd'):read(),' - Please Try Again!')
-end
+warn('No Valid Script File Found: Either According to Environment Variable - script_path - or under Current Working Directory - ',io.popen('cd'):read(),' - Please Try Again!')
 return false
 end]===]):gsub("\n","n\\\n")
 local script_len=math.max(#script1,#script2)
@@ -4403,7 +4409,7 @@ luaL_error(L,"Associated MetaTable Has Been Tampered!");
 return 0;
 }
 
-int generator_Function(lua_State *L){
+int natural_Generator_Function(lua_State *L){
 lua_settop(L,2);
 skip_upvalue:
 if(lua_next(L,lua_upvalueindex(1))){
@@ -4415,7 +4421,7 @@ goto skip_upvalue;
 }else if(lua_istable(L,lua_upvalueindex(idx))){
 lua_pushnil(L);
 while(lua_next(L,lua_upvalueindex(idx))){
-if(lua_rawequal(L,-1,-3)|| lua_rawequal(L,-1,-4)|| lua_rawequal(L,-2,-3)|| lua_rawequal(L,-2,-4)){
+if(lua_rawequal(L,-4,-2)|| lua_rawequal(L,-4,-1)|| lua_rawequal(L,-3,-2)|| lua_rawequal(L,-3,-1)){
 lua_pop(L,3);
 goto skip_upvalue;
 }
@@ -4424,10 +4430,116 @@ lua_pop(L,1);
 }
 }
 return 2;
-}else{
+}
 lua_pushnil(L);
 return 1;
 }
+
+int generator_Function(lua_State *L){
+merged_emerges:
+if(lua_istable(L,lua_upvalueindex(2))&&(lua_pushvalue(L,lua_upvalueindex(5)),lua_rawget(L,lua_upvalueindex(2)))==LUA_TSTRING &&(lua_pushliteral(L,"merged_keys"),lua_rawequal(L,-2,-1))&& lua_isinteger(L,lua_upvalueindex(3))){
+lua_pushliteral(L,"inverse_");
+lua_insert(L,-2);
+lua_concat(L,2);
+lua_rawget(L,lua_upvalueindex(2));
+int idx1=lua_tointeger(L,lua_upvalueindex(3));
+while(++idx1<=lua_rawlen(L,lua_upvalueindex(2))){
+if(lua_rawgeti(L,lua_upvalueindex(2),idx1)!=LUA_TNUMBER ||({
+lua_pushvalue(L,-1);
+lua_rawget(L,-3);
+int ref=lua_tointeger(L,-1);
+lua_pop(L,1);
+idx1==ref;
+})){
+_Bool skip_upvalue=0;
+int idx2=3;
+while(!lua_isnoneornil(L,lua_upvalueindex(++idx2))){
+if(lua_rawequal(L,lua_upvalueindex(idx2),-1))
+skip_upvalue=1;
+else if(lua_istable(L,lua_upvalueindex(idx2))){
+lua_pushnil(L);
+while(lua_next(L,lua_upvalueindex(idx2))){
+if(lua_rawequal(L,-3,-2)|| lua_rawequal(L,-3,-1)){
+lua_pop(L,2);
+skip_upvalue=1;
+break;
+}
+lua_pop(L,1);
+}
+}
+if(skip_upvalue)
+break;
+}
+if(skip_upvalue){
+lua_pop(L,1);
+continue;
+}
+lua_replace(L,3);
+lua_settop(L,3);
+break;
+}else
+lua_pop(L,1);
+}
+if(idx1>lua_rawlen(L,lua_upvalueindex(2))){
+lua_pushnil(L);
+lua_pushvalue(L,-1);
+lua_replace(L,lua_upvalueindex(3));
+lua_replace(L,lua_upvalueindex(2));
+if(lua_gettop(L)>3)
+goto skip_upvalue;
+}else{
+lua_pushinteger(L,idx1);
+lua_replace(L,lua_upvalueindex(3));
+}
+return 2;
+}else{
+skip_upvalue:
+lua_settop(L,2);
+if(lua_next(L,lua_upvalueindex(1))){
+if(lua_istable(L,-1)&&(lua_pushvalue(L,lua_upvalueindex(5)),lua_rawget(L,-2))==LUA_TSTRING &&(lua_pushliteral(L,"merged_keys"),lua_rawequal(L,-2,-1))){
+lua_pushliteral(L,"inverse_");
+lua_insert(L,-2);
+lua_concat(L,2);
+lua_rawget(L,-3);
+int idx=3;
+while(!lua_isnoneornil(L,lua_upvalueindex(++idx))){
+if(lua_rawequal(L,lua_upvalueindex(idx),-4))
+goto skip_upvalue;
+else if(lua_istable(L,lua_upvalueindex(idx))){
+lua_pushnil(L);
+while(lua_next(L,lua_upvalueindex(idx))){
+if(lua_rawequal(L,-6,-2)|| lua_rawequal(L,-6,-1))
+goto skip_upvalue;
+lua_pop(L,1);
+}
+}
+}
+lua_rotate(L,-3,-1);
+lua_replace(L,lua_upvalueindex(2));
+lua_pushinteger(L,0);
+lua_replace(L,lua_upvalueindex(3));
+goto merged_emerges;
+}else{
+int idx=3;
+while(!lua_isnoneornil(L,lua_upvalueindex(++idx))){
+if(lua_rawequal(L,lua_upvalueindex(idx),-2)|| lua_rawequal(L,lua_upvalueindex(idx),-1))
+goto skip_upvalue;
+else if(lua_istable(L,lua_upvalueindex(idx))){
+lua_pushnil(L);
+while(lua_next(L,lua_upvalueindex(idx))){
+if(lua_rawequal(L,-4,-2)|| lua_rawequal(L,-4,-1)|| lua_rawequal(L,-3,-2)|| lua_rawequal(L,-3,-1))
+goto skip_upvalue;
+lua_pop(L,1);
+}
+}
+}
+lua_settop(L,3);
+return 2;
+}
+}
+}
+lua_pushnil(L);
+return 1;
 }
 
 int generator_Factory(lua_State *L){
@@ -4435,13 +4547,22 @@ if(lua_rawequal(L,lua_upvalueindex(1),1))
 return 0;
 lua_settop(L,2);
 struct ref_couple *refs=luaL_checkudata(L,-2,"dual_Capable_Map");
-lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ref);
+lua_rawgeti(L,LUA_REGISTRYINDEX,(lua_isboolean(L,-1)&& !lua_toboolean(L,-1))?refs->ivrs_ref:refs->ref);
+if(lua_isboolean(L,-2)&& !lua_toboolean(L,-2)){
+lua_pushnil(L);
+lua_pushvalue(L,-1);
+}
 int idx=0;
 while(!lua_isnoneornil(L,lua_upvalueindex(++idx)))
 lua_pushvalue(L,lua_upvalueindex(idx));
-lua_pushcclosure(L,generator_Function,idx);
+lua_pushcclosure(L,(lua_isboolean(L,2)&& !lua_toboolean(L,2))?generator_Function:natural_Generator_Function,(lua_isboolean(L,2)&& !lua_toboolean(L,2))?2+idx:idx);
+if(lua_isboolean(L,-2)&& !lua_toboolean(L,-2)){
+lua_insert(L,-2);
+lua_pushnil(L);
+}else{
 lua_pushboolean(L,0);
 lua_rotate(L,-3,-1);
+}
 return 3;
 }
 
@@ -4820,16 +4941,13 @@ return 0;
 #define REG do{\
 lua_pushliteral(L,"");\
 lua_getmetatable(L,-1);\
-lua_replace(L,-2);\
 lua_pushliteral(L,"__call");\
 lua_pushcfunction(L,string_Subscription);\
 lua_rawset(L,-3);\
 lua_pushliteral(L,"__newindex");\
 lua_pushcfunction(L,string_Modification);\
 lua_rawset(L,-3);\
-luaL_getsubtable(L,-2,"c_UpBinds");\
-lua_insert(L,-3);\
-lua_pop(L,2);\
+luaL_getsubtable(L,-3,"c_UpBinds");\
 lua_newuserdatauv(L,0,0);\
 luaL_newmetatable(L,"dual_Capable_Map");\
 lua_pushvalue(L,-2);\
@@ -4845,7 +4963,9 @@ while(++idx,c_UpBinds[idx].name || c_UpBinds[idx].func){\
 lua_pushcfunction(L,c_UpBinds[idx].func);\
 lua_setfield(L,-2,c_UpBinds[idx].name);\
 }\
-lua_pop(L,1);\
+lua_rotate(L,-6,-2);\
+lua_setfield(L,-3,"global_snapshot");\
+lua_pop(L,5);\
 }while(0)
 
 const int collective_signals[]={SIGINT,SIGABRT,SIGSEGV,SIGBUS,SIGILL,SIGFPE};
@@ -4881,7 +5001,7 @@ pthread_cond_t task_queue_full;
 pthread_cond_t await_outcome;
 pthread_cond_t outcome_queue_full=PTHREAD_COND_INITIALIZER;
 
-struct multithread_task_cyclic_queue{
+volatile struct multithread_task_cyclic_queue{
 _Bool resize_next_window;
 int queue_size;
 int start;
@@ -4895,7 +5015,7 @@ int array_size;
 char *results[];
 };
 
-struct multithread_outcome_cyclic_queue{
+volatile struct multithread_outcome_cyclic_queue{
 _Bool resize_next_window;
 int queue_size;
 int start;
@@ -4903,13 +5023,21 @@ int end;
 struct array_of_results **outcomes;
 }outcome_queue;
 
-_Bool upcome;
-int tasks_assigned=0;
-int outcomes_collected=0;
+volatile _Bool upcome;
+volatile int tasks_assigned=0;
+volatile int outcomes_collected=0;
 
 void* individual_Thread(void *arg){
 lua_State *L=(lua_State*)arg;
 luaL_openlibs(L);
+lua_pushglobaltable(L);
+lua_createtable(L,0,3);
+lua_pushnil(L);
+while(lua_next(L,-3)){
+lua_pushvalue(L,-2);
+lua_insert(L,-2);
+lua_rawset(L,-4);
+}
 lua_pushboolean(L,0);
 lua_setglobal(L,"c_thread");
 struct array_of_results *results=NULL;
@@ -5018,6 +5146,7 @@ pthread_cond_wait(&outcome_queue_full,&outcome_queue_lock);
 pthread_mutex_unlock(&outcome_queue_lock);
 }
 premature_end:
+if(results){
 pthread_mutex_lock(&outcome_queue_lock);
 if(outcome_queue.resize_next_window ||(outcome_queue.start<outcome_queue.end && outcome_queue.end-outcome_queue.start>=3*outcome_queue.queue_size/4)){
 outcome_queue.outcomes=realloc(outcome_queue.outcomes,3*outcome_queue.queue_size/2*sizeof(char*));
@@ -5032,12 +5161,11 @@ outcome_queue.queue_size/=2;
 outcome_queue.outcomes=realloc(outcome_queue.outcomes,outcome_queue.queue_size*sizeof(char*));
 }
 pthread_cond_signal(&await_outcome);
-if(upcome && results->thread_serial_in_case_of_error<0){
 pthread_mutex_unlock(&outcome_queue_lock);
-goto another;
 }
-pthread_mutex_unlock(&outcome_queue_lock);
-if(results->thread_serial_in_case_of_error>-1){
+if(upcome &&(!results || results->thread_serial_in_case_of_error<0))
+goto another;
+if(results && results->thread_serial_in_case_of_error>-1){
 size_t length_of_error_message;
 const char *cache_error_message=lua_tolstring(L,-1,&length_of_error_message);
 char *error_message=calloc(3+length_of_error_message,1);
@@ -5269,6 +5397,7 @@ pthread_condattr_setclock(&attr,CLOCK_MONOTONIC);
 pthread_cond_init(&task_queue_full,&attr);
 pthread_cond_init(&await_outcome,&attr);
 pthread_condattr_destroy(&attr);
+if(upcome!=1)
 upcome=1;
 lua_getglobal(L,"table");
 lua_getfield(L,-1,"remove");
@@ -5290,10 +5419,10 @@ task_queue.end=(1+task_queue.end)%task_queue.queue_size;
 pthread_mutex_unlock(&task_queue_lock);
 mt_ctx->mt_ctx_stts->states[idx]=luaL_newstate();
 lua_pushinteger(mt_ctx->mt_ctx_stts->states[idx],idx);
+tasks_assigned++;
 pthread_create(&mt_ctx->mt_ctx_thrds->threads[idx],NULL,individual_Thread,mt_ctx->mt_ctx_stts->states[idx]);
 lua_pop(L,1);
 }
-tasks_assigned=task_queue.queue_size;
 lua_State *Ld=lua_newthread(L);
 lua_insert(L,-10);
 lua_xmove(L,Ld,4);
@@ -5339,7 +5468,7 @@ goto premature_end;\
 #define CLEANUP_AFTERMATH(CURRENT_OR_LAST,RECORDED_STACK_FRAME) do{\
 if(states->tracks[strlen(states->tracks)-CURRENT_OR_LAST]==1){\
 int ctopx=lua_gettop(L);\
-lua_rawgeti(L,LUA_REGISTRYINDEX,LUA_RIDX_GLOBALS);\
+lua_pushglobaltable(L);\
 for(int idx2=ctopx;idx2>=RECORDED_STACK_FRAME;idx2--){\
 lua_pushvalue(L,states->frames[strlen(states->frames)-CURRENT_OR_LAST]+idx2-ctopx);\
 lua_pushvalue(L,idx2);\
@@ -5781,7 +5910,7 @@ premature_end:
 return -1;
 }
 
-sig_atomic_t signal_counter=0;
+volatile sig_atomic_t signal_counter=0;
 
 sigjmp_buf context_for_jump;
 
@@ -5828,6 +5957,14 @@ segment++;
 int segmentation[1+segment][2];
 L=luaL_newstate();
 luaL_openlibs(L);
+lua_pushglobaltable(L);
+lua_createtable(L,0,3);
+lua_pushnil(L);
+while(lua_next(L,-3)){
+lua_pushvalue(L,-2);
+lua_insert(L,-2);
+lua_rawset(L,-4);
+}
 char script[]===],3+script_len,"]=",script1,[===[;
 DOSTR_ERRH(script,"Error Executing Module-Search Script: %s!",CUSTOM_GOTO,premature_end);
 REG;
@@ -5893,7 +6030,7 @@ lua_pushliteral(L,"\t");
 lua_rotate(L,1,3);
 lua_pop(L,3);
 }
-int ctop;
+volatile int ctop;
 if(lua_isfunction(L,-1)){
 lua_insert(L,4);
 ctop=lua_gettop(L);
@@ -5909,7 +6046,7 @@ lua_sethook(L,NULL,0,0);
 lua_remove(L,4);
 ctop=3;
 }else{
-_Bool script_file_unfound=lua_isboolean(L,-1)&& !lua_toboolean(L,-1),script_file_syntactic_error=lua_isstring(L,-1)&& !lua_toboolean(L,-2);
+volatile _Bool script_file_unfound=lua_isboolean(L,-1)&& !lua_toboolean(L,-1),script_file_syntactic_error=lua_isstring(L,-1)&& !lua_toboolean(L,-2);
 if(!script_file_unfound && !script_file_syntactic_error)
 CLEAR_STACK(3);
 else{
@@ -6122,8 +6259,9 @@ end
 code_line=next_line
 until not next_line
 io.output():close()
-local database_found,database_finder,database_path,database_location=pcall(directory_Match,'"'..(os.getenv("ANDROID_ROOT")=="/system"and where:match("^(.-/)[^/]+/$")or io.popen('cd /D "'..where..'.." && cd'):read().."\\")..(os.getenv("ANDROID_ROOT")=="/system"and'" -path *'..interface.renewed.."* -type f"or"*"..interface.renewed..'*" A:-D'))
-household_sum,status,code_line=directory_CheckSum(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version),where),"ready for run",nil
+household_sum,status,code_line=directory_CheckSum(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version),where),"pack with lib",nil
+local database_found,database_finder,database_path,database_location=pcall(directory_Match,'"'..(os.getenv("ANDROID_ROOT")=="/system"and where:match("^(.-/)[^/]+/$")or io.popen('cd /D "'..where..'.." && cd'):read().."\\")..(os.getenv("ANDROID_ROOT")=="/system"and'" -path *'..where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version).."* -type f"or"*"..where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version)..'*" /A:-D'))
+status="ready for run"
 io.output(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
 if database_found then
 io.write("--range[15][18]\n")
@@ -6133,7 +6271,7 @@ io.input():close()
 elseif type(database_finder)=="table"then
 io.write("local database_snapshots={")
 for idx=1,#database_finder//3 do
-io.write("[",idx,"]=[",("="):rep(15),"[",io.input(database_finder[3*idx-1]):read("a"),"]",("="):rep(15),3*(1+idx)>#database_finder and"]}\n"or"],\n")
+io.write("[",("="):rep(15),"[",io.input(database_finder[3*idx-1]):read("a"),"]",("="):rep(15),3*(1+idx)>#database_finder and"]}\n"or"],\n")
 io.input():close()
 end
 end
@@ -6188,7 +6326,7 @@ end
 print(cache_count.." "..cache_category..(cache_count>1 and"s"or"")..' loaded - as module named "'..required_name..'",')
 print("Ready to Roll!")
 if status=="under maintenance"then
-status="debugging"
+status="debug"
 init_Dbg(interface)
 status=cstatus
 end
