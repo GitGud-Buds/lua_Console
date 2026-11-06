@@ -117,7 +117,13 @@ return l<r
 end
 elseif type(l)=="userdata"then
 if io.type(l)~=io.type(r)then
+if not io.type(r)then
+return false
+elseif not io.type(l)then
+return true
+else
 return io.type(l)<io.type(r)
+end
 end
 elseif type(l)=="string"then
 if utf8.len(l)==#l and utf8.len(r)==#r and l~=r then
@@ -3353,8 +3359,8 @@ debug.setmetatable(consolidate_File,consolidate_File)
 
 
 local interface={
-version=1.5234375,
-renewed=20261103,
+version=1.5546875,
+renewed=1793937600,
 ["Pointers in Practice"]="Deeming certain parameters tables or refering to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-invoke time.",
 replicate=replicate,
 zip=zip,
@@ -3383,7 +3389,8 @@ consolidate_File=consolidate_File
 --a few declarations:
 do
 local status="ready for run";
-local digest=-580271686560052250;
+local digestH=-2269606849572242180;
+local digestM=-144967788;
 local required_name,find_self,where=...
 if os.getenv("ANDROID_ROOT")=="/system"then
 where=find_self:match("^(.-/)[^/]+$")
@@ -3396,7 +3403,7 @@ end
 local function keystone(x,y)
 if type(x)=="number"then
 if math.tointeger(x)and math.tointeger(y)then
-return y%6==0 and interface.renewed-x or interface.renewed+x
+return y%6*(interface.renewed-x)
 elseif not math.tointeger(x)and math.tointeger(y)then
 return math.floor((x*y/13)*1e3)/1e3
 elseif math.tointeger(x)and not math.tointeger(y)then
@@ -3519,7 +3526,7 @@ end
 if os.execute('dir '..directory..' /A:D /S /B')then
 local cache_directory=directory
 if directory:find('".-"$')==1 then
-cache_directory=directory:match('^"(.-)"$')
+cache_directory=directory:sub(2,-2)
 end
 absolute_path=io.popen('dir '..directory..' /A:D /S /B'):read()or cache_directory
 if absolute_path:find(cache_directory)==1 then
@@ -3538,7 +3545,7 @@ if not absolute_path or absolute_path==""then
 break
 end
 if absolute_path:find('".-"$')==1 then
-absolute_path=absolute_path:match('^"(.-)"$')
+absolute_path=absolute_path:sub(2,-2)
 end
 necessary_func()
 end
@@ -3975,12 +3982,16 @@ interface.init_Dbg=init_Dbg
 if c_thread==false then
 goto lower_overhead
 end
+local cversion=interface.version
 local cstatus=status
 
 --range[6][6]
 --[=[
 query collision\deletion
-lay return false if trying to paste a table to a find list
+add return false if kv both map
+edit return true if not apply or false if kv both map
+lay return false if trying to paste a pair to a find list
+import return true if nothing collected or false if trying to paste a pair to a find list
 params
 lower half
 
@@ -3988,7 +3999,7 @@ sort navigate (including from find) before cache_idx1
 {display add create	make sure to create ud instead of table
 edit through termux-open file at non-private directory
 copy paste delete
-find replace}
+find replace} find keyword or find exact from cache - just like add exact from cache - exact then match
 import export make sure to convert to ud before import
 dump save disambiguity explicitly before dump, then clear it when loaded back and catalogue empty - do catalog this wipe - add unique_key="collected_nodes"afterward
 yield return wipe indexes of recycle on resume if dispose true
@@ -4061,15 +4072,15 @@ if env[idx][select(3,require(module_name).c_UpBinds.dual_Capable_Map())][select(
 env[idx][select(3,require(module_name).c_UpBinds.dual_Capable_Map())][select(2,require(module_name).c_UpBinds.dual_Capable_Map())]="collected_nodes"
 end
 end
+database_index=math.tointeger(tonumber(database_index))and 1+(math.tointeger(tonumber(database_index))-1)%#env or 1
+else
+database_index=1
+end
 for idx=1,#env do
 if env[idx].disambiguity~=nil then
 catalogue[1+#catalogue]=env[idx].disambiguity
 env[idx].disambiguity=nil
 end
-end
-database_index=math.tointeger(tonumber(database_index))and 1+(math.tointeger(tonumber(database_index))-1)%#env or 1
-else
-database_index=1
 end
 local reset,navigate,names,flush,on_display,recycled,cache,routes,names_en_route,pointer,unique_key_meta,unique_key_parents,unique_key_extra=env.reset,{},{},nil,{},debug.setmetatable({},{mode="k"}),require(module_name).c_UpBinds.dual_Capable_Map{[select(4,require(module_name).c_UpBinds.dual_Capable_Map())]="fresh_cache"},{[database_index]={env[database_index]}},{[database_index]={[env[database_index]]="root"..database_index}},env[database_index],select(2,require(module_name).c_UpBinds.dual_Capable_Map())
 env.reset=nil
@@ -4169,11 +4180,11 @@ end
 local function assemble_Route(collected_routes_index,collected_routes,collected_names_en_route,full)
 local assembler={(collected_names_en_route or names_en_route)[collected_routes_index or database_index][(collected_routes or routes)[collected_routes_index or database_index][1]]}
 for idx=2,#(collected_routes or routes)[collected_routes_index or database_index]do
-if(collected_names_en_route or names_en_route)[collected_routes_index or database_index][(collected_routes or routes)[collected_routes_index or database_index][idx]]:find("root%d+%.disambiguity%[%d+%]$")==1 then
+if type((collected_names_en_route or names_en_route)[collected_routes_index or database_index][(collected_routes or routes)[collected_routes_index or database_index][idx]])=="string"and(collected_names_en_route or names_en_route)[collected_routes_index or database_index][(collected_routes or routes)[collected_routes_index or database_index][idx]]:find("root%d+%.disambiguity%[%d+%]$")==1 then
 if not full then
 assembler=table.move(reset,1,#assembler,1,assembler)
 end
-assembler[1+#assembler]=(full and"["or"")..(collected_names_en_route or names_en_route)[collected_routes_index or database_index][(collected_routes or routes)[collected_routes_index or database_index][idx]]..(full and"]"or"")
+assembler[1+#assembler]=(full and"["or"")..tostring((collected_names_en_route or names_en_route)[collected_routes_index or database_index][(collected_routes or routes)[collected_routes_index or database_index][idx]])..(full and"]"or"")
 else
 assembler[1+#assembler]="["..("%q"):format((collected_names_en_route or names_en_route)[collected_routes_index or database_index][(collected_routes or routes)[collected_routes_index or database_index][idx]]).."]"
 end
@@ -4294,6 +4305,129 @@ end
 end
 end
 
+local function add_Occasionally_by_Index(directive)
+local idx1,indexed_cache,associated_data,couple,to_uncache,replica,entry=0,{},{},{}
+if directive:find("add%s-[kv]$")==1 then
+for k,v in pairs(cache)do
+if math.type(k)=="integer"and k>0 and k<=#cache then
+idx1=1+idx1
+print(idx1,v)
+indexed_cache[idx1]=v
+elseif type(k)=="userdata"and tostring(k):find("dual_Capable_Map")==1 then
+if k[unique_key_meta]=="collected_nodes"then
+for idx2=1,#k do
+local object,content=load("return "..v.."["..("%q"):format(k[idx2]).."]","Fetch from Cache Entry "..v.." #"..idx2,nil,env)()
+if type(object)=="string"and utf8.len(object)>127 then
+content=object(":127")
+end
+idx1=1+idx1
+print(idx1,v,k[idx2],content or object)
+indexed_cache[idx1]=object
+associated_data[object]=v.."["..("%q"):format(k[idx2]).."]"
+to_uncache={k,k[idx2]}
+end
+else
+idx1=1+idx1
+print(idx1,"root"..v,k)
+indexed_cache[idx1]=k
+associated_data[k]=v
+end
+elseif type(k)~="table"then
+local object,content=load("return "..v.."["..("%q"):format(k).."]","Fetch from Cache Entry "..v,nil,env)()
+if type(object)=="string"and utf8.len(object)>127 then
+content=object(":127")
+end
+idx1=1+idx1
+print(idx1,v,k,content or object)
+indexed_cache[idx1]=object
+associated_data[object]=v.."["..("%q"):format(k).."]"
+to_uncache=k
+end
+end
+::cut_short::
+print("Which to Assign "..(directive:find("add%s-k$")==1 and"to"or"as").." Key?")
+local success,sub_directive=pcall(io.input().read,io.input())
+if not success or not sub_directive then
+if success then
+io.input():close()
+end
+sub_directive=io.input(io.stdin):read()
+end
+idx1=tonumber(sub_directive:match("^%s-r?%s-(%d+)$"))
+if idx1 then
+idx1=1+(idx1-1)%#indexed_cache
+else
+warn("Invalid Input with No Integer Index Extracted - Please Try Again!")
+goto cut_short
+end
+if type(indexed_cache[idx1])=="userdata"and tostring(indexed_cache[idx1]):find("dual_Capable_Map")==1 and(sub_directive:find("%s-r")==1 or(tonumber(associated_data[indexed_cache[idx1]])or tonumber(associated_data[indexed_cache[idx1]]:match("^root(%d+)")))~=database_index)then
+replica=replicate(indexed_cache[idx1])
+end
+couple[directive:find("add%s-k$")==1 and 2 or 1]=replica or indexed_cache[idx1]
+local entry=replica and"load("..table.concat(table.pack(serialise(replica,true,"\t")),"\n")..',"ReConstruct across DataBases")()'or(math.type(associated_data[indexed_cache[idx1]])=="integer"and"root"..associated_data[indexed_cache[idx1]]..".disambiguity["..env[associated_data[indexed_cache[idx1]]][unique_key_parents]:lookUp(indexed_cache[idx1]).."]"or(associated_data[indexed_cache[idx1]]==nil and("%q"):format(indexed_cache[idx1])or associated_data[indexed_cache[idx1]]))
+if type(associated_data[indexed_cache[idx1]])=="string"then
+if type(to_uncache)=="table"then
+table.remove(to_uncache[1],to_uncache[1]:lookUp(to_uncache[2]))
+if #to_uncache[1]<=1 then
+cache[to_uncache[1]:nLookUp(1)]=cache:nLookUp(to_uncache[1])
+cache[to_uncache[1]]=nil
+end
+else
+cache[to_uncache]=nil
+end
+elseif math.type(associated_data[indexed_cache[idx1]])=="integer"then
+cache[indexed_cache[idx1]]=nil
+else
+table.remove(cache,cache:lookUp(indexed_cache[idx1]))
+end
+end
+for idx2=1,2 do
+if couple[idx2]==nil then
+print("Please Enter Literal to Assign "..(idx2==1 and"as"or"to").." Key:")
+local literal
+idx1,literal=pcall(io.input().read,io.input(),"a")
+if not idx1 or not literal then
+if idx1 then
+io.input():close()
+end
+literal=io.input(io.stdin):read("a")
+end
+if literal=="new"then
+literal=require(module_name).c_UpBinds.dual_Capable_Map(reset)
+elseif literal=="true"then
+literal=true
+elseif literal=="false"then
+literal=false
+elseif tonumber(literal)then
+literal=math.tointeger(tonumber(literal))or tonumber(literal)
+elseif literal(1)=='"'and literal(utf8.len(literal))=='"'then
+literal=literal:sub(2,-2)
+end
+couple[idx2]=literal
+end
+end
+local logue1,logue2
+if type(couple[1])=="userdata"and tostring(couple[1]):find("dual_Capable_Map")==1 then
+logue1="require(module_name).c_UpBinds.dual_Capable_Map(reset)"
+end
+if type(couple[2])=="userdata"and tostring(couple[2]):find("dual_Capable_Map")==1 then
+if logue1 then
+return false
+else
+logue2="require(module_name).c_UpBinds.dual_Capable_Map(reset)"
+end
+end
+local cache_old
+if(directive:find("add%s-k$")==1 and not logue1)or(directive:find("add%s-v$")==1 and not replica)then
+cache_old=pointer[couple[1]]
+end
+pointer[couple[1]]=couple[2]
+catalogue[1+#catalogue]=assemble_Route().."["..(directive:find("add%s-v$")==1 and entry or logue1 or("%q"):format(couple[1])).."]="..(directive:find("add%s-k$")==1 and entry or logue2 or("%q"):format(couple[2]))
+if type(cache_old)=="userdata"and tostring(cache_old):find("dual_Capable_Map")==1 and pointer[cache_old]==nil then
+recycled[cache_old]=1+(recycled[cache_old]or 0)
+end
+end
+
 local function predicate_Orientation(dual_map,presumed_key,presumed_value)
 if rawequal(dual_map:nLookUp(presumed_key),presumed_value)then
 return true
@@ -4405,7 +4539,7 @@ end
 
 local function lay_by_Index(cue,collected_routes,collected_names_en_route)
 local idx1,indexed_cache,associated_data,pool=0,{},{},{}
-for v,k in cache:__pairs(false)do
+for k,v in pairs(cache)do
 if math.type(k)=="integer"and k>0 and k<=#cache then
 idx1=1+idx1
 print(idx1,v)
@@ -4468,7 +4602,7 @@ site=assemble_Route()
 pointer=routes[database_index][#routes[database_index]]
 single_destination=true
 end
-if directive:find("[kv]")==1 then
+if directive:find("%s-[kv]")==1 then
 for capt1,capt2,capt3,capt4,capt5 in directive:gmatch("[^:%->%d]*(%d*)%s-(:?)%s-(%d*)%s-%->%s-(%-?)(%d+)")do
 local stop,anchor
 idx1,stop,anchor=tonumber(capt1),tonumber(capt3),tonumber(capt5)
@@ -4491,22 +4625,21 @@ stop=cache_idx1
 end
 if anchor then
 anchor=1+(anchor-1)%#navigate
-else
-anchor=false
 end
 for idx2=idx1,stop==false and idx1 or(idx1>stop and cache_idx1 or stop)do
 local collected_database_index
-if not single_destination then
+if not single_destination and anchor then
 site=assemble_Route(anchor,collected_routes,collected_names_en_route)
 pointer=collected_routes[anchor][#collected_routes[anchor]]
 collected_database_index=tonumber(collected_names_en_route[anchor][collected_routes[anchor][1]]:match("^root(%d+)$"))
 end
 local replica
-if type(indexed_cache[idx2])=="userdata"and tostring(indexed_cache[idx2]):find("dual_Capable_Map")==1 and(directive:find("[kv]%s-r")==1 or(tonumber(associated_data[indexed_cache[idx2]])or tonumber(associated_data[indexed_cache[idx2]]:match("^root(%d+)")))~=(collected_database_index or database_index))then
+if type(indexed_cache[idx2])=="userdata"and tostring(indexed_cache[idx2]):find("dual_Capable_Map")==1 and(directive:find("%s-[kv]%s-r")==1 or(tonumber(associated_data[indexed_cache[idx2]])or tonumber(associated_data[indexed_cache[idx2]]:match("^root(%d+)")))~=(collected_database_index or database_index))then
 replica=replicate(indexed_cache[idx2])
 end
-local entry=replica and"load("..("%q"):format(table.concat(table.pack(serialise(replica,true,"\t")),"\n"))..',"ReConstruct across DataBases")()'or(math.type(associated_data[indexed_cache[idx2]])=="integer"and"root"..associated_data[indexed_cache[idx2]]..".disambiguity["..env[associated_data[indexed_cache[idx2]]][unique_key_parents]:lookUp(indexed_cache[idx2]).."]"or(associated_data[indexed_cache[idx2]]==nil and("%q"):format(indexed_cache[idx2])or associated_data[indexed_cache[idx2]]))
+local entry=replica and"load("..table.concat(table.pack(serialise(replica,true,"\t")),"\n")..',"ReConstruct across DataBases")()'or(math.type(associated_data[indexed_cache[idx2]])=="integer"and"root"..associated_data[indexed_cache[idx2]]..".disambiguity["..env[associated_data[indexed_cache[idx2]]][unique_key_parents]:lookUp(indexed_cache[idx2]).."]"or(associated_data[indexed_cache[idx2]]==nil and("%q"):format(indexed_cache[idx2])or associated_data[indexed_cache[idx2]]))
 local ambiguous,disambiguous
+if anchor then
 if single_destination then
 ambiguous=names[navigate[anchor-1]]==names[navigate[anchor]]or names[navigate[1+anchor]]==names[navigate[anchor]]
 else
@@ -4521,7 +4654,10 @@ table.insert(env[collected_database_index or database_index][unique_key_parents]
 end
 disambiguous="root"..(collected_database_index or database_index)..".disambiguity["..env[collected_database_index or database_index][unique_key_parents]:lookUp(navigate[anchor]).."]"
 end
-local orientation,key,value=predicate_Orientation(pointer,names[navigate[anchor]],navigate[anchor])
+end
+local orientation,key,value
+if anchor then
+orientation=predicate_Orientation(pointer,names[navigate[anchor]],navigate[anchor])
 if orientation then
 key,value=names[navigate[anchor]],navigate[anchor]
 elseif orientation==false then
@@ -4534,7 +4670,8 @@ end
 warn("Internal DataBase Error: Pair - ",names[navigate[anchor]]," and ",truncated," - Do Not Belong to ",single_destination and names_en_route[database_index][routes[database_index][#routes[database_index]]]or collected_names_en_route[anchor][collected_routes[anchor][#collected_routes[anchor]]],"!")
 goto continue
 end
-if(((type(indexed_cache[idx2])=="userdata"and tostring(indexed_cache[idx2]):find("dual_Capable_Map")==1)or directive:find("v")==1)and not orientation)or(((type(indexed_cache[idx2])~="userdata"or tostring(indexed_cache[idx2]):find("dual_Capable_Map")~=1)and directive:find("k")==1)and orientation)then
+end
+if(((type(indexed_cache[idx2])=="userdata"and tostring(indexed_cache[idx2]):find("dual_Capable_Map")==1)or directive:find("%s-v")==1)and not orientation)or(((type(indexed_cache[idx2])~="userdata"or tostring(indexed_cache[idx2]):find("dual_Capable_Map")~=1)and directive:find("%s-k")==1)and orientation)then
 if not anchor then
 pointer[replica or indexed_cache[idx2]]=false
 catalogue[1+#catalogue]=site.."["..entry.."]=false"
@@ -4560,13 +4697,13 @@ end
 end
 end
 if type(associated_data[indexed_cache[idx2]])=="string"then
-if type(pool)=="table"then
+if type(pool[indexed_cache[idx2]])=="table"then
 table.remove(pool[indexed_cache[idx2]][1],pool[indexed_cache[idx2]][1]:lookUp(pool[indexed_cache[idx2]][2]))
 if #pool[indexed_cache[idx2]][1]<=0 then
 cache[pool[indexed_cache[idx2]][1]]=nil
 end
 else
-cache[pool]=nil
+cache[pool[indexed_cache[idx2]]]=nil
 end
 elseif math.type(associated_data[indexed_cache[idx2]])=="integer"then
 cache[indexed_cache[idx2]]=nil
@@ -4615,22 +4752,22 @@ for k2,v2 in v1[unique_key_parents]:__pairs(#v1[unique_key_parents])do
 source=tonumber(v2[2][v2[1][1]]:match("^root(%d+)$"))
 break
 end
-if source~=database_index or directive:find("i?%s-r")==1 then
+if source~=database_index or directive:find("%s-i?%s-r")==1 then
 replica=replicate(v1)
 end
 end
-local entry=replica and"load("..("%q"):format(table.concat(table.pack(serialise(replica,true,"\t")),"\n"))..',"ReConstruct across DataBases")()'or(source and(env[source][unique_key_parents]:lookUp(v1)and"root"..source..".disambiguity["..env[source][unique_key_parents]:lookUp(v1).."]"or associated_data[indexed_cache[idx2]].."["..("%q"):format(k1).."]")or("%q"):format(v1))
-if directive:find("i")==1 then
-local cache_old=pointer[k1]
-pointer[k1]=replica or v1
-catalogue[1+#catalogue]=site.."["..("%q"):format(k1).."]="..entry
+local entry=replica and"load("..table.concat(table.pack(serialise(replica,true,"\t")),"\n")..',"ReConstruct across DataBases")()'or(source and(env[source][unique_key_parents]:lookUp(v1)and"root"..source..".disambiguity["..env[source][unique_key_parents]:lookUp(v1).."]"or associated_data[indexed_cache[idx2]].."["..("%q"):format(k1).."]")or("%q"):format(v1))
+if directive:find("%s-i")==1 then
+local cache_old=not replica and pointer:nLookUp(v1)
+pointer[replica or v1]=k1
+catalogue[1+#catalogue]=site.."["..entry.."]="..("%q"):format(k1)
 if type(cache_old)=="userdata"and tostring(cache_old):find("dual_Capable_Map")==1 and pointer[cache_old]==nil then
 recycled[cache_old]=1+(recycled[cache_old]or 0)
 end
 else
-local cache_old=not replica and pointer[v1]
-pointer[replica or v1]=k1
-catalogue[1+#catalogue]=site.."["..entry.."]="..("%q"):format(k1)
+local cache_old=pointer:nLookUp(k1)
+pointer[k1]=replica or v1
+catalogue[1+#catalogue]=site.."["..("%q"):format(k1).."]="..entry
 if type(cache_old)=="userdata"and tostring(cache_old):find("dual_Capable_Map")==1 and pointer[cache_old]==nil then
 recycled[cache_old]=1+(recycled[cache_old]or 0)
 end
@@ -4651,6 +4788,475 @@ end
 end
 else
 return false
+end
+end
+
+local function edit_by_Index(directive,collected_routes,collected_names_en_route)
+::cut_short::
+local index=tonumber(directive:match("^edit%s-[kv]%s-(%d+)$"))
+if index then
+index=1+(index-1)%#navigate
+else
+warn("Invalid Input with No Integer Index Extracted - Please Try Again!")
+goto cut_short
+end
+local to_edit
+if directive:find("edit%s-k%s-f")==1 or(directive:find("edit%s-k")==1 and type(names[navigate[index]])=="string"and utf8.len(names[navigate[index]])>127)then
+to_edit=names[navigate[index]]
+elseif directive:find("edit%s-v%s-f")==1 or(directive:find("edit%s-v")==1 and type(navigate[index])=="string"and utf8.len(navigate[index])>127)then
+to_edit=navigate[index]
+end
+local cave_found
+if to_edit then
+cave_found=io.popen("find /sdcard/Download/Cave -type d 2>/dev/null"):read()
+io.output(cave_found and"/sdcard/Download/Cave/tmpfile.txt"or"./tmpfile.txt"):write(to_edit)
+io.output():close()
+os.execute("termux-open "..(cave_found and"/sdcard/Download/Cave/tmpfile.txt"or"./tmpfile.txt"))
+print("Edit with External App of Choice, Save, then Return with a Notification: (retry\\n)")
+else
+print("Please Enter Replacement:")
+end
+local site,replacement,pointer=pcall(io.input().read,io.input(),not to_edit and"a"or nil)
+if not site or not replacement then
+if site then
+io.input():close()
+end
+replacement=io.input(io.stdin):read(not to_edit and "a"or nil)
+end
+local logue
+if to_edit then
+if replacement=="retry"then
+os.remove(cave_found and"/sdcard/Download/Cave/tmpfile.txt"or"./tmpfile.txt")
+goto cut_short
+else
+replacement=io.input(cave_found and"/sdcard/Download/Cave/tmpfile.txt"or"./tmpfile.txt"):read("a")
+io.input():close()
+os.remove(cave_found and"/sdcard/Download/Cave/tmpfile.txt"or"./tmpfile.txt")
+print("About to Apply the Following:")
+print(utf8.len(replacement)>127 and replacement(":127")or replacement,"->",to_edit(":127"))
+print("Are You Sure? (apply\\n)")
+local sub_directive
+site,sub_directive=pcall(io.input().read,io.input())
+if not site or not sub_directive then
+if site then
+io.input():close()
+end
+sub_directive=io.input(io.stdin):read()
+end
+if sub_directive~="apply"then
+return true
+end
+end
+else
+if replacement=="new"then
+replacement=require(module_name).c_UpBinds.dual_Capable_Map(reset)
+logue="require(module_name).c_UpBinds.dual_Capable_Map(reset)"
+elseif replacement=="true"then
+replacement=true
+elseif replacement=="false"then
+replacement=false
+elseif tonumber(replacement)then
+replacement=math.tointeger(tonumber(replacement))or tonumber(replacement)
+elseif replacement(1)=='"'and replacement(utf8.len(replacement))=='"'then
+replacement=replacement:sub(2,-2)
+end
+end
+local single_destination
+if not collected_routes or not collected_names_en_route then
+site=assemble_Route()
+pointer=routes[database_index][#routes[database_index]]
+single_destination=true
+end
+local collected_database_index
+if not single_destination then
+site=assemble_Route(index,collected_routes,collected_names_en_route)
+pointer=collected_routes[index][#collected_routes[index]]
+collected_database_index=tonumber(collected_names_en_route[index][collected_routes[index][1]]:match("^root(%d+)$"))
+end
+local ambiguous,disambiguous
+if single_destination then
+ambiguous=names[navigate[index-1]]==names[navigate[index]]or names[navigate[1+index]]==names[navigate[index]]
+else
+local merged_keys=collected_routes[index][#collected_routes[index]]:lookUp(navigate[index])
+if type(merged_keys)=="table"and merged_keys[unique_key_meta]=="collected_nodes"then
+ambiguous=true
+end
+end
+if ambiguous and type(navigate[index])=="userdata"and tostring(navigate[index]):find("dual_Capable_Map")==1 then
+if not env[collected_database_index or database_index][unique_key_parents]:lookUp(navigate[index])then
+table.insert(env[collected_database_index or database_index][unique_key_parents],navigate[index])
+end
+disambiguous="root"..(collected_database_index or database_index)..".disambiguity["..env[collected_database_index or database_index][unique_key_parents]:lookUp(navigate[index]).."]"
+end
+local orientation,key,value=predicate_Orientation(pointer,names[navigate[index]],navigate[index])
+if orientation then
+key,value=names[navigate[index]],navigate[index]
+elseif orientation==false then
+key,value=navigate[index],names[navigate[index]]
+else
+local truncated=serialise(navigate[index],false)
+if utf8.len(truncated)>127 then
+truncated=truncated(":127")
+end
+warn("Internal DataBase Error: Pair - ",names[navigate[index]]," and ",truncated," - Do Not Belong to ",single_destination and names_en_route[database_index][routes[database_index][#routes[database_index]]]or collected_names_en_route[index][collected_routes[index][#collected_routes[index]]],"!")
+return false
+end
+if(directive:find("edit%s-k")==1 and orientation)or(directive:find("edit%s-v")==1 and not orientation)then
+if logue and type(key)=="userdata"and tostring(key):find("dual_Capable_Map")==1 then
+return false
+end
+if not rawequal(replacement,key)then
+pointer[replacement]=value
+pointer[key]=nil
+catalogue[1+#catalogue]=site.."["..(logue or("%q"):format(replacement)).."]="..(orientation and site.."["..("%q"):format(key).."]"or("%q"):format(value))
+catalogue[1+#catalogue]=site.."["..(orientation and("%q"):format(key)or disambiguous or(ambiguous and("%q"):format(key)or site.."["..("%q"):format(value).."]")).."]=nil"
+if not orientation and type(navigate[index])=="userdata"and tostring(navigate[index]):find("dual_Capable_Map")==1 and pointer[navigate[index]]==nil then
+recycled[navigate[index]]=1+(recycled[navigate[index]]or 0)
+end
+end
+elseif(directive:find("edit%s-k")==1 and not orientation)or(directive:find("edit%s-v")==1 and orientation)then
+if logue and type(value)=="userdata"and tostring(value):find("dual_Capable_Map")==1 then
+return false
+end
+if not rawequal(replacement,value)then
+pointer[key]=replacement
+catalogue[1+#catalogue]=site.."["..(orientation and("%q"):format(key)or disambiguous or(ambiguous and("%q"):format(key)or site.."["..("%q"):format(value).."]")).."]="..(logue or("%q"):format(replacement))
+if orientation and type(navigate[index])=="userdata"and tostring(navigate[index]):find("dual_Capable_Map")==1 and pointer[navigate[index]]==nil then
+recycled[navigate[index]]=1+(recycled[navigate[index]]or 0)
+end
+end
+end
+end
+
+local function import_by_Index(global_key,collected_routes,collected_names_en_route)
+local idx1,indexed_keys,collected_individuals,collected_couples=0,{}
+if type(_ENV[global_key])=="boolean"or type(_ENV[global_key])=="number"or type(_ENV[global_key])=="string"then
+collected_individuals=_ENV[global_key]
+elseif type(_ENV[global_key])=="table"or(type(_ENV[global_key])=="userdata"and tostring(_ENV[global_key]):find("dual_Capable_Map")==1)then
+::another_thought::
+for k,v in pairs(_ENV[global_key])do
+local contents1,contents2
+if type(k)=="table"or(type(k)=="userdata"and tostring(k):find("dual_Capable_Map")==1)then
+contents1=serialise(k,false)
+if utf8.len(contents1)>127 then
+contents1=contents1(":127")
+end
+end
+if type(v)=="table"or(type(v)=="userdata"and tostring(v):find("dual_Capable_Map")==1)then
+contents2=serialise(v,false)
+if utf8.len(contents2)>127 then
+contents2=contents2(":127")
+end
+end
+idx1=1+idx1
+print(idx1,contents1 or k,contents2 or v)
+indexed_keys[k]=v
+end
+print((collected_individuals or collected_couples)and"More? (-nomore)"or"Which to Cache?")
+local directive
+idx1,directive=pcall(io.input().read,io.input())
+if not idx1 or not directive then
+if idx1 then
+io.input():close()
+end
+directive=io.input(io.stdin):read()
+end
+for capt1,capt2,capt3 in directive:gmatch("[^:%d]*(%d*)%s-(:?)%s-(%d*)")do
+local stop
+idx1,stop=tonumber(capt1),tonumber(capt3)
+if not stop and capt2~=":"then
+if idx1 then
+stop=false
+else
+goto continue
+end
+end
+if idx1 then
+idx1=1+(idx1-1)%#indexed_keys
+else
+idx1=1
+end
+if stop then
+stop=1+(stop-1)%#indexed_keys
+elseif stop==nil then
+stop=#indexed_keys
+end
+for idx2=idx1,stop==false and idx1 or(idx1>stop and #indexed_keys or stop)do
+local key,value
+if type(indexed_keys[idx2])=="boolean"or type(indexed_keys[idx2])=="number"or type(indexed_keys[idx2])=="string"or type(indexed_keys[idx2])=="table"or(type(indexed_keys[idx2])=="userdata"and tostring(indexed_keys[idx2]):find("dual_Capable_Map")==1)then
+if directive:find("%s-k")==1 then
+if type(collected_individuals)=="table"then
+collected_individuals[1+#collected_individuals]=indexed_keys[idx2]
+elseif collected_individuals==nil then
+collected_individuals=indexed_keys[idx2]
+else
+collected_individuals={collected_individuals,indexed_keys[idx2]}
+end
+elseif directive:find("%s-[kv]")~=1 then
+key=indexed_keys[idx2]
+end
+end
+if type(_ENV[global_key][indexed_keys[idx2]])=="boolean"or type(_ENV[global_key][indexed_keys[idx2]])=="number"or type(_ENV[global_key][indexed_keys[idx2]])=="string"or type(_ENV[global_key][indexed_keys[idx2]])=="table"or(type(_ENV[global_key][indexed_keys[idx2]])=="userdata"and tostring(_ENV[global_key][indexed_keys[idx2]]):find("dual_Capable_Map")==1)then
+if directive:find("%s-v")==1 then
+if type(collected_individuals)=="table"then
+collected_individuals[1+#collected_individuals]=_ENV[global_key][indexed_keys[idx2]]
+elseif collected_individuals==nil then
+collected_individuals=_ENV[global_key][indexed_keys[idx2]]
+else
+collected_individuals={collected_individuals,_ENV[global_key][indexed_keys[idx2]]}
+end
+elseif directive:find("%s-[kv]")~=1 then
+value=_ENV[global_key][indexed_keys[idx2]]
+end
+end
+if key and value and type(key)~="table"and(type(key)~="userdata"or tostring(key):find("dual_Capable_Map")~=1)and type(value)~="table"and(type(value)~="userdata"or tostring(value):find("dual_Capable_Map")~=1)then
+if not collected_couples then
+collected_couples={}
+end
+collected_couples[key]=value
+end
+end
+if stop and idx1>stop then
+for idx2=1,stop do
+
+
+
+
+
+end
+end
+::continue::
+end
+if not directive:match("nomore$")then
+goto another_thought
+end
+end
+::another_glimpse::
+if collected_individuals==nil and not collected_couples then
+return true
+elseif type(collected_individuals)~="table"then
+collected_individuals={}
+end
+idx1=0
+repeat
+idx1=1+idx1
+local contents
+if type(collected_individuals[idx1])=="table"or(type(collected_individuals[idx1])=="userdata"and tostring(collected_individuals[idx1]):find("dual_Capable_Map")==1)then
+contents=serialise(collected_individuals[idx1],false)
+if utf8.len(contents)>127 then
+contents=contents(":127")
+end
+end
+print(idx1,contents or collected_individuals[idx1])
+until idx1>=#collected_individuals
+local cache_idx1
+if collected_couples then
+cache_idx1=idx1
+for k,v in next,collected_couples do
+idx1=1+idx1
+local contents1,contents2
+if type(k)=="table"or(type(k)=="userdata"and tostring(k):find("dual_Capable_Map")==1)then
+contents1=serialise(k,false)
+if utf8.len(contents1)>127 then
+contents1=contents1(":127")
+end
+end
+if type(v)=="table"or(type(v)=="userdata"and tostring(v):find("dual_Capable_Map")==1)then
+contents2=serialise(v,false)
+if utf8.len(contents2)>127 then
+contents2=contents2(":127")
+end
+end
+print(idx1,contents1 or k,contents2 or v)
+if indexed_keys then
+collected_individuals[1+#collected_individuals]=k
+end
+end
+end
+print(indexed_keys and"Which to Lay?"or"More? (-nomore)")
+local site,directive,pointer=pcall(io.input().read,io.input())
+if not site or not directive then
+if site then
+io.input():close()
+end
+directive=io.input(io.stdin):read()
+end
+local single_destination
+if not collected_routes or not collected_names_en_route then
+site=assemble_Route()
+pointer=routes[database_index][#routes[database_index]]
+single_destination=true
+end
+if(cache_idx1 or 0)>1 and directive:find("%s-[kv]")==1 then
+for capt1,capt2,capt3,capt4,capt5 in directive:gmatch("[^:%->%d]*(%d*)%s-(:?)%s-(%d*)%s-%->%s-(%-?)(%d+)")do
+local stop,anchor
+idx1,stop,anchor=tonumber(capt1),tonumber(capt3),tonumber(capt5)
+if not stop and capt2~=":"then
+if idx1 then
+stop=false
+else
+goto continue
+end
+end
+if idx1 then
+idx1=1+(idx1-1)%cache_idx1
+else
+idx1=1
+end
+if stop then
+stop=1+(stop-1)%cache_idx1
+elseif stop==nil then
+stop=cache_idx1
+end
+if anchor then
+anchor=1+(anchor-1)%#navigate
+end
+for idx2=idx1,stop==false and idx1 or(idx1>stop and cache_idx1 or stop)do
+local collected_database_index
+if not single_destination and anchor then
+site=assemble_Route(anchor,collected_routes,collected_names_en_route)
+pointer=collected_routes[anchor][#collected_routes[anchor]]
+collected_database_index=tonumber(collected_names_en_route[anchor][collected_routes[anchor][1]]:match("^root(%d+)$"))
+end
+local replica
+if type(collected_individuals[idx2])=="userdata"and tostring(collected_individuals[idx2]):find("dual_Capable_Map")==1 then
+replica=replicate(collected_individuals[idx2],false)
+end
+local entry=replica and"load("..table.concat(table.pack(serialise(replica,true,"\t")),"\n")..',"ReConstruct External Resources")()'or("%q"):format(collected_individuals[idx2])
+local ambiguous,disambiguous
+if anchor then
+if single_destination then
+ambiguous=names[navigate[anchor-1]]==names[navigate[anchor]]or names[navigate[1+anchor]]==names[navigate[anchor]]
+else
+local merged_keys=collected_routes[anchor][#collected_routes[anchor]]:lookUp(navigate[anchor])
+if type(merged_keys)=="table"and merged_keys[unique_key_meta]=="collected_nodes"then
+ambiguous=true
+end
+end
+if ambiguous and type(navigate[anchor])=="userdata"and tostring(navigate[anchor]):find("dual_Capable_Map")==1 then
+if not env[collected_database_index or database_index][unique_key_parents]:lookUp(navigate[anchor])then
+table.insert(env[collected_database_index or database_index][unique_key_parents],navigate[anchor])
+end
+disambiguous="root"..(collected_database_index or database_index)..".disambiguity["..env[collected_database_index or database_index][unique_key_parents]:lookUp(navigate[anchor]).."]"
+end
+end
+local orientation,key,value
+if anchor then
+orientation=predicate_Orientation(pointer,names[navigate[anchor]],navigate[anchor])
+if orientation then
+key,value=names[navigate[anchor]],navigate[anchor]
+elseif orientation==false then
+key,value=navigate[anchor],names[navigate[anchor]]
+else
+local truncated=serialise(navigate[anchor],false)
+if utf8.len(truncated)>127 then
+truncated=truncated(":127")
+end
+warn("Internal DataBase Error: Pair - ",names[navigate[anchor]]," and ",truncated," - Do Not Belong to ",single_destination and names_en_route[database_index][routes[database_index][#routes[database_index]]]or collected_names_en_route[anchor][collected_routes[anchor][#collected_routes[anchor]]],"!")
+goto continue
+end
+end
+if(((type(collected_individuals[idx2])=="userdata"and tostring(collected_individuals[idx2]):find("dual_Capable_Map")==1)or directive:find("%s-v")==1)and not orientation)or(((type(collected_individuals[idx2])~="userdata"or tostring(collected_individuals[idx2]):find("dual_Capable_Map")~=1)and directive:find("%s-k")==1)and orientation)then
+if not anchor then
+pointer[replica or collected_individuals[idx2]]=false
+catalogue[1+#catalogue]=site.."["..entry.."]=false"
+elseif replica or not rawequal(collected_individuals[idx2],key)then
+pointer[replica or collected_individuals[idx2]]=value
+pointer[key]=nil
+catalogue[1+#catalogue]=site.."["..entry.."]="..(orientation and site.."["..("%q"):format(key).."]"or("%q"):format(value))
+catalogue[1+#catalogue]=site.."["..(orientation and("%q"):format(key)or disambiguous or(ambiguous and("%q"):format(key)or site.."["..("%q"):format(value).."]")).."]=nil"
+if not orientation and type(navigate[anchor])=="userdata"and tostring(navigate[anchor]):find("dual_Capable_Map")==1 and pointer[navigate[anchor]]==nil then
+recycled[navigate[anchor]]=1+(recycled[navigate[anchor]]or 0)
+end
+end
+else
+if not anchor then
+pointer[1+#pointer]=replica or collected_individuals[idx2]
+catalogue[1+#catalogue]=site.."[1+#"..site.."]="..entry
+elseif replica or not rawequal(collected_individuals[idx2],value)then
+pointer[key]=replica or collected_individuals[idx2]
+catalogue[1+#catalogue]=site.."["..(orientation and("%q"):format(key)or disambiguous or(ambiguous and("%q"):format(key)or site.."["..("%q"):format(value).."]")).."]="..entry
+if orientation and type(navigate[anchor])=="userdata"and tostring(navigate[anchor]):find("dual_Capable_Map")==1 and pointer[navigate[anchor]]==nil then
+recycled[navigate[anchor]]=1+(recycled[navigate[anchor]]or 0)
+end
+end
+end
+anchor=anchor+(capt4=="-"and -1 or 1)
+end
+if stop and idx1>stop then
+for idx2=1,stop do
+
+
+
+
+
+end
+end
+::continue::
+end
+elseif collected_couples and single_destination then
+for capt1,capt2,capt3 in directive:gmatch("[^:%d]*(%d*)%s-(:?)%s-(%d*)")do
+local stop
+idx1,stop=tonumber(capt1),tonumber(capt3)
+if not stop and capt2~=":"then
+if idx1 then
+stop=false
+else
+goto continue
+end
+end
+if idx1 then
+idx1=1+cache_idx1+(idx1-1-cache_idx1)%(#collected_individuals-cache_idx1)
+else
+idx1=1+cache_idx1
+end
+if stop then
+stop=1+cache_idx1+(stop-1-cache_idx1)%(#collected_individuals-cache_idx1)
+elseif stop==nil then
+stop=#collected_individuals
+end
+for idx2=idx1,stop==false and idx1 or(idx1>stop and #collected_individuals or stop)do
+local replica_key,replica_value
+if type(collected_individuals[idx2])=="table"or(type(collected_individuals[idx2])=="userdata"and tostring(collected_individuals[idx2]):find("dual_Capable_Map")==1)then
+replica_key=replicate(collected_individuals[idx2],false)
+elseif type(collected_couples[collected_individuals[idx2]])=="table"or(type(collected_couples[collected_individuals[idx2]])=="userdata"and tostring(collected_couples[collected_individuals[idx2]]):find("dual_Capable_Map")==1)then
+replica_value=replicate(collected_couples[collected_individuals[idx2]],false)
+end
+if directive:find("%s-i")==1 then
+local cache_old=not replica_value and pointer:nLookUp(collected_couples[collected_individuals[idx2]])
+pointer[replica_value or collected_couples[collected_individuals[idx2]]]=replica_key or collected_individuals[idx2]
+catalogue[1+#catalogue]=site.."["..(replica_value and"load("..table.concat(table.pack(serialise(replica_value,true,"\t")),"\n")..',"ReConstruct External Resources")()'or("%q"):format(collected_couples[collected_individuals[idx2]])).."]="..(replica_key and"load("..table.concat(table.pack(serialise(replica_key,true,"\t")),"\n")..',"ReConstruct External Resources")()'or("%q"):format(collected_individuals[idx2]))
+if type(cache_old)=="userdata"and tostring(cache_old):find("dual_Capable_Map")==1 and pointer[cache_old]==nil then
+recycled[cache_old]=1+(recycled[cache_old]or 0)
+end
+else
+local cache_old=not replica_key and pointer:nLookUp(collected_individuals[idx2])
+pointer[replica_key or collected_individuals[idx2]]=replica_value or collected_couples[collected_individuals[idx2]]
+catalogue[1+#catalogue]=site.."["..(replica_key and"load("..table.concat(table.pack(serialise(replica_key,true,"\t")),"\n")..',"ReConstruct External Resources")()'or("%q"):format(collected_individuals[idx2])).."]="..(replica_value and"load("..table.concat(table.pack(serialise(replica_value,true,"\t")),"\n")..',"ReConstruct External Resources")()'or("%q"):format(collected_couples[collected_individuals[idx2]]))
+if type(cache_old)=="userdata"and tostring(cache_old):find("dual_Capable_Map")==1 and pointer[cache_old]==nil then
+recycled[cache_old]=1+(recycled[cache_old]or 0)
+end
+end
+end
+if stop and idx1>stop then
+for idx2=1+cache_idx1,stop do
+
+
+
+
+
+end
+end
+::continue::
+end
+else
+return false
+end
+if not directive:match("nomore$")then
+if indexed_keys then
+indexed_keys=nil
+end
+goto another_glimpse
 end
 end
 
@@ -4728,7 +5334,7 @@ if recycled[v[1][idx2]]or(idx2>=#v[1]and not rawequal(v[1][idx2],pointer))then
 pointer[unique_key_parents][k]=nil
 goto continue
 end
-print_route[1+#print_route]=v[2][v[1][idx2]]
+print_route[1+#print_route]=tostring(v[2][v[1][idx2]])
 end
 idx1=1+idx1
 names[v]=v[1][#v[1]-1]
@@ -4751,7 +5357,7 @@ if recycled[v2[1][idx2]]or(idx2>=#v2[1]and not rawequal(v2[1][idx2],v1))then
 v1[unique_key_parents][k2]=nil
 goto continue
 end
-print_route[1+#print_route]=v2[2][v2[1][idx2]]
+print_route[1+#print_route]=tostring(v2[2][v2[1][idx2]])
 end
 idx1=1+idx1
 print(idx1,k1,v1,table.concat(print_route,"»"))
@@ -4770,7 +5376,7 @@ if recycled[v2[1][idx2]]or(idx2>=#v2[1]and not rawequal(v2[1][idx2],k1))then
 k1[unique_key_parents][k2]=nil
 goto continue
 end
-print_route[1+#print_route]=v2[2][v2[1][idx2]]
+print_route[1+#print_route]=tostring(v2[2][v2[1][idx2]])
 end
 idx1=1+idx1
 print(idx1,"root"..v1,k1,table.concat(print_route,"»"))
@@ -4786,7 +5392,7 @@ end
 do
 local print_route={}
 for idx2=1,#routes[database_index]do
-print_route[1+#print_route]=names_en_route[database_index][routes[database_index][idx2]]
+print_route[1+#print_route]=tostring(names_en_route[database_index][routes[database_index][idx2]])
 end
 print(table.concat(print_route,"»"))
 end
@@ -4889,7 +5495,7 @@ warn("Cache Is Empty!")
 goto cut_short1
 end
 end
-if not lay_by_Index("Lay")then
+if lay_by_Index("Lay")==false then
 warn("Not Supposed to Happen - Go Check Your Program!")
 end
 elseif directive:find("cache")==1 then
@@ -4959,15 +5565,6 @@ directive=io.input(io.stdin):read()
 end
 if directive==""then
 goto just_arrived
-elseif directive:find("display")==1 then
-if #navigate<=0 then
-warn("Nothing Is Here to Display!")
-goto cut_short2
-end
-if directive:match("flush$")then
-flush=0
-end
-display_by_Index(directive)
 elseif directive:find("delete")==1 then
 if #navigate<=0 then
 warn("Nothing Is Here to Delete!")
@@ -4989,7 +5586,7 @@ warn("Cache Is Empty!")
 goto cut_short2
 end
 end
-if not lay_by_Index("Paste")then
+if lay_by_Index("Paste")==false then
 warn("Not Supposed to Happen - Go Check Your Program!")
 end
 elseif directive:find("copy")==1 then
@@ -5001,9 +5598,40 @@ if cache[unique_key_extra]=="fresh_cache"then
 cache[unique_key_extra]=nil
 end
 cache_by_Index(directive,"copy")
+elseif directive:find("display")==1 then
+if #navigate<=0 then
+warn("Nothing Is Here to Display!")
+goto cut_short2
+end
+if directive:match("flush$")then
+flush=0
+end
+display_by_Index(directive)
+elseif directive:find("edit")==1 then
+if #navigate<=0 then
+warn("Nothing Is Here to Edit!")
+goto cut_short2
+end
+local feedback=edit_by_Index(directive)
+if feedback then
+warn("Edition Cancelled!")
+elseif feedback==false then
+warn("That Would Form a Invalid DataBase Pair!")
+end
+elseif directive:find("add")==1 then
+if add_Occasionally_by_Index(directive)==false then
+warn("That Would Form a Invalid DataBase Pair!")
+end
+elseif directive:find("import")==1 then
+local feedback=import_by_Index(directive:match("^import%s-[_%a][_%w]*$"))
+if feedback then
+warn("Nothing Has Been Collected to Import!")
+elseif feedback==false then
+warn("Not Supposed to Happen - Go Check Your Program!")
+end
 elseif directive:find("export")==1 then
 if #navigate<=0 then
-warn("Nothing is Here to Export!")
+warn("Nothing Is Here to Export!")
 goto cut_short2
 end
 export_by_Index(directive)
@@ -5083,7 +5711,128 @@ end
 --range[6][5]
 
 --autorun part 1:
-if status=="off maintenance"then
+if status~="under maintenance"then
+local ranges,line_number,bracket_number,modulo1,modulo2={},0,0
+for code_line in io.input(find_self):lines()do
+line_number=1+line_number
+local found,_,capture1,capture2=code_line:find("%s-%-%-%s-range%s-%[%s-(%d+)%s-%]%s-%[%s-(%d+)%s-%]%s-$")
+if found and found<=1 then
+bracket_number=tonumber(capture1)>bracket_number and tonumber(capture1)or bracket_number
+ranges[tonumber(capture1)]=ranges[tonumber(capture1)]or{}
+ranges[tonumber(capture1)][keystone(tonumber(capture1),tonumber(capture2))]=line_number
+if not modulo1 then
+modulo1=modulo2
+modulo2=tonumber(capture2)%6
+end
+end
+end
+line_number,status=0,"checksum"
+io.output(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
+io.input():seek("set")
+local code_line
+repeat
+local next_line=io.input():read()
+if code_line then
+line_number=1+line_number
+if ranges[bracket_number]and line_number>math.max(ranges[bracket_number][keystone(bracket_number,modulo1)],ranges[bracket_number][keystone(bracket_number,modulo2)])then
+bracket_number=bracket_number-1
+while bracket_number>0 and not ranges[bracket_number]do
+bracket_number=bracket_number-1
+end
+end
+if code_line:find("%s-%-%-%s-range%s-%[%s-(%d+)%s-%]%s-%[%s-(%d+)%s-%]%s-$")~=1 then
+if ranges[bracket_number]and line_number>=math.min(ranges[bracket_number][keystone(bracket_number,modulo1)],ranges[bracket_number][keystone(bracket_number,modulo2)])and line_number<=math.max(ranges[bracket_number][keystone(bracket_number,modulo1)],ranges[bracket_number][keystone(bracket_number,modulo2)])then
+goto skip_line
+end
+if code_line:find("%s-local%s-status%s-=%s-\"%s-.-%s-\"%s-;%s-$")==1 then
+io.write('local status="',status,'";',next_line and"\n"or"")
+elseif code_line:find("%s-local%s-digestH%s-=%s-.-%s-;%s-$")==1 then
+io.write("local digestH=0;",next_line and"\n"or"")
+elseif code_line:find("%s-local%s-digestM%s-=%s-.-%s-;%s-$")==1 then
+io.write("local digestM=0;",next_line and"\n"or"")
+else
+io.write(code_line,next_line and"\n"or"")
+end
+::skip_line::
+end
+end
+code_line=next_line
+until not next_line
+io.output():close()
+local standard_handle,household_sum,mainprogram_sum=io.input(),directory_CheckSum(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version),where),0
+if os.getenv("ANDROID_ROOT")=="/system"and io.popen("find $PREFIX/local/c_M/lua_Console -type f 2>/dev/null"):read()==io.popen("echo $PREFIX"):read().."/local/c_M/lua_Console"then
+mainprogram_sum=directory_CheckSum(io.popen("echo $PREFIX"):read().."/local/c_M/lua_Console",io.popen("echo $PREFIX"):read().."/local/c_M/")
+end
+if household_sum==digestH and(os.getenv("ANDROID_ROOT")~="/system"or mainprogram_sum==digestM)then
+os.remove(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
+else
+status=cstatus
+if status=="ready for run"then
+warn("⚠️Main program, crucial chunks of the library or both have been tampered - deploy, run or whatever at your own risk!")
+elseif status=="off maintenance"then
+status="checksum"
+os.remove(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
+local time_table=os.date("*t")
+time_table.hour=nil
+time_table.min=nil
+time_table.sec=nil
+if os.time(time_table)~=interface.renewed then
+interface.renewed=os.time(time_table)
+end
+interface.version,ranges,line_number,bracket_number,modulo1,modulo2=2^(-6)+interface.version,{},0,0,nil,nil
+io.input(standard_handle):seek("set")
+for code_line in io.input():lines()do
+line_number=1+line_number
+local found,_,capture1,capture2=code_line:find("%s-%-%-%s-range%s-%[%s-(%d+)%s-%]%s-%[%s-(%d+)%s-%]%s-$")
+if found and found<=1 then
+bracket_number=tonumber(capture1)>bracket_number and tonumber(capture1)or bracket_number
+ranges[tonumber(capture1)]=ranges[tonumber(capture1)]or{}
+ranges[tonumber(capture1)][keystone(tonumber(capture1),tonumber(capture2))]=line_number
+if not modulo1 then
+modulo1=modulo2
+modulo2=tonumber(capture2)%6
+end
+end
+end
+line_number,code_line=0,nil
+io.output(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
+io.input():seek("set")
+repeat
+local next_line=io.input():read()
+if code_line then
+line_number=1+line_number
+if ranges[bracket_number]and line_number>math.max(ranges[bracket_number][keystone(bracket_number,modulo1)],ranges[bracket_number][keystone(bracket_number,modulo2)])then
+bracket_number=bracket_number-1
+while bracket_number>0 and not ranges[bracket_number]do
+bracket_number=bracket_number-1
+end
+end
+if code_line:find("%s-%-%-%s-range%s-%[%s-(%d+)%s-%]%s-%[%s-(%d+)%s-%]%s-$")~=1 then
+if ranges[bracket_number]and line_number>=math.min(ranges[bracket_number][keystone(bracket_number,modulo1)],ranges[bracket_number][keystone(bracket_number,modulo2)])and line_number<=math.max(ranges[bracket_number][keystone(bracket_number,modulo1)],ranges[bracket_number][keystone(bracket_number,modulo2)])then
+goto skip_line
+end
+if code_line:find("%s-version%s-=%s-.-%s-,%s-$")==1 then
+io.write("version=",interface.version,",",next_line and"\n"or"")
+elseif code_line:find("%s-renewed%s-=%s-.-%s-,%s-$")==1 then
+io.write("renewed=",interface.renewed,",",next_line and"\n"or"")
+elseif code_line:find("%s-local%s-status%s-=%s-\"%s-.-%s-\"%s-;%s-$")==1 then
+io.write('local status="',status,'";',next_line and"\n"or"")
+elseif code_line:find("%s-local%s-digestH%s-=%s-.-%s-;%s-$")==1 then
+io.write("local digestH=0;",next_line and"\n"or"")
+elseif code_line:find("%s-local%s-digestM%s-=%s-.-%s-;%s-$")==1 then
+io.write("local digestM=0;",next_line and"\n"or"")
+else
+io.write(code_line,next_line and"\n"or"")
+end
+::skip_line::
+end
+end
+code_line=next_line
+until not next_line
+io.output():close()
+household_sum=directory_CheckSum(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version),where)
+
+--autorun part 2:
 status="maint by c"
 local script1,script2=("%q"):format([===[local cache_package_path=package.path
 package.path=]===]..("%q"):format(find_self).."\nlocal success1,module_instance=pcall(require,'"..required_name..[===[')
@@ -5099,12 +5848,12 @@ if not module_path then
 gen_func,invar_state,ctrl_var_init=ipairs(module_finder)
 end
 for i,v in module_path and module_finder:lines()or gen_func,not module_path and invar_state or nil,not module_path and ctrl_var_init or nil do
-if(module_path or(i%3==2 and module_finder[1+i]))and(module_path and i or v):match('%-'..]===]..interface.version..[===[)then
+if(module_path or(i%3==2 and module_finder[1+i]))and(module_path and i or v):match('%-'..]===]..(digestH==digestM and interface.version or cversion)..[===[)then
 package.path=module_path and i or v
 if os.getenv('ANDROID_ROOT')=='/system'then
-module_name=(module_path and i or v):match('/([^/]-)%-'..]===]..interface.version..[===[)
+module_name=(module_path and i or v):match('/([^/]-)%-'..]===]..(digestH==digestM and interface.version or cversion)..[===[)
 elseif os.getenv('OS')=='Windows_NT'then
-module_name=(module_path and i or v):match('\\([^\\]-)%-'..]===]..interface.version..[===[)
+module_name=(module_path and i or v):match('\\([^\\]-)%-'..]===]..(digestH==digestM and interface.version or cversion)..[===[)
 end
 break
 end
@@ -5118,12 +5867,12 @@ if not module_path then
 gen_func,invar_state,ctrl_var_init=ipairs(module_finder)
 end
 for i,v in module_path and module_finder:lines()or gen_func,not module_path and invar_state or nil,not module_path and ctrl_var_init or nil do
-if(module_path or(i%3==2 and module_finder[1+i]))and(module_path and i or v):match('%-'..]===]..interface.version..[===[)then
+if(module_path or(i%3==2 and module_finder[1+i]))and(module_path and i or v):match('%-'..]===]..(digestH==digestM and interface.version or cversion)..[===[)then
 package.path=module_path and i or v
 if os.getenv('ANDROID_ROOT')=='/system'then
-module_name=(module_path and i or v):match('/([^/]-)%-'..]===]..interface.version..[===[)
+module_name=(module_path and i or v):match('/([^/]-)%-'..]===]..(digestH==digestM and interface.version or cversion)..[===[)
 elseif os.getenv('OS')=='Windows_NT'then
-module_name=(module_path and i or v):match('\\([^\\]-)%-'..]===]..interface.version..[===[)
+module_name=(module_path and i or v):match('\\([^\\]-)%-'..]===]..(digestH==digestM and interface.version or cversion)..[===[)
 end
 break
 end
@@ -5131,7 +5880,7 @@ end
 if module_name then
 module_instance=require(module_name)
 else
-error('Unable to Find Module Corresponding to Version: '..]===]..interface.version..[===[ ..'!')
+error('Unable to Find Module Corresponding to Version: '..]===]..(digestH==digestM and interface.version or cversion)..[===[ ..'!')
 end
 end
 end
@@ -5172,7 +5921,7 @@ redirectory=io.popen('find '..directives..' -type d 2>/dev/null'):read()
 elseif os.getenv('OS')=='Windows_NT'and os.execute('dir '..directives..' /A:D /S /B')then
 local cache_directives=directives
 if directives:find('".-"$')==1 then
-cache_directives=directives:match('^"(.-)"$')
+cache_directives=directives:sub(2,-2)
 end
 redirectory=io.popen('dir '..directives..' /A:D /S /B'):read()or cache_directives
 if redirectory:find(cache_directives)==1 then
@@ -7258,10 +8007,12 @@ os.execute("mkdir -v $PREFIX/local")
 end
 os.execute("rm -rvf $PREFIX/local/c_M")
 os.execute("mkdir -v -m +rwx $PREFIX/local/c_M")
+os.execute("export SOURCE_DATE_EPOCH="..interface.renewed)
 if os.execute('clang -x c "'..where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version)..'" -fPIC -fdata-sections -ffunction-sections -Wl,--gc-sections,--as-needed -ffp-contract=fast '..
 --'-fsanitize=address,undefined -fsanitize-recover=address,undefined '..
 '-ggdb -O0 -Wall -o $PREFIX/local/c_M/lua_Console -L$PREFIX/local/lib -llua -L$PREFIX/lib -landroid-execinfo -pthread -lm')then
-os.execute([===[unset LUA_INIT
+os.execute([===[unset SOURCE_DATE_EPOCH
+unset LUA_INIT
 unset LUA_INIT_]===].._VERSION:match("%f[%s%.%d][%s%.%w]*"):gsub("%s",""):gsub("%.","_").."\n"..[===[export "PATH=$PREFIX/bin"
 cat > ~/.bashrc << EOF
 $(luarocks path)
@@ -7273,120 +8024,21 @@ TAB: menu-complete
 set show-all-if-ambiguous on
 set menu-complete-display-prefix on
 EOF]===])
-print("Main Program Ready for Run!")
+print("Main Program Correctly Set Up!")
+else
+error("Error Setting Up Main Program!")
 end
 os.remove(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
+mainprogram_sum=directory_CheckSum(io.popen("echo $PREFIX"):read().."/local/c_M/lua_Console",io.popen("echo $PREFIX"):read().."/local/c_M/")
 ::not_bother::
-status=cstatus
-end
 
---autorun part 2:
-local ranges
-if status~="under maintenance"then
-ranges={}
-local line_number,bracket_number=0,0
-for code_line in io.input(find_self):lines()do
-line_number=1+line_number
-local found,_,capture1,capture2=code_line:find("%s-%-%-%s-range%s-%[%s-(%d+)%s-%]%s-%[%s-(%d+)%s-%]%s-$")
-if found and found<=1 then
-bracket_number=tonumber(capture1)>bracket_number and tonumber(capture1)or bracket_number
-ranges[tonumber(capture1)]=ranges[tonumber(capture1)]or{}
-ranges[tonumber(capture1)][keystone(tonumber(capture1),tonumber(capture2))]=line_number
-end
-end
-line_number,status=0,"checksum"
-io.output(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
-io.input():seek("set")
-local code_line
-repeat
-local next_line=io.input():read()
-if code_line then
-line_number=1+line_number
-if ranges[bracket_number]and line_number>math.max(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])then
-bracket_number=bracket_number-1
-while bracket_number>0 and not ranges[bracket_number]do
-bracket_number=bracket_number-1
-end
-end
-if code_line:find("%s-%-%-%s-range%s-%[%s-(%d+)%s-%]%s-%[%s-(%d+)%s-%]%s-$")~=1 then
-if ranges[bracket_number]and line_number>=math.min(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])and line_number<=math.max(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])then
-goto skip_line
-end
-if code_line:find("%s-local%s-status%s-=%s-\"%s-.-%s-\"%s-;%s-$")==1 then
-io.write('local status="',status,'";',next_line and"\n"or"")
-elseif code_line:find("%s-local%s-digest%s-=%s-.-%s-;%s-$")==1 then
-io.write("local digest=0;",next_line and"\n"or"")
-else
-io.write(code_line,next_line and"\n"or"")
-end
-::skip_line::
-end
-end
-code_line=next_line
-until not next_line
-io.output():close()
-local standard_handle=io.input()
-local household_sum=directory_CheckSum(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version),where)
-if household_sum==digest then
-os.remove(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
-else
-status=cstatus
-if status=="ready for run"then
-warn("⚠️Crucial chunks of the library have been tampered - deploy, run or whatever at your own risk!")
-elseif status=="off maintenance"then
-status="checksum"
-os.remove(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
-line_number,bracket_number,ranges,interface.version,interface.renewed=0,0,{},2^(-6)+interface.version,tonumber(os.date("%Y%m%d"))
-io.input(standard_handle):seek("set")
-for code_line in io.input():lines()do
-line_number=1+line_number
-local found,_,capture1,capture2=code_line:find("%s-%-%-%s-range%s-%[%s-(%d+)%s-%]%s-%[%s-(%d+)%s-%]%s-$")
-if found and found<=1 then
-bracket_number=tonumber(capture1)>bracket_number and tonumber(capture1)or bracket_number
-ranges[tonumber(capture1)]=ranges[tonumber(capture1)]or{}
-ranges[tonumber(capture1)][keystone(tonumber(capture1),tonumber(capture2))]=line_number
-end
-end
-line_number,code_line=0,nil
-io.output(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
-io.input():seek("set")
-repeat
-local next_line=io.input():read()
-if code_line then
-line_number=1+line_number
-if ranges[bracket_number]and line_number>math.max(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])then
-bracket_number=bracket_number-1
-while bracket_number>0 and not ranges[bracket_number]do
-bracket_number=bracket_number-1
-end
-end
-if code_line:find("%s-%-%-%s-range%s-%[%s-(%d+)%s-%]%s-%[%s-(%d+)%s-%]%s-$")~=1 then
-if ranges[bracket_number]and line_number>=math.min(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])and line_number<=math.max(ranges[bracket_number][keystone(bracket_number,6)],ranges[bracket_number][keystone(bracket_number,5)])then
-goto skip_line
-end
-if code_line:find("%s-version%s-=%s-.-%s-,%s-$")==1 then
-io.write("version=",interface.version,",",next_line and"\n"or"")
-elseif code_line:find("%s-renewed%s-=%s-.-%s-,%s-$")==1 then
-io.write("renewed=",interface.renewed,",",next_line and"\n"or"")
-elseif code_line:find("%s-local%s-status%s-=%s-\"%s-.-%s-\"%s-;%s-$")==1 then
-io.write('local status="',status,'";',next_line and"\n"or"")
-elseif code_line:find("%s-local%s-digest%s-=%s-.-%s-;%s-$")==1 then
-io.write("local digest=0;",next_line and"\n"or"")
-else
-io.write(code_line,next_line and"\n"or"")
-end
-::skip_line::
-end
-end
-code_line=next_line
-until not next_line
-io.output():close()
-household_sum,status,code_line=directory_CheckSum(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version),where),"pack with lib",nil
+--autorun part 3:
+status="pack with lib"
 local database_found,database_finder,database_path,database_location=pcall(directory_Match,'"'..(os.getenv("ANDROID_ROOT")=="/system"and where:match("^(.-/)[^/]+/$")or io.popen('cd /D "'..where..'.." && cd'):read().."\\")..(os.getenv("ANDROID_ROOT")=="/system"and'" -path *'..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version).."* -type f"or"*"..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version)..'*" /A:-D'))
-status="ready for run"
+status,code_line="ready for run",nil
 io.output(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
 if database_found then
-io.write("--range[15][18]\n")
+io.write("--range[15][",modulo1+3*6,"]\n")
 if database_location and database_path:find(database_location)==1 then
 io.write("local database_snapshot=[",("="):rep(15),"[",io.input(database_path):read("a"),"]",("="):rep(15),"]\n")
 io.input():close()
@@ -7397,7 +8049,7 @@ io.write("[",("="):rep(15),"[",io.input(database_finder[3*idx-1]):read("a"),"]",
 io.input():close()
 end
 end
-io.write("--range[15][15]\n")
+io.write("--range[15][",modulo2+2*6,"]\n")
 end
 io.input(standard_handle):seek("set")
 repeat
@@ -7409,8 +8061,10 @@ elseif code_line:find("%s-renewed%s-=%s-.-%s-,%s-$")==1 then
 io.write("renewed=",interface.renewed,",",next_line and"\n"or"")
 elseif code_line:find("%s-local%s-status%s-=%s-\"%s-.-%s-\"%s-;%s-$")==1 then
 io.write('local status="',status,'";',next_line and"\n"or"")
-elseif code_line:find("%s-local%s-digest%s-=%s-.-%s-;%s-$")==1 then
-io.write("local digest=",household_sum,";",next_line and"\n"or"")
+elseif code_line:find("%s-local%s-digestH%s-=%s-.-%s-;%s-$")==1 then
+io.write("local digestH=",household_sum,";",next_line and"\n"or"")
+elseif code_line:find("%s-local%s-digestM%s-=%s-.-%s-;%s-$")==1 then
+io.write("local digestM=",mainprogram_sum,";",next_line and"\n"or"")
 else
 io.write(code_line,next_line and"\n"or"")
 end
