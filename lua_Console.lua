@@ -1,3 +1,65 @@
+--range[15][18]
+local database_snapshot=[===============[local d=require(module_name).c_UpBinds.dual_Capable_Map{
+	["directory_Contrast.txt"]="local dictation,arg1,arg2,arg3=...\
+local loaded_module=require(module_name)\
+if dictation==\"d\"then\
+io.input(io.stdin):read()\
+loaded_module.directory_Contrast(_,_,arg1 or 27,arg2 or 27,arg3)\
+elseif dictation==\"f\"then\
+io.input(io.stdin):read()\
+local results=loaded_module.directory_Match()\
+loaded_module.directory_Contrast('\"'..results[2]..'\"','\"'..results[5]..'\"',arg1 or 27,arg2 or 27,arg3)\
+elseif dictation==\"s\"then\
+loaded_module.directory_Contrast(\"/sdcard/Download/Codes/\",\"/sdcard/Download/Codes/\",arg1 or 27,arg2 or 27,arg3)\
+end",
+	["space_before_Eol.txt"]="io.input(io.stdin):read()\
+local line_number,bool,problematic,directory=0,true,{},select(2,require(module_name).directory_Match())\
+for file_line in io.input(directory):lines(\"L\")do\
+line_number=1+line_number\
+if string.match(file_line,\"%s+\\n$\")then\
+bool=false\
+problematic[1+#problematic]=line_number\
+end\
+end\
+io.input(directory):close()\
+print(bool)\
+print(require(module_name).serialise(problematic,true))",
+	["cGen.txt"]="os.execute(\"rm -rvf $PREFIX/local/cTinkering\")\
+os.execute(\"mkdir -v -m +rwx $PREFIX/local/cTinkering\")\
+io.output(os.getenv(\"PREFIX\")..\"/local/cTinkering/cSrc\"):write([===[\
+#include<stdlib.h>\
+#include<string.h>\
+#include<pthread.h>\
+#include<lua.h>\
+#include<lualib.h>\
+#include<lauxlib.h>\
+\
+\
+int main(int argc,char *argv[], char *envp[]){\
+return 0;\
+}]===])\
+io.close()\
+if os.execute(\"clang -x c $PREFIX/local/cTinkering/cSrc -S -emit-llvm -fno-discard-value-names -fPIC -ggdb -O0 -ffp-contract=fast -Wall -o $PREFIX/local/cTinkering/cIR\")and os.execute(\"cp $PREFIX/local/cTinkering/cIR /sdcard/Download/Codes/\")and os.execute(\"clang -x ir $PREFIX/local/cTinkering/cIR -S -fPIC -ggdb -O0 -ffp-contract=fast -Wall -o $PREFIX/local/cTinkering/cAsbl\")and os.execute(\"cp $PREFIX/local/cTinkering/cAsbl /sdcard/Download/Codes/\")and os.execute(\"clang -x assembler $PREFIX/local/cTinkering/cAsbl -fPIC -ggdb -O0 -ffp-contract=fast -Wall -o $PREFIX/local/cTinkering/cProgram -L$PREFIX/local/lib -llua -L$PREFIX/lib -pthread -lm\")then\
+print(\"\\n------\")\
+os.execute(\"$PREFIX/local/cTinkering/cProgram\")\
+print(\"------\\n\")\
+end\
+os.execute(\"rm -rvf $PREFIX/local/cTinkering\")"
+}
+local c=require(module_name).c_UpBinds.dual_Capable_Map{
+	["Applets"]=d
+}
+local b=require(module_name).c_UpBinds.dual_Capable_Map{
+}
+local a=require(module_name).c_UpBinds.dual_Capable_Map{
+	["Coding"]=c
+}
+local _=require(module_name).c_UpBinds.dual_Capable_Map{
+	["应有尽有"]=a,
+	["disambiguity"]=b
+}
+return _]===============]
+--range[15][15]
 local function replicate(object,reconstruct,delve_guard,replicated,depth)
 reconstruct,delve_guard,replicated,depth=math.tointeger(tonumber(reconstruct))or nil,math.tointeger(tonumber(delve_guard))or 1,type(replicated)=="table"and replicated or(type(delve_guard)=="table"and delve_guard or(type(reconstruct)=="table"and reconstruct or{})),math.tointeger(tonumber(depth)) or 1
 if(not reconstruct or reconstruct>=depth)and(type(object)=="table"or(type(object)=="userdata"and tostring(object):find("dual_Capable_Map")==1))then
@@ -3359,8 +3421,8 @@ debug.setmetatable(consolidate_File,consolidate_File)
 
 
 local interface={
-version=1.5546875,
-renewed=1793937600,
+version=1.5859375,
+renewed=1794110400,
 ["Pointers in Practice"]="Deeming certain parameters tables or refering to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-invoke time.",
 replicate=replicate,
 zip=zip,
@@ -3389,8 +3451,8 @@ consolidate_File=consolidate_File
 --a few declarations:
 do
 local status="ready for run";
-local digestH=-2269606849572242180;
-local digestM=-144967788;
+local digestH=188847419467421124;
+local digestM=178775712;
 local required_name,find_self,where=...
 if os.getenv("ANDROID_ROOT")=="/system"then
 where=find_self:match("^(.-/)[^/]+$")
@@ -3422,7 +3484,7 @@ if os.getenv("ANDROID_ROOT")=="/system"then
 local bootstrap
 ::rematch::
 if directory then
-if not io.popen('find '..directory..' 2>/dev/null'):read()then
+if not io.popen("find "..directory.." 2>/dev/null"):read()then
 error(tostring(directory)..": No Such File or Directory!",2)
 end
 elseif directory==nil then
@@ -3441,7 +3503,7 @@ end
 else
 goto work
 end
-for item in(directory and io.popen('find '..directory..' 2>/dev/null')or io.popen('find /sdcard/ -type f 2>/dev/null')):lines()do
+for item in(directory and io.popen("find "..directory.." 2>/dev/null|sort")or io.popen("find /sdcard/ -type f 2>/dev/null|sort")):lines()do
 local temp,relative_path
 if directory then
 absolute_path=item
@@ -3457,7 +3519,7 @@ if directory or bootstrap[relative_path]then
 if handle then
 if type(handle)~="table"then
 if directory or item~=handle then
-handle={where_in and io.popen('find "'..where_in..'" 2>/dev/null')or io.popen('find "'..handle..'" 2>/dev/null'),handle,where_in,[handle]=not directory and true or nil}
+handle={where_in and io.popen('find "'..where_in..'" 2>/dev/null|sort')or io.popen('find "'..handle..'" 2>/dev/null|sort'),handle,where_in,[handle]=not directory and true or nil}
 handle[where_in or handle[2]]=handle[1]
 if where_in then
 where_in=nil
@@ -3465,7 +3527,7 @@ end
 end
 end
 if directory or not handle[item]then
-handle[1+#handle]=(temp and handle[temp]or handle[absolute_path])or(temp and io.popen('find "'..temp..'" 2>/dev/null')or io.popen('find "'..absolute_path..'" 2>/dev/null'))
+handle[1+#handle]=(temp and handle[temp]or handle[absolute_path])or(temp and io.popen('find "'..temp..'" 2>/dev/null|sort')or io.popen('find "'..absolute_path..'" 2>/dev/null|sort'))
 handle[1+#handle]=directory and absolute_path or item
 handle[1+#handle]=not directory and absolute_path or temp or false
 if not directory then
@@ -3487,7 +3549,7 @@ elseif type(handle)~="table"then
 if not directory then
 absolute_path=handle
 end
-handle=where_in and io.popen('find "'..where_in..'" 2>/dev/null')or io.popen('find "'..handle..'" 2>/dev/null')
+handle=where_in and io.popen('find "'..where_in..'" 2>/dev/null|sort')or io.popen('find "'..handle..'" 2>/dev/null|sort')
 elseif not directory then
 for idx=2,#handle,3 do
 handle[handle[idx]]=nil
@@ -3520,21 +3582,21 @@ end
 end
 ::rematch::
 if directory then
-if not os.execute('dir '..directory..' /S /B')then
+if not os.execute("dir "..directory.." /S /B")then
 error(tostring(directory)..": No Such File or Directory!",2)
 end
-if os.execute('dir '..directory..' /A:D /S /B')then
+if os.execute("dir "..directory.." /A:D /S /B")then
 local cache_directory=directory
 if directory:find('".-"$')==1 then
 cache_directory=directory:sub(2,-2)
 end
-absolute_path=io.popen('dir '..directory..' /A:D /S /B'):read()or cache_directory
+absolute_path=io.popen("dir "..directory.." /A:D /S /B"):read()or cache_directory
 if absolute_path:find(cache_directory)==1 then
 absolute_path=cache_directory
 necessary_func()
 end
 end
-for item in io.popen('dir '..directory..' /S /B'):lines()do
+for item in io.popen("dir "..directory.." /S /B"):lines()do
 absolute_path=item
 necessary_func()
 end
@@ -3982,15 +4044,14 @@ interface.init_Dbg=init_Dbg
 if c_thread==false then
 goto lower_overhead
 end
-local cversion=interface.version
-local cstatus=status
+local cversion,cstatus=interface.version,status
 
 --range[6][6]
 --[=[
 query collision\deletion
 add return false if kv both map
-edit return true if not apply or false if kv both map
-lay return false if trying to paste a pair to a find list
+edit return error string or false if kv both map
+lay return true if cache becomes empty or false if trying to paste a pair to a find list
 import return true if nothing collected or false if trying to paste a pair to a find list
 params
 lower half
@@ -4251,7 +4312,7 @@ collected_individuals=names[navigate[idx]]
 else
 collected_individuals[batch_from]=names[navigate[idx]]
 end
-if stop==true and type(navigate[idx])~="string"then
+if stop==false and type(navigate[idx])~="string"then
 jump=(jump-1)%-6
 cache[jump]=navigate[idx]
 end
@@ -4548,7 +4609,10 @@ elseif type(k)=="userdata"and tostring(k):find("dual_Capable_Map")==1 then
 if k[unique_key_meta]=="collected_nodes"then
 for idx2=1,#k do
 local object,content=load("return "..v.."["..("%q"):format(k[idx2]).."]","Fetch from Cache Entry "..v.." #"..idx2,nil,env)()
-if type(object)=="string"and utf8.len(object)>127 then
+if object==nil or(type(object)=="table"and object[unique_key_meta]=="merged_keys")then
+pool[1+#pool]={k,k[idx2]}
+goto continue1
+elseif type(object)=="string"and utf8.len(object)>127 then
 content=object(":127")
 end
 idx1=1+idx1
@@ -4556,16 +4620,24 @@ print(idx1,v,k[idx2],content or object)
 indexed_cache[idx1]=object
 associated_data[object]=v.."["..("%q"):format(k[idx2]).."]"
 pool[object]={k,k[idx2]}
+::continue1::
 end
 else
+if recycled[k]then
+cache[k]=nil
+goto continue2
+end
 idx1=1+idx1
 print(idx1,"root"..v,k)
 indexed_cache[idx1]=k
 associated_data[k]=v
 end
-elseif type(k)~="table"then
+elseif type(k)~="table"and(type(v)~="userdata"or tostring(v):find("dual_Capable_Map")~=1)then
 local object,content=load("return "..v.."["..("%q"):format(k).."]","Fetch from Cache Entry "..v,nil,env)()
-if type(object)=="string"and utf8.len(object)>127 then
+if object==nil or(type(object)=="table"and object[unique_key_meta]=="merged_keys")then
+pool[1+#pool]=k
+goto continue2
+elseif type(object)=="string"and utf8.len(object)>127 then
 content=object(":127")
 end
 idx1=1+idx1
@@ -4574,6 +4646,7 @@ indexed_cache[idx1]=object
 associated_data[object]=v.."["..("%q"):format(k).."]"
 pool[object]=k
 end
+::continue2::
 end
 local cache_idx1=idx1
 for k,v in cache:__pairs(#cache)do
@@ -4587,6 +4660,34 @@ print(idx1,v,contents)
 indexed_cache[idx1]=k
 associated_data[k]=v
 end
+end
+for idx2=1,#pool do
+if type(pool[idx2])=="table"then
+table.remove(pool[idx2][1],pool[idx2][1]:lookUp(pool[idx2][2]))
+if #pool[idx2][1]<=0 then
+cache[pool[idx2][1]]=nil
+end
+else
+cache[pool[idx2]]=nil
+end
+end
+local empty,next_key=true,pairs(cache)()
+if next_key~=nil and(math.type(next_key)~="integer"or next_key<-5 or next_key>0)then
+empty=false
+end
+for idx2=0,-5,-1 do
+if cache:nLookUp(idx2)then
+next_key=cache:__pairs()(false,idx2)
+if empty and(next_key~=nil and(math.type(next_key)~="integer"or next_key<-5 or next_key>0))then
+empty=false
+end
+end
+if recycled[cache:nLookUp(idx2)]then
+cache[idx2]=nil
+end
+end
+if empty then
+return empty
 end
 print("Which to "..cue.."?")
 local site,directive,pointer=pcall(io.input().read,io.input())
@@ -4603,7 +4704,7 @@ pointer=routes[database_index][#routes[database_index]]
 single_destination=true
 end
 if directive:find("%s-[kv]")==1 then
-for capt1,capt2,capt3,capt4,capt5 in directive:gmatch("[^:%->%d]*(%d*)%s-(:?)%s-(%d*)%s-%->%s-(%-?)(%d+)")do
+for capt1,capt2,capt3,capt4,capt5 in directive:gmatch("[^:%->%d]*(%d*)%s-(:?)%s-(%d*)%s-%->%s-(%-?)(%d*)")do
 local stop,anchor
 idx1,stop,anchor=tonumber(capt1),tonumber(capt3),tonumber(capt5)
 if not stop and capt2~=":"then
@@ -4644,7 +4745,7 @@ if single_destination then
 ambiguous=names[navigate[anchor-1]]==names[navigate[anchor]]or names[navigate[1+anchor]]==names[navigate[anchor]]
 else
 local merged_keys=collected_routes[anchor][#collected_routes[anchor]]:lookUp(navigate[anchor])
-if type(merged_keys)=="table"and merged_keys[unique_key_meta]=="collected_nodes"then
+if type(merged_keys)=="table"and merged_keys[unique_key_meta]=="merged_keys"then
 ambiguous=true
 end
 end
@@ -4670,6 +4771,10 @@ end
 warn("Internal DataBase Error: Pair - ",names[navigate[anchor]]," and ",truncated," - Do Not Belong to ",single_destination and names_en_route[database_index][routes[database_index][#routes[database_index]]]or collected_names_en_route[anchor][collected_routes[anchor][#collected_routes[anchor]]],"!")
 goto continue
 end
+elseif directive:find("%s-k")==1 then
+orientation=false
+elseif directive:find("%s-v")==1 then
+orientation=true
 end
 if(((type(indexed_cache[idx2])=="userdata"and tostring(indexed_cache[idx2]):find("dual_Capable_Map")==1)or directive:find("%s-v")==1)and not orientation)or(((type(indexed_cache[idx2])~="userdata"or tostring(indexed_cache[idx2]):find("dual_Capable_Map")~=1)and directive:find("%s-k")==1)and orientation)then
 if not anchor then
@@ -4710,7 +4815,9 @@ cache[indexed_cache[idx2]]=nil
 else
 table.remove(cache,cache:lookUp(indexed_cache[idx2]))
 end
+if anchor then
 anchor=anchor+(capt4=="-"and -1 or 1)
+end
 end
 if stop and idx1>stop then
 for idx2=1,stop do
@@ -4731,7 +4838,7 @@ if not stop and capt2~=":"then
 if idx1 then
 stop=false
 else
-goto continue
+goto continue1
 end
 end
 if idx1 then
@@ -4748,6 +4855,9 @@ for idx2=idx1,stop==false and idx1 or(idx1>stop and #indexed_cache or stop)do
 for k1,v1 in next,indexed_cache[idx2]do
 local source,replica
 if type(v1)=="userdata"and tostring(v1):find("dual_Capable_Map")==1 then
+if recycled[v1]then
+goto continue2
+end
 for k2,v2 in v1[unique_key_parents]:__pairs(#v1[unique_key_parents])do
 source=tonumber(v2[2][v2[1][1]]:match("^root(%d+)$"))
 break
@@ -4772,6 +4882,7 @@ if type(cache_old)=="userdata"and tostring(cache_old):find("dual_Capable_Map")==
 recycled[cache_old]=1+(recycled[cache_old]or 0)
 end
 end
+::continue2::
 end
 cache[indexed_cache[idx2]]=nil
 end
@@ -4784,7 +4895,7 @@ for idx2=1+cache_idx1,stop do
 
 end
 end
-::continue::
+::continue1::
 end
 else
 return false
@@ -4792,13 +4903,11 @@ end
 end
 
 local function edit_by_Index(directive,collected_routes,collected_names_en_route)
-::cut_short::
-local index=tonumber(directive:match("^edit%s-[kv]%s-(%d+)$"))
+local index=tonumber(directive:match("^edit%s-[kv]%s-f?%s-(%d+)$"))
 if index then
 index=1+(index-1)%#navigate
 else
-warn("Invalid Input with No Integer Index Extracted - Please Try Again!")
-goto cut_short
+return"Invalid Input with No Integer Index Extracted - Please Try Again!"
 end
 local to_edit
 if directive:find("edit%s-k%s-f")==1 or(directive:find("edit%s-k")==1 and type(names[navigate[index]])=="string"and utf8.len(names[navigate[index]])>127)then
@@ -4807,33 +4916,33 @@ elseif directive:find("edit%s-v%s-f")==1 or(directive:find("edit%s-v")==1 and ty
 to_edit=navigate[index]
 end
 local cave_found
-if to_edit then
+if to_edit~=nil then
 cave_found=io.popen("find /sdcard/Download/Cave -type d 2>/dev/null"):read()
-io.output(cave_found and"/sdcard/Download/Cave/tmpfile.txt"or"./tmpfile.txt"):write(to_edit)
+io.output(cave_found and"/sdcard/Download/Cave/tmpfile.txt"or"./tmpfile.txt"):write(tostring(to_edit))
 io.output():close()
 os.execute("termux-open "..(cave_found and"/sdcard/Download/Cave/tmpfile.txt"or"./tmpfile.txt"))
-print("Edit with External App of Choice, Save, then Return with a Notification: (retry\\n)")
+print("Edit with External App of Choice, Save, then Return with a Notification: (abort\\n)")
 else
 print("Please Enter Replacement:")
 end
-local site,replacement,pointer=pcall(io.input().read,io.input(),not to_edit and"a"or nil)
+local site,replacement,pointer=pcall(io.input().read,io.input(),to_edit==nil and"a"or"l")
 if not site or not replacement then
 if site then
 io.input():close()
 end
-replacement=io.input(io.stdin):read(not to_edit and "a"or nil)
+replacement=io.input(io.stdin):read(to_edit==nil and "a"or"l")
 end
 local logue
-if to_edit then
-if replacement=="retry"then
+if to_edit~=nil then
+if replacement=="abort"then
 os.remove(cave_found and"/sdcard/Download/Cave/tmpfile.txt"or"./tmpfile.txt")
-goto cut_short
+return"Editing through File Aborted According to User Request!"
 else
 replacement=io.input(cave_found and"/sdcard/Download/Cave/tmpfile.txt"or"./tmpfile.txt"):read("a")
 io.input():close()
 os.remove(cave_found and"/sdcard/Download/Cave/tmpfile.txt"or"./tmpfile.txt")
 print("About to Apply the Following:")
-print(utf8.len(replacement)>127 and replacement(":127")or replacement,"->",to_edit(":127"))
+print(utf8.len(replacement)>127 and replacement(":127")or replacement,"->",utf8.len(tostring(to_edit))>127 and tostring(to_edit)(":127")or to_edit)
 print("Are You Sure? (apply\\n)")
 local sub_directive
 site,sub_directive=pcall(io.input().read,io.input())
@@ -4844,7 +4953,7 @@ end
 sub_directive=io.input(io.stdin):read()
 end
 if sub_directive~="apply"then
-return true
+return"Modification Abandoned by User and Therefore Not Applied!"
 end
 end
 else
@@ -4878,7 +4987,7 @@ if single_destination then
 ambiguous=names[navigate[index-1]]==names[navigate[index]]or names[navigate[1+index]]==names[navigate[index]]
 else
 local merged_keys=collected_routes[index][#collected_routes[index]]:lookUp(navigate[index])
-if type(merged_keys)=="table"and merged_keys[unique_key_meta]=="collected_nodes"then
+if type(merged_keys)=="table"and merged_keys[unique_key_meta]=="merged_keys"then
 ambiguous=true
 end
 end
@@ -5088,7 +5197,7 @@ pointer=routes[database_index][#routes[database_index]]
 single_destination=true
 end
 if(cache_idx1 or 0)>1 and directive:find("%s-[kv]")==1 then
-for capt1,capt2,capt3,capt4,capt5 in directive:gmatch("[^:%->%d]*(%d*)%s-(:?)%s-(%d*)%s-%->%s-(%-?)(%d+)")do
+for capt1,capt2,capt3,capt4,capt5 in directive:gmatch("[^:%->%d]*(%d*)%s-(:?)%s-(%d*)%s-%->%s-(%-?)(%d*)")do
 local stop,anchor
 idx1,stop,anchor=tonumber(capt1),tonumber(capt3),tonumber(capt5)
 if not stop and capt2~=":"then
@@ -5129,7 +5238,7 @@ if single_destination then
 ambiguous=names[navigate[anchor-1]]==names[navigate[anchor]]or names[navigate[1+anchor]]==names[navigate[anchor]]
 else
 local merged_keys=collected_routes[anchor][#collected_routes[anchor]]:lookUp(navigate[anchor])
-if type(merged_keys)=="table"and merged_keys[unique_key_meta]=="collected_nodes"then
+if type(merged_keys)=="table"and merged_keys[unique_key_meta]=="merged_keys"then
 ambiguous=true
 end
 end
@@ -5155,6 +5264,10 @@ end
 warn("Internal DataBase Error: Pair - ",names[navigate[anchor]]," and ",truncated," - Do Not Belong to ",single_destination and names_en_route[database_index][routes[database_index][#routes[database_index]]]or collected_names_en_route[anchor][collected_routes[anchor][#collected_routes[anchor]]],"!")
 goto continue
 end
+elseif directive:find("%s-k")==1 then
+orientation=false
+elseif directive:find("%s-v")==1 then
+orientation=true
 end
 if(((type(collected_individuals[idx2])=="userdata"and tostring(collected_individuals[idx2]):find("dual_Capable_Map")==1)or directive:find("%s-v")==1)and not orientation)or(((type(collected_individuals[idx2])~="userdata"or tostring(collected_individuals[idx2]):find("dual_Capable_Map")~=1)and directive:find("%s-k")==1)and orientation)then
 if not anchor then
@@ -5181,7 +5294,9 @@ recycled[navigate[anchor]]=1+(recycled[navigate[anchor]]or 0)
 end
 end
 end
+if anchor then
 anchor=anchor+(capt4=="-"and -1 or 1)
+end
 end
 if stop and idx1>stop then
 for idx2=1,stop do
@@ -5305,10 +5420,8 @@ if utf8.len(contents2)>127 then
 contents2=contents2(":127")
 end
 warn("Invalid DataBase Pair - ",contents1," and ",contents2," - They Have Been Recycled!")
-recycled[1+#recycled]=v
-recycled[v]=#recycled
-recycled[1+#recycled]=k
-recycled[k]=#recycled
+recycled[v]=1+(recycled[v]or 0)
+recycled[k]=1+(recycled[k]or 0)
 pointer[k]=nil
 goto continue
 end
@@ -5354,8 +5467,16 @@ for k2,v2 in v1[unique_key_parents]:__pairs(#v1[unique_key_parents])do
 local print_route={}
 for idx2=1,#v2[1]do
 if recycled[v2[1][idx2]]or(idx2>=#v2[1]and not rawequal(v2[1][idx2],v1))then
+local expired_foothold
+if idx2>=#v2[1]and rawequal(v2[1][idx2],v1)then
+cache[k1]=nil
+expired_foothold=true
+end
 v1[unique_key_parents][k2]=nil
-goto continue
+if expired_foothold then
+goto continue1
+end
+goto continue2
 end
 print_route[1+#print_route]=tostring(v2[2][v2[1][idx2]])
 end
@@ -5364,7 +5485,7 @@ print(idx1,k1,v1,table.concat(print_route,"»"))
 navigate[idx1]=replicate(v2,2)
 names[navigate[idx1]]=navigate[idx1][1][#navigate[idx1][1]]
 table.insert(navigate[idx1][1],false)
-::continue::
+::continue2::
 end
 end
 ::value_repetition::
@@ -5373,8 +5494,16 @@ for k2,v2 in k1[unique_key_parents]:__pairs(#k1[unique_key_parents])do
 local print_route={}
 for idx2=1,#v2[1]do
 if recycled[v2[1][idx2]]or(idx2>=#v2[1]and not rawequal(v2[1][idx2],k1))then
+local expired_foothold
+if idx2>=#v2[1]and rawequal(v2[1][idx2],k1)then
+cache[k1]=nil
+expired_foothold=true
+end
 k1[unique_key_parents][k2]=nil
-goto continue
+if expired_foothold then
+goto continue1
+end
+goto continue2
 end
 print_route[1+#print_route]=tostring(v2[2][v2[1][idx2]])
 end
@@ -5383,10 +5512,11 @@ print(idx1,"root"..v1,k1,table.concat(print_route,"»"))
 navigate[idx1]=replicate(v2,2)
 names[navigate[idx1]]=navigate[idx1][1][#navigate[idx1][1]]
 table.insert(navigate[idx1][1],false)
-::continue::
+::continue2::
 end
 end
 cache_v1=v1
+::continue1::
 end
 end
 do
@@ -5481,21 +5611,25 @@ recycled[1+#recycled]=cache_pointer[unique_key_parents]
 recycled[cache_pointer[unique_key_parents]]=#recycled
 end
 elseif directive=="lay"then
+local empty=true
 if cache[unique_key_extra]=="fresh_cache"then
 warn("Nothing Has Been Cached Yet!")
 goto cut_short1
 else
-local empty=true
 for k,v in pairs(cache)do
 empty=false
 break
 end
+end
+::presently_empty::
 if empty then
 warn("Cache Is Empty!")
 goto cut_short1
 end
-end
-if lay_by_Index("Lay")==false then
+empty=lay_by_Index("Lay")
+if empty then
+goto presently_empty
+elseif empty==false then
 warn("Not Supposed to Happen - Go Check Your Program!")
 end
 elseif directive:find("cache")==1 then
@@ -5526,10 +5660,8 @@ if utf8.len(contents2)>127 then
 contents2=contents2(":127")
 end
 warn("Invalid DataBase Pair - ",contents1," and ",contents2," - They Have Been Recycled!")
-recycled[1+#recycled]=v
-recycled[v]=#recycled
-recycled[1+#recycled]=k
-recycled[k]=#recycled
+recycled[v]=1+(recycled[v]or 0)
+recycled[k]=1+(recycled[k]or 0)
 pointer[k]=nil
 goto continue
 end
@@ -5572,21 +5704,25 @@ goto cut_short2
 end
 delete_by_Index(directive)
 elseif directive=="paste"then
+local empty=true
 if cache[unique_key_extra]=="fresh_cache"then
 warn("Nothing Has Been Cached Yet!")
 goto cut_short2
 else
-local empty=true
 for k,v in pairs(cache)do
 empty=false
 break
 end
+end
+::presently_empty::
 if empty then
 warn("Cache Is Empty!")
 goto cut_short2
 end
-end
-if lay_by_Index("Paste")==false then
+empty=lay_by_Index("Paste")
+if empty then
+goto presently_empty
+elseif empty==false then
 warn("Not Supposed to Happen - Go Check Your Program!")
 end
 elseif directive:find("copy")==1 then
@@ -5614,7 +5750,7 @@ goto cut_short2
 end
 local feedback=edit_by_Index(directive)
 if feedback then
-warn("Edition Cancelled!")
+warn(feedback)
 elseif feedback==false then
 warn("That Would Form a Invalid DataBase Pair!")
 end
@@ -5712,7 +5848,7 @@ end
 
 --autorun part 1:
 if status~="under maintenance"then
-local ranges,line_number,bracket_number,modulo1,modulo2={},0,0
+local line_number,bracket_number,ranges,modulos=0,0,{},{}
 for code_line in io.input(find_self):lines()do
 line_number=1+line_number
 local found,_,capture1,capture2=code_line:find("%s-%-%-%s-range%s-%[%s-(%d+)%s-%]%s-%[%s-(%d+)%s-%]%s-$")
@@ -5720,9 +5856,11 @@ if found and found<=1 then
 bracket_number=tonumber(capture1)>bracket_number and tonumber(capture1)or bracket_number
 ranges[tonumber(capture1)]=ranges[tonumber(capture1)]or{}
 ranges[tonumber(capture1)][keystone(tonumber(capture1),tonumber(capture2))]=line_number
-if not modulo1 then
-modulo1=modulo2
-modulo2=tonumber(capture2)%6
+modulos[tonumber(capture1)]=modulos[tonumber(capture1)]or{}
+if modulos[tonumber(capture1)][1]then
+modulos[tonumber(capture1)][2]=tonumber(capture2)%6
+else
+modulos[tonumber(capture1)][1]=tonumber(capture2)%6
 end
 end
 end
@@ -5734,14 +5872,14 @@ repeat
 local next_line=io.input():read()
 if code_line then
 line_number=1+line_number
-if ranges[bracket_number]and line_number>math.max(ranges[bracket_number][keystone(bracket_number,modulo1)],ranges[bracket_number][keystone(bracket_number,modulo2)])then
+if ranges[bracket_number]and line_number>math.max(ranges[bracket_number][keystone(bracket_number,modulos[bracket_number][1])],ranges[bracket_number][keystone(bracket_number,modulos[bracket_number][2])])then
 bracket_number=bracket_number-1
 while bracket_number>0 and not ranges[bracket_number]do
 bracket_number=bracket_number-1
 end
 end
 if code_line:find("%s-%-%-%s-range%s-%[%s-(%d+)%s-%]%s-%[%s-(%d+)%s-%]%s-$")~=1 then
-if ranges[bracket_number]and line_number>=math.min(ranges[bracket_number][keystone(bracket_number,modulo1)],ranges[bracket_number][keystone(bracket_number,modulo2)])and line_number<=math.max(ranges[bracket_number][keystone(bracket_number,modulo1)],ranges[bracket_number][keystone(bracket_number,modulo2)])then
+if ranges[bracket_number]and line_number>=math.min(ranges[bracket_number][keystone(bracket_number,modulos[bracket_number][1])],ranges[bracket_number][keystone(bracket_number,modulos[bracket_number][2])])and line_number<=math.max(ranges[bracket_number][keystone(bracket_number,modulos[bracket_number][1])],ranges[bracket_number][keystone(bracket_number,modulos[bracket_number][2])])then
 goto skip_line
 end
 if code_line:find("%s-local%s-status%s-=%s-\"%s-.-%s-\"%s-;%s-$")==1 then
@@ -5767,7 +5905,7 @@ if household_sum==digestH and(os.getenv("ANDROID_ROOT")~="/system"or mainprogram
 os.remove(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
 else
 status=cstatus
-if status=="ready for run"then
+if status=="ready for run"or(status=="checksum"and digestH==digestM)then
 warn("⚠️Main program, crucial chunks of the library or both have been tampered - deploy, run or whatever at your own risk!")
 elseif status=="off maintenance"then
 status="checksum"
@@ -5779,7 +5917,7 @@ time_table.sec=nil
 if os.time(time_table)~=interface.renewed then
 interface.renewed=os.time(time_table)
 end
-interface.version,ranges,line_number,bracket_number,modulo1,modulo2=2^(-6)+interface.version,{},0,0,nil,nil
+interface.version,line_number,bracket_number,ranges,modulos=2^(-6)+interface.version,0,0,{},{}
 io.input(standard_handle):seek("set")
 for code_line in io.input():lines()do
 line_number=1+line_number
@@ -5788,9 +5926,11 @@ if found and found<=1 then
 bracket_number=tonumber(capture1)>bracket_number and tonumber(capture1)or bracket_number
 ranges[tonumber(capture1)]=ranges[tonumber(capture1)]or{}
 ranges[tonumber(capture1)][keystone(tonumber(capture1),tonumber(capture2))]=line_number
-if not modulo1 then
-modulo1=modulo2
-modulo2=tonumber(capture2)%6
+modulos[tonumber(capture1)]=modulos[tonumber(capture1)]or{}
+if modulos[tonumber(capture1)][1]then
+modulos[tonumber(capture1)][2]=tonumber(capture2)%6
+else
+modulos[tonumber(capture1)][1]=tonumber(capture2)%6
 end
 end
 end
@@ -5801,14 +5941,14 @@ repeat
 local next_line=io.input():read()
 if code_line then
 line_number=1+line_number
-if ranges[bracket_number]and line_number>math.max(ranges[bracket_number][keystone(bracket_number,modulo1)],ranges[bracket_number][keystone(bracket_number,modulo2)])then
+if ranges[bracket_number]and line_number>math.max(ranges[bracket_number][keystone(bracket_number,modulos[bracket_number][1])],ranges[bracket_number][keystone(bracket_number,modulos[bracket_number][2])])then
 bracket_number=bracket_number-1
 while bracket_number>0 and not ranges[bracket_number]do
 bracket_number=bracket_number-1
 end
 end
 if code_line:find("%s-%-%-%s-range%s-%[%s-(%d+)%s-%]%s-%[%s-(%d+)%s-%]%s-$")~=1 then
-if ranges[bracket_number]and line_number>=math.min(ranges[bracket_number][keystone(bracket_number,modulo1)],ranges[bracket_number][keystone(bracket_number,modulo2)])and line_number<=math.max(ranges[bracket_number][keystone(bracket_number,modulo1)],ranges[bracket_number][keystone(bracket_number,modulo2)])then
+if ranges[bracket_number]and line_number>=math.min(ranges[bracket_number][keystone(bracket_number,modulos[bracket_number][1])],ranges[bracket_number][keystone(bracket_number,modulos[bracket_number][2])])and line_number<=math.max(ranges[bracket_number][keystone(bracket_number,modulos[bracket_number][1])],ranges[bracket_number][keystone(bracket_number,modulos[bracket_number][2])])then
 goto skip_line
 end
 if code_line:find("%s-version%s-=%s-.-%s-,%s-$")==1 then
@@ -5888,17 +6028,18 @@ end
 end
 end
 package.path=cache_package_path
-return module_instance]===]):gsub("\n","n\\\n"),("%q"):format([===[if math.tointeger(tonumber(task_serial))then
+return module_instance]===]):gsub("\n","n\\\n"),("%q"):format([===[::await_task::
+if type(task_queue)~='table'and math.tointeger(tonumber(task_serial))then
 local extra_globals={}
 for k,v in next,_ENV do
 if not rawequal(require(module_name).c_UpBinds.global_snapshot[k],v)then
-extra_globals[1+#extra_globals]=tostring(k).." "..tostring(v)
+extra_globals[1+#extra_globals]=tostring(k)..' '..tostring(v)
 end
 end
-print("The Following Non-Standard Globals Exist:")
-print(table.concat(extra_globals,"\t"))
-::redirected::
-print('Task #'..task_serial..': Please Enter Directory to Redirect to or Globals to Serialise, Either to Proceed UnDisrupted or QUIT to Opt Out...')
+print('The Following Non-Standard Globals Exist:')
+print(table.concat(extra_globals,'\t'))
+::step_back::
+print('Task #'..task_serial..' - Please Enter Integer to Set Segment at, Directory to Redirect to or Globals to Serialise, Either to Proceed UnDisrupted or QUIT to Opt Out:')
 local quit,directives,handle=pcall(io.input().read,io.input())
 if quit and directives then
 quit=nil
@@ -5914,6 +6055,9 @@ quit=true
 goto cut_short
 elseif directives==''or not directives then
 goto cut_short
+elseif tonumber(directives)then
+segment=tonumber(directives)
+goto step_back
 else
 local redirectory
 if os.getenv('ANDROID_ROOT')=='/system'then
@@ -5929,10 +6073,14 @@ redirectory=cache_directives
 end
 end
 if redirectory then
-require(module_name).c_UpBinds.chdir(redirectory)
+local attempt,feedback=require(module_name).c_UpBinds.chdir(redirectory)
+if attempt then
 print('Working Directory Redirected to '..redirectory..'!')
-goto redirected
+goto step_back
 end
+warn(feedback,' - Proceeding with Working Directory UnAltered...')
+end
+goto cut_short
 end
 for token in directives:gmatch('%S+')do
 if token=='QUIT'then
@@ -5952,30 +6100,53 @@ if quit then
 error('Making Exit...')
 end
 end
+if type(task_queue)~='table'or #task_queue<=0 then
 if os.getenv('ANDROID_ROOT')=='/system'then
 local script_finder,script_path,script_location=(directory_Match or require(module_name).directory_Match)()
-local gen_func,invar_state,ctrl_var_init
 if script_location then
+if type(task_queue)~='table'then
 return loadfile(script_path)
-elseif not script_path then
+end
+task_queue[1+#task_queue]=loadfile(script_path)
+elseif script_finder then
+local gen_func,invar_state,ctrl_var_init
+if not script_path then
 gen_func,invar_state,ctrl_var_init=ipairs(script_finder)
 end
 for i,v in script_path and script_finder:lines()or gen_func,not script_path and invar_state or nil,not script_path and ctrl_var_init or nil do
 if script_path or(i%3==2 and script_finder[1+i])then
 if(script_path and i or v):match('/[^/%.]-script[^/%.]-%.?[^/%.]-$')then
-return loadfile(script_path and i or v)
+if type(task_queue)~='table'then
+task_queue={}
+end
+task_queue[1+#task_queue]=loadfile(script_path and i or v)
 end
 end
 end
+end
+if type(task_queue)~='table'then
 warn('No Valid Script File Found: Either among BootStrapped Files or under Current Working Directory - ',io.popen('pwd'):read(),' - Please Try Again!')
 return false
+end
 elseif os.getenv('OS')=='Windows_NT'then
 local script_path=os.getenv('script_path')
 if script_path then
+if script_path:find('".-"$')==1 then
+script_path=script_path:sub(2,-2)
+end
+if type(task_queue)~='table'then
 return loadfile(script_path)
 end
+task_queue[1+#task_queue]=loadfile(script_path)
+else
 local script_finder,script_location
 script_finder,script_path,script_location=(directory_Match or require(module_name).directory_Match)(false)
+if script_location then
+if type(task_queue)~='table'then
+return loadfile(script_path)
+end
+task_queue[1+#task_queue]=loadfile(script_path)
+elseif script_finder then
 local gen_func,invar_state,ctrl_var_init
 if not script_path then
 gen_func,invar_state,ctrl_var_init=ipairs(script_finder)
@@ -5983,12 +6154,27 @@ end
 for i,v in script_path and script_finder:lines()or gen_func,not script_path and invar_state or nil,not script_path and ctrl_var_init or nil do
 if script_path or(i%3==2 and script_finder[1+i])then
 if(script_path and i or v):match('\\[^\\%.]-script[^\\%.]-%.?[^\\%.]-$')then
-return loadfile(script_path and i or v)
+if type(task_queue)~='table'then
+task_queue={}
+end
+task_queue[1+#task_queue]=loadfile(script_path and i or v)
 end
 end
 end
+end
+end
+if type(task_queue)~='table'then
 warn('No Valid Script File Found: Either According to Environment Variable - script_path - or under Current Working Directory - ',io.popen('cd'):read(),' - Please Try Again!')
 return false
+end
+end
+end
+if type(task_queue)=='table'and #task_queue>0 then
+print('Task Run #'..(task_serial or 1)..':')
+return table.remove(task_queue,1)
+elseif type(task_queue)=='table'then
+task_queue=nil
+goto await_task
 end]===]):gsub("\n","n\\\n")
 local script_len=math.max(#script1,#script2)
 io.output(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version)):write([===[
@@ -7956,7 +8142,7 @@ lua_insert(L,idx2);
 lua_pushliteral(L,"\n");
 }
 lua_getglobal(L,"task_serial");
-lua_pushfstring(L,"--finish line of stack dump for task #%d\n",luaL_optinteger(L,-1,0)-1);
+lua_pushfstring(L,"--finish line of stack dump for task #%d\n",(int)lua_tonumber(L,-1)-1);
 lua_replace(L,-2);
 lua_concat(L,lua_gettop(L)-ctop);
 size_t result_length;
@@ -7976,17 +8162,24 @@ lua_pop(L,1);
 }
 int cache_segment=segment;
 if(lua_getglobal(L,"segment")==LUA_TNUMBER){
-segment=luaL_optinteger(L,-1,1);
+segment=lua_tonumber(L,-1);
+cache_segment=segment;
+if(segment<0)
+segment=0;
+else{
 for(idx1=lua_gettop(L);idx1>=1;idx1--){
-if(lua_isstring(L,idx1)&& !lua_isnumber(L,idx1)&&(!strcmp(lua_tostring(L,idx1),"dead")||(!strcmp(lua_tostring(L,idx1),"cannot resume dead coroutine")&& lua_isboolean(L,idx1-1)&& !lua_toboolean(L,idx1-1)))){
+if(lua_isstring(L,idx1)&& !lua_isnumber(L,idx1)&& !strcmp(lua_tostring(L,idx1),"cannot resume dead coroutine")&& lua_isboolean(L,idx1-1)&& !lua_toboolean(L,idx1-1)){
 lua_settop(L,4);
 segment=1+segment%(sizeof segmentation/sizeof segmentation[0]-1);
 break;
 }
 }
+if(segment>=sizeof segmentation/sizeof segmentation[0])
+segment=1+(segment-1)%(sizeof segmentation/sizeof segmentation[0]-1);
+}
 }else
 segment=1;
-if(segment==cache_segment)
+if(segment==cache_segment && lua_isinteger(L,-1))
 lua_pop(L,1);
 else{
 lua_pushinteger(L,segment);
@@ -8038,7 +8231,7 @@ local database_found,database_finder,database_path,database_location=pcall(direc
 status,code_line="ready for run",nil
 io.output(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
 if database_found then
-io.write("--range[15][",modulo1+3*6,"]\n")
+io.write("--range[15][",modulos[15][1]+3*6,"]\n")
 if database_location and database_path:find(database_location)==1 then
 io.write("local database_snapshot=[",("="):rep(15),"[",io.input(database_path):read("a"),"]",("="):rep(15),"]\n")
 io.input():close()
@@ -8049,7 +8242,7 @@ io.write("[",("="):rep(15),"[",io.input(database_finder[3*idx-1]):read("a"),"]",
 io.input():close()
 end
 end
-io.write("--range[15][",modulo2+2*6,"]\n")
+io.write("--range[15][",modulos[15][2]+2*6,"]\n")
 end
 io.input(standard_handle):seek("set")
 repeat
