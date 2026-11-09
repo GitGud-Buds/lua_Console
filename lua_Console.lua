@@ -1,64 +1,332 @@
 --range[15][18]
-local database_snapshot=[===============[local d=require(module_name).c_UpBinds.dual_Capable_Map{
-	["directory_Contrast.txt"]="local dictation,arg1,arg2,arg3=...\
-local loaded_module=require(module_name)\
-if dictation==\"d\"then\
-io.input(io.stdin):read()\
-loaded_module.directory_Contrast(_,_,arg1 or 27,arg2 or 27,arg3)\
-elseif dictation==\"f\"then\
-io.input(io.stdin):read()\
-local results=loaded_module.directory_Match()\
-loaded_module.directory_Contrast('\"'..results[2]..'\"','\"'..results[5]..'\"',arg1 or 27,arg2 or 27,arg3)\
-elseif dictation==\"s\"then\
-loaded_module.directory_Contrast(\"/sdcard/Download/Codes/\",\"/sdcard/Download/Codes/\",arg1 or 27,arg2 or 27,arg3)\
-end",
-	["space_before_Eol.txt"]="io.input(io.stdin):read()\
-local line_number,bool,problematic,directory=0,true,{},select(2,require(module_name).directory_Match())\
-for file_line in io.input(directory):lines(\"L\")do\
-line_number=1+line_number\
-if string.match(file_line,\"%s+\\n$\")then\
-bool=false\
-problematic[1+#problematic]=line_number\
-end\
-end\
-io.input(directory):close()\
-print(bool)\
-print(require(module_name).serialise(problematic,true))",
-	["cGen.txt"]="os.execute(\"rm -rvf $PREFIX/local/cTinkering\")\
-os.execute(\"mkdir -v -m +rwx $PREFIX/local/cTinkering\")\
-io.output(os.getenv(\"PREFIX\")..\"/local/cTinkering/cSrc\"):write([===[\
-#include<stdlib.h>\
-#include<string.h>\
-#include<pthread.h>\
-#include<lua.h>\
-#include<lualib.h>\
-#include<lauxlib.h>\
-\
-\
-int main(int argc,char *argv[], char *envp[]){\
-return 0;\
-}]===])\
-io.close()\
-if os.execute(\"clang -x c $PREFIX/local/cTinkering/cSrc -S -emit-llvm -fno-discard-value-names -fPIC -ggdb -O0 -ffp-contract=fast -Wall -o $PREFIX/local/cTinkering/cIR\")and os.execute(\"cp $PREFIX/local/cTinkering/cIR /sdcard/Download/Codes/\")and os.execute(\"clang -x ir $PREFIX/local/cTinkering/cIR -S -fPIC -ggdb -O0 -ffp-contract=fast -Wall -o $PREFIX/local/cTinkering/cAsbl\")and os.execute(\"cp $PREFIX/local/cTinkering/cAsbl /sdcard/Download/Codes/\")and os.execute(\"clang -x assembler $PREFIX/local/cTinkering/cAsbl -fPIC -ggdb -O0 -ffp-contract=fast -Wall -o $PREFIX/local/cTinkering/cProgram -L$PREFIX/local/lib -llua -L$PREFIX/lib -pthread -lm\")then\
-print(\"\\n------\")\
-os.execute(\"$PREFIX/local/cTinkering/cProgram\")\
-print(\"------\\n\")\
-end\
-os.execute(\"rm -rvf $PREFIX/local/cTinkering\")"
-}
-local c=require(module_name).c_UpBinds.dual_Capable_Map{
-	["Applets"]=d
-}
-local b=require(module_name).c_UpBinds.dual_Capable_Map{
-}
-local a=require(module_name).c_UpBinds.dual_Capable_Map{
-	["Coding"]=c
-}
-local _=require(module_name).c_UpBinds.dual_Capable_Map{
-	["应有尽有"]=a,
-	["disambiguity"]=b
-}
-return _]===============]
+local database_snapshots={"local c=require(module_name).c_UpBinds.dual_Capable_Map{\
+\9[\"hexeract\"]=\"local meta_Script=[===[\\\
+require(module_name).arithmetiCalc.initcalc=_\\\
+require(module_name).arithmetiCalc.imptalgo=require(module_name).algorithms\\\
+local x,y,z,a,b,c=require(module_name).arithmetiCalc(0,0,0,0,0,0)\\\
+local initial_states={\\\
+sizes={0.3,0.3},\\\
+axes={\\\
+{1,-math.sqrt(3)},\\\
+{math.sqrt(3),-1},\\\
+{2,0},\\\
+{math.sqrt(3),1},\\\
+{1,math.sqrt(3)},\\\
+{0,2}\\\
+},\\\
+dimenses={\\\
+{%d,%d,var=x},\\\
+{%d,%d,var=y},\\\
+{%d,%d,var=z},\\\
+{%d,%d,var=a},\\\
+{%d,%d,var=b},\\\
+{%d,%d,var=c}\\\
+}\\\
+}\\\
+for _,perm in require(module_name).permutation_Generator({x,y,z,a,b,c},{1,stateless=true})do\\\
+initial_states.relations=require(module_name).true_Iterator({-2,2,-2,2,-2,2,-2,2,-2,2,step1=4,step2=4,step3=4,step4=4,step5=4,function(states)\\\
+local comprehended={}\\\
+for idx=1,#perm-1 do\\\
+comprehended[idx]={perm[idx],\\\"==\\\",states.ctrls[idx],dof=0.1}\\\
+end\\\
+comprehended[1+#comprehended]={perm[#perm],\\\">=\\\",-2}\\\
+comprehended[1+#comprehended]={perm[#perm],\\\"<=\\\",2}\\\
+return comprehended\\\
+end},_,initial_states.relations)\\\
+end\\\
+print(require(module_name).serialise(initial_states.relations,\\\"\\\\t\\\"))\\\
+return require(module_name).dimensional_Animator(initial_states)\\\
+]===]\\\
+local scripts={}\\\
+for idx1=-3,0,3 do\\\
+for idx2=-3,0,3 do\\\
+for idx3=-3,0,3 do\\\
+for idx4=-3,0,3 do\\\
+for idx5=-3,0,3 do\\\
+for idx6=-3,0,3 do\\\
+scripts[1+#scripts]=string.format(meta_Script,idx1,3+idx1,idx2,3+idx2,idx3,3+idx3,idx4,3+idx4,idx5,3+idx5,idx6,3+idx6)\\\
+end\\\
+end\\\
+end\\\
+end\\\
+end\\\
+end\\\
+local collect=require(module_name).c_UpBinds.thread_Consolidator(scripts)\\\
+require(module_name).plot_Pixels(collect)\",\
+\9[\"rotated Parabolae\"]=\"local loaded_module=require(module_name)\\\
+loaded_module.arithmetiCalc.initcalc=nil\\\
+loaded_module.arithmetiCalc.imptalgo=loaded_module.algorithms\\\
+local x,y,z=loaded_module.arithmetiCalc(0,0,0)\\\
+local a,b,c,d,e,f=z(0,0,0,0,0,0)\\\
+local j,k,l,m,n,o=z(0,0,0,0,0,0)\\\
+local axes={\\\
+{math.sqrt(3),-1},\\\
+{math.sqrt(3),1},\\\
+{0,2}\\\
+}\\\
+local background={\\\
+axes=axes,\\\
+relations={\\\
+{\\\
+{\\\
+{\\\
+{(x-7)^2+(y-math.sqrt(20))^2,\\\"==\\\",12,dof=1.1},\\\
+{z,\\\"==\\\",6,dof=0.1}\\\
+},\\\
+{\\\
+{(x+7)^2+(y+5+math.sqrt(12))^2,\\\"==\\\",12,dof=1.1},\\\
+{z,\\\"==\\\",5-math.sqrt(12),dof=0.1}\\\
+}\\\
+}\\\
+},\\\
+{\\\
+{x,\\\"==\\\",0,dof=0.1},\\\
+{y,\\\"==\\\",0,dof=0.1},\\\
+{z,\\\"<=\\\",1},\\\
+{z,\\\">=\\\",0}\\\
+},\\\
+{\\\
+{y,\\\"==\\\",0,dof=0.1},\\\
+{z,\\\"==\\\",0,dof=0.1},\\\
+{x,\\\"<=\\\",1},\\\
+{x,\\\">=\\\",0}\\\
+},\\\
+{\\\
+{z,\\\"==\\\",0,dof=0.1},\\\
+{x,\\\"==\\\",0,dof=0.1},\\\
+{y,\\\"<=\\\",1},\\\
+{y,\\\">=\\\",0}\\\
+}\\\
+},\\\
+dimenses={\\\
+{-11,11,var=x},\\\
+{-12,10,var=y},\\\
+{-1,7,var=z}\\\
+}\\\
+}\\\
+local states1={\\\
+axes=axes,\\\
+animation=function(ctrl)\\\
+return function(_,n)\\\
+n=1+n\\\
+local y=n/100-math.sqrt(50)\\\
+local z=10-1/5*y^2\\\
+if z>=0 then\\\
+return n,{7,y,z},{7,y,z}\\\
+end\\\
+return nil\\\
+end,nil,ctrl\\\
+end,\\\
+animators={\\\
+a,b,c,\\\
+arg1=0,\\\
+arg2=true\\\
+},\\\
+relations={\\\
+{{(d-a)^2+(e-b)^2+(f-c)^2,\\\"<=\\\",10}},\\\
+{{(d-a)^2+(e-b)^2+(f-c)^2,\\\"==\\\",10,dof=1.1}}\\\
+},\\\
+dimenses={\\\
+{a-math.sqrt(15),a+math.sqrt(15),var=d},\\\
+{b-math.sqrt(15),b+math.sqrt(15),var=e},\\\
+{c-math.sqrt(15),c+math.sqrt(15),var=f}\\\
+},\\\
+trail=true,\\\
+pace=20\\\
+}\\\
+local states2={\\\
+axes=axes,\\\
+animation=function(ctrl)\\\
+return function(_,n)\\\
+n=1+n\\\
+local y=math.sqrt(50)-n/100\\\
+local z1=10-1/5*y^2\\\
+local z2=10-1/5*(10+y)^2\\\
+if y>=-5 then\\\
+return n,{-7,y,z1},{-7,y,z1}\\\
+else\\\
+return n,{-7,y,z2},{-7,y,z2}\\\
+end\\\
+return nil\\\
+end,nil,ctrl\\\
+end,\\\
+animators={\\\
+j,k,l,\\\
+arg1=0,\\\
+arg2=true\\\
+},\\\
+relations={\\\
+{{(m-j)^2+(n-k)^2+(o-l)^2,\\\"<=\\\",10}},\\\
+{{(m-j)^2+(n-k)^2+(o-l)^2,\\\"==\\\",10,dof=1.1}}\\\
+},\\\
+dimenses={\\\
+{j-math.sqrt(15),j+math.sqrt(15),var=m},\\\
+{k-math.sqrt(15),k+math.sqrt(15),var=n},\\\
+{l-math.sqrt(15),l+math.sqrt(15),var=o}\\\
+},\\\
+trail=true,\\\
+pace=20\\\
+}\\\
+local base_pixels=loaded_module.dimensional_Animator(background)\\\
+local threads={coroutine.create(loaded_module.dimensional_Animator),coroutine.create(loaded_module.dimensional_Animator)}\\\
+local n=1\\\
+repeat\\\
+local _,coords=coroutine.resume(threads[1],n<=1 and states1 or nil,n<=1 and base_pixels or nil)\\\
+coroutine.resume(threads[2],n<=1 and states2 or nil,n<=1 and base_pixels or nil)\\\
+states1.override=true\\\
+local cache_color=states1.colours[1]\\\
+states1.colours[1]={127,127,127}\\\
+local _,replica=coroutine.resume(threads[1])\\\
+states1.colours[1]=cache_color\\\
+states1.override=false\\\
+states2.override=true\\\
+cache_color=states2.colours[1]\\\
+states2.colours[1]={127,127,127}\\\
+loaded_module.plot_Pixels(select(2,coroutine.resume(threads[2],replica)),string.format(\\\"/sdcard/Fonts/frame%03d.bmp\\\",n),{-350,200,-200,200})\\\
+states2.colours[1]=cache_color\\\
+states2.override=false\\\
+n=1+n\\\
+until coords[2]>=0\\\
+local rotate,ctrl1,ctrl2=0\\\
+while rotate<24 do\\\
+rotate=1+rotate\\\
+axes[1]={math.cos((-0.25-rotate/24)*math.pi)*math.sqrt(6),math.sin((-0.25-rotate/24)*math.pi)*math.sqrt(2)}\\\
+axes[2]={math.cos((0.25-rotate/24)*math.pi)*math.sqrt(6),math.sin((0.25-rotate/24)*math.pi)*math.sqrt(2)}\\\
+_,_,ctrl1=coroutine.resume(threads[1])\\\
+_,_,ctrl2=coroutine.resume(threads[2])\\\
+coroutine.close(threads[1])\\\
+coroutine.close(threads[2])\\\
+background={axes=background.axes,relations=background.relations,dimenses=background.dimenses}\\\
+local rotated_base=loaded_module.dimensional_Animator(background)\\\
+states1={axes=states1.axes,animation=states1.animation,animators=states1.animators,relations=states1.relations,dimenses=states1.dimenses,trail=states1.trail,pace=states1.pace}\\\
+states2={axes=states2.axes,animation=states2.animation,animators=states2.animators,relations=states2.relations,dimenses=states2.dimenses,trail=states2.trail,pace=states2.pace}\\\
+threads[1]=coroutine.create(loaded_module.dimensional_Animator)\\\
+threads[2]=coroutine.create(loaded_module.dimensional_Animator)\\\
+states1.pace=20+ctrl1\\\
+coroutine.resume(threads[1],states1,rotated_base)\\\
+states1.pace=20\\\
+states2.pace=20+ctrl2\\\
+coroutine.resume(threads[2],states2,rotated_base)\\\
+states2.pace=20\\\
+states1.override=true\\\
+local cache_color=states1.colours[1]\\\
+states1.colours[1]={127,127,127}\\\
+local _,replica=coroutine.resume(threads[1])\\\
+states1.colours[1]=cache_color\\\
+states1.override=false\\\
+states2.override=true\\\
+cache_color=states2.colours[1]\\\
+states2.colours[1]={127,127,127}\\\
+loaded_module.plot_Pixels(select(2,coroutine.resume(threads[2],replica)),string.format(\\\"/sdcard/Fonts/frame%03d.bmp\\\",n),{-350-75*(math.cos(rotate/24*math.pi)-1),200-75*(math.cos(rotate/24*math.pi)-1),-200+75*math.sin(rotate/24*math.pi)/math.sqrt(3),200+75*math.sin(rotate/24*math.pi)/math.sqrt(3)})\\\
+states2.colours[1]=cache_color\\\
+states2.override=false\\\
+n=1+n\\\
+end\\\
+repeat\\\
+coroutine.resume(threads[1])\\\
+coroutine.resume(threads[2])\\\
+states1.override=true\\\
+local cache_color=states1.colours[1]\\\
+states1.colours[1]={127,127,127}\\\
+local status,replica=coroutine.resume(threads[1])\\\
+if not status then break end\\\
+states1.colours[1]=cache_color\\\
+states1.override=false\\\
+states2.override=true\\\
+cache_color=states2.colours[1]\\\
+states2.colours[1]={127,127,127}\\\
+loaded_module.plot_Pixels(select(2,coroutine.resume(threads[2],replica)),string.format(\\\"/sdcard/Fonts/frame%03d.bmp\\\",n),{-200,350,-200,200})\\\
+states2.colours[1]=cache_color\\\
+states2.override=false\\\
+n=1+n\\\
+until not status\\\
+coroutine.close(threads[1])\\\
+coroutine.close(threads[2])\\\
+os.execute('magick -loop 0 -dispose previous -delay 10 /sdcard/Fonts/*.bmp \\\"/sdcard/Download/rotated Animation.gif\\\"')\"\
+}\
+local b=require(module_name).c_UpBinds.dual_Capable_Map{\
+}\
+local a=require(module_name).c_UpBinds.dual_Capable_Map{\
+\9[\"space before EOL\"]=\"io.input(io.stdin):read()\\\
+local line_number,bool,problematic,directory=0,true,{},select(2,require(module_name).directory_Match())\\\
+for file_line in io.input(directory):lines(\\\"L\\\")do\\\
+line_number=1+line_number\\\
+if string.match(file_line,\\\"%s+\\\\n$\\\")then\\\
+bool=false\\\
+problematic[1+#problematic]=line_number\\\
+end\\\
+end\\\
+io.input(directory):close()\\\
+print(bool)\\\
+print(require(module_name).serialise(problematic,true))\",\
+\9[\"Theoretical\"]=c,\
+\9[\"c WhiteBoard\"]=\"os.execute(\\\"rm -rvf $PREFIX/local/cTinkering\\\")\\\
+os.execute(\\\"mkdir -v -m +rwx $PREFIX/local/cTinkering\\\")\\\
+io.output(os.getenv(\\\"PREFIX\\\")..\\\"/local/cTinkering/cSrc\\\"):write([===[\\\
+#include<stdlib.h>\\\
+#include<string.h>\\\
+#include<pthread.h>\\\
+#include<lua.h>\\\
+#include<lualib.h>\\\
+#include<lauxlib.h>\\\
+\\\
+\\\
+int main(int argc,char *argv[], char *envp[]){\\\
+return 0;\\\
+}]===])\\\
+io.close()\\\
+if os.execute(\\\"clang -x c $PREFIX/local/cTinkering/cSrc -S -emit-llvm -fno-discard-value-names -fPIC -ggdb -O0 -ffp-contract=fast -Wall -o $PREFIX/local/cTinkering/cIR\\\")and os.execute(\\\"cp $PREFIX/local/cTinkering/cIR /sdcard/Download/Codes/\\\")and os.execute(\\\"clang -x ir $PREFIX/local/cTinkering/cIR -S -fPIC -ggdb -O0 -ffp-contract=fast -Wall -o $PREFIX/local/cTinkering/cAsbl\\\")and os.execute(\\\"cp $PREFIX/local/cTinkering/cAsbl /sdcard/Download/Codes/\\\")and os.execute(\\\"clang -x assembler $PREFIX/local/cTinkering/cAsbl -fPIC -ggdb -O0 -ffp-contract=fast -Wall -o $PREFIX/local/cTinkering/cProgram -L$PREFIX/local/lib -llua -L$PREFIX/lib -pthread -lm\\\")then\\\
+print(\\\"\\\\n------\\\")\\\
+os.execute(\\\"$PREFIX/local/cTinkering/cProgram\\\")\\\
+print(\\\"------\\\\n\\\")\\\
+end\\\
+os.execute(\\\"rm -rvf $PREFIX/local/cTinkering\\\")\",\
+\9[\"directory Contrast\"]=\"local dictation,arg1,arg2,arg3=...\\\
+local loaded_module=require(module_name)\\\
+if dictation==\\\"d\\\"then\\\
+io.input(io.stdin):read()\\\
+loaded_module.directory_Contrast(_,_,arg1 or 27,arg2 or 27,arg3)\\\
+elseif dictation==\\\"f\\\"then\\\
+io.input(io.stdin):read()\\\
+local results=loaded_module.directory_Match()\\\
+loaded_module.directory_Contrast('\\\"'..results[2]..'\\\"','\\\"'..results[5]..'\\\"',arg1 or 27,arg2 or 27,arg3)\\\
+elseif dictation==\\\"s\\\"then\\\
+loaded_module.directory_Contrast(\\\"/sdcard/Download/Codes/\\\",\\\"/sdcard/Download/Codes/\\\",arg1 or 27,arg2 or 27,arg3)\\\
+end\"\
+}\
+local _=require(module_name).c_UpBinds.dual_Capable_Map{\
+\9[\"Applets\"]=a,\
+\9[\"disambiguity\"]=b,\
+\9[\"lua_Console.bat\"]=\"chcp 65001\\13\\\
+@echo off\\13\\\
+setlocal enabledelayedexpansion\\13\\\
+set index=1\\13\\\
+:while\\13\\\
+call set \\\"temp=%%%index%%\\\"\\13\\\
+if defined temp (\\13\\\
+set \\\"directory!index!=!temp!\\\"\\13\\\
+echo !directory%index%!\\13\\\
+set \\\"temp=\\\"\\13\\\
+set /a index+=1\\13\\\
+goto while\\13\\\
+) else (\\13\\\
+set /a index-=1\\13\\\
+call set \\\"temp=%%!index!%\\\"\\13\\\
+set \\\"script_path=!temp!\\\"\\13\\\
+echo !script_path!\\13\\\
+set \\\"directory!index!=\\\"\\13\\\
+set \\\"temp=\\\"\\13\\\
+)\\13\\\
+cmd\\13\\\
+pause\"\
+}\
+return _",
+"local e=require(module_name).c_UpBinds.dual_Capable_Map{\
+}\
+local d=require(module_name).c_UpBinds.dual_Capable_Map{\
+\9[\"disambiguity\"]=e\
+}\
+return d"}
 --range[15][15]
 local function replicate(object,reconstruct,delve_guard,replicated,depth)
 reconstruct,delve_guard,replicated,depth=math.tointeger(tonumber(reconstruct))or nil,math.tointeger(tonumber(delve_guard))or 1,type(replicated)=="table"and replicated or(type(delve_guard)=="table"and delve_guard or(type(reconstruct)=="table"and reconstruct or{})),math.tointeger(tonumber(depth)) or 1
@@ -3421,8 +3689,8 @@ debug.setmetatable(consolidate_File,consolidate_File)
 
 
 local interface={
-version=1.5859375,
-renewed=1794110400,
+version=1.6015625,
+renewed=1794196800,
 ["Pointers in Practice"]="Deeming certain parameters tables or refering to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-invoke time.",
 replicate=replicate,
 zip=zip,
@@ -3451,8 +3719,8 @@ consolidate_File=consolidate_File
 --a few declarations:
 do
 local status="ready for run";
-local digestH=188847419467421124;
-local digestM=178775712;
+local digestH=1664157088847350608;
+local digestM=-428270633;
 local required_name,find_self,where=...
 if os.getenv("ANDROID_ROOT")=="/system"then
 where=find_self:match("^(.-/)[^/]+$")
@@ -4044,7 +4312,7 @@ interface.init_Dbg=init_Dbg
 if c_thread==false then
 goto lower_overhead
 end
-local cversion,cstatus=interface.version,status
+local cversion,crenewed,cstatus=interface.version,interface.renewed,status
 
 --range[6][6]
 --[=[
@@ -4067,18 +4335,21 @@ yield return wipe indexes of recycle on resume if dispose true
 once any modification involving ambiguity occurs, return cannot happen before another dump - add a warning after scanning catalogue for disamb
 ]=]
 function interface.portable_Hole(database_index,dispose_on_leave)
-local env
+local catalogue,env={}
 if database_snapshot and not _ENV.database_snapshot then
-env={root1=load(database_snapshot,"Retrieve the DataBase")(),require=require,module_name=module_name,table=table,reset={}}
+env={root1=load(database_snapshot,"Retrieve the DataBase")(),require=require,module_name=module_name,table=table,select=select,reset={}}
 elseif database_snapshots and not _ENV.database_snapshots then
-env={require=require,module_name=module_name,table=table,reset={}}
+env={require=require,module_name=module_name,table=table,select=select,reset={}}
 for idx=1,#database_snapshots do
 env["root"..idx]=load(database_snapshots[idx],"Retrieve DataBase"..idx)()
 end
 else
-env={root1=require(module_name).c_UpBinds.dual_Capable_Map{disambiguity=require(module_name).c_UpBinds.dual_Capable_Map{[select(2,require(module_name).c_UpBinds.dual_Capable_Map())]="collected_nodes"}},require=require,module_name=module_name,table=table,reset={}}
+env={require=require,module_name=module_name,select=select,reset={}}
+catalogue[1+#catalogue]='root1=require(module_name).c_UpBinds.dual_Capable_Map{disambiguity=require(module_name).c_UpBinds.dual_Capable_Map{[select(2,require(module_name).c_UpBinds.dual_Capable_Map())]="collected_nodes"}}'
+catalogue[1+#catalogue]="n=1"
 end
-local catalogue,success,database_finder,database_path,database_location={},pcall(directory_Match,"/sdcard/Download/Cave -type f")
+if next(catalogue)==nil then
+local success,database_finder,database_path,database_location=pcall(directory_Match,"/sdcard/Download/Cave -type f")
 if success and database_finder then
 local directory
 if database_location and database_path:find(database_location)==1 and database_path:match("%d%d%d%d%-[0-1]%d%-[0-3]%d [0-2]%d：[0-5]%d：[0-6]%d")then
@@ -4096,12 +4367,14 @@ for database_line in io.input(directory):lines()do
 catalogue[1+#catalogue]=database_line
 end
 io.input():close()
+end
+end
+end
 load(table.concat(catalogue,"\n"),"Execute Catalogue",nil,env)()
-end
-end
 env.require=nil
 env.module_name=nil
 env.table=nil
+env.select=nil
 env[1]=env.root1
 if type(env[1].disambiguity)=="userdata"and tostring(env[1].disambiguity):find("dual_Capable_Map")==1 then
 if next(catalogue)==nil then
@@ -4116,8 +4389,8 @@ end
 if env[1][select(3,require(module_name).c_UpBinds.dual_Capable_Map())][select(2,require(module_name).c_UpBinds.dual_Capable_Map())]~="collected_nodes"then
 env[1][select(3,require(module_name).c_UpBinds.dual_Capable_Map())][select(2,require(module_name).c_UpBinds.dual_Capable_Map())]="collected_nodes"
 end
-if database_snapshots and not _ENV.database_snapshots then
-for idx=2,#database_snapshots do
+if(env.n or #database_snapshots)>1 then
+for idx=2,env.n or #database_snapshots do
 env[idx]=env["root"..idx]
 if type(env[idx].disambiguity)=="userdata"and tostring(env[idx].disambiguity):find("dual_Capable_Map")==1 then
 if next(catalogue)==nil then
@@ -4168,9 +4441,6 @@ elseif stop==nil then
 stop=#navigate
 end
 for idx=start,stop==false and start or(start>stop and #navigate or stop)do
-if flush then
-flush=1+flush
-end
 if directive:find("display%s-[kv]")==1 then
 on_display[1+#on_display]=directive:find("display%s-k")==1 and names[navigate[idx]]or(type(navigate[idx])=="userdata"and tostring(navigate[idx]):find("dual_Capable_Map")==1 and serialise(navigate[idx],"\t")or navigate[idx])
 else
@@ -4372,34 +4642,48 @@ if directive:find("add%s-[kv]$")==1 then
 for k,v in pairs(cache)do
 if math.type(k)=="integer"and k>0 and k<=#cache then
 idx1=1+idx1
-print(idx1,v)
+local truncated
+if type(v)=="string"and utf8.len(v)>127 then
+truncated=v(":127")
+end
+print(idx1,truncated or v)
 indexed_cache[idx1]=v
 elseif type(k)=="userdata"and tostring(k):find("dual_Capable_Map")==1 then
 if k[unique_key_meta]=="collected_nodes"then
 for idx2=1,#k do
-local object,content=load("return "..v.."["..("%q"):format(k[idx2]).."]","Fetch from Cache Entry "..v.." #"..idx2,nil,env)()
+local object,content1,content2=load("return "..v.."["..("%q"):format(k[idx2]).."]","Fetch from Cache Entry "..v.." #"..idx2,nil,env)()
+if type(k[idx2])=="string"and utf8.len(k[idx2])>127 then
+content1=k[idx2](":127")
+end
 if type(object)=="string"and utf8.len(object)>127 then
-content=object(":127")
+content2=object(":127")
 end
 idx1=1+idx1
-print(idx1,v,k[idx2],content or object)
+print(idx1,v,content1 or k[idx2],content2 or object)
 indexed_cache[idx1]=object
 associated_data[object]=v.."["..("%q"):format(k[idx2]).."]"
 to_uncache={k,k[idx2]}
 end
 else
 idx1=1+idx1
-print(idx1,"root"..v,k)
+local contents=serialise(k,false)
+if utf8.len(contents)>127 then
+contents=contents(":127")
+end
+print(idx1,"root"..v,k,contents)
 indexed_cache[idx1]=k
 associated_data[k]=v
 end
-elseif type(k)~="table"then
-local object,content=load("return "..v.."["..("%q"):format(k).."]","Fetch from Cache Entry "..v,nil,env)()
+elseif type(k)~="table"and(type(v)~="userdata"or tostring(v):find("dual_Capable_Map")~=1)then
+local object,content1,content2=load("return "..v.."["..("%q"):format(k).."]","Fetch from Cache Entry "..v,nil,env)()
+if type(k)=="string"and utf8.len(k)>127 then
+content1=k(":127")
+end
 if type(object)=="string"and utf8.len(object)>127 then
-content=object(":127")
+content2=object(":127")
 end
 idx1=1+idx1
-print(idx1,v,k,content or object)
+print(idx1,v,content1 or k,content2 or object)
 indexed_cache[idx1]=object
 associated_data[object]=v.."["..("%q"):format(k).."]"
 to_uncache=k
@@ -4603,20 +4887,27 @@ local idx1,indexed_cache,associated_data,pool=0,{},{},{}
 for k,v in pairs(cache)do
 if math.type(k)=="integer"and k>0 and k<=#cache then
 idx1=1+idx1
-print(idx1,v)
+local content
+if type(v)=="string"and utf8.len(v)>127 then
+content=v(":127")
+end
+print(idx1,content or v)
 indexed_cache[idx1]=v
 elseif type(k)=="userdata"and tostring(k):find("dual_Capable_Map")==1 then
 if k[unique_key_meta]=="collected_nodes"then
 for idx2=1,#k do
-local object,content=load("return "..v.."["..("%q"):format(k[idx2]).."]","Fetch from Cache Entry "..v.." #"..idx2,nil,env)()
+local object,content1,content2=load("return "..v.."["..("%q"):format(k[idx2]).."]","Fetch from Cache Entry "..v.." #"..idx2,nil,env)()
+if type(k[idx2])=="string"and utf8.len(k[idx2])>127 then
+content1=k[idx2](":127")
+end
 if object==nil or(type(object)=="table"and object[unique_key_meta]=="merged_keys")then
 pool[1+#pool]={k,k[idx2]}
 goto continue1
 elseif type(object)=="string"and utf8.len(object)>127 then
-content=object(":127")
+content2=object(":127")
 end
 idx1=1+idx1
-print(idx1,v,k[idx2],content or object)
+print(idx1,v,content1 or k[idx2],content2 or object)
 indexed_cache[idx1]=object
 associated_data[object]=v.."["..("%q"):format(k[idx2]).."]"
 pool[object]={k,k[idx2]}
@@ -4628,20 +4919,27 @@ cache[k]=nil
 goto continue2
 end
 idx1=1+idx1
-print(idx1,"root"..v,k)
+local contents=serialise(k,false)
+if utf8.len(contents)>127 then
+contents=contents(":127")
+end
+print(idx1,"root"..v,k,contents)
 indexed_cache[idx1]=k
 associated_data[k]=v
 end
 elseif type(k)~="table"and(type(v)~="userdata"or tostring(v):find("dual_Capable_Map")~=1)then
-local object,content=load("return "..v.."["..("%q"):format(k).."]","Fetch from Cache Entry "..v,nil,env)()
+local object,content1,content2=load("return "..v.."["..("%q"):format(k).."]","Fetch from Cache Entry "..v,nil,env)()
+if type(k)=="string"and utf8.len(k)>127 then
+content1=k(":127")
+end
 if object==nil or(type(object)=="table"and object[unique_key_meta]=="merged_keys")then
 pool[1+#pool]=k
 goto continue2
 elseif type(object)=="string"and utf8.len(object)>127 then
-content=object(":127")
+content2=object(":127")
 end
 idx1=1+idx1
-print(idx1,v,k,content or object)
+print(idx1,v,content1 or k,content2 or object)
 indexed_cache[idx1]=object
 associated_data[object]=v.."["..("%q"):format(k).."]"
 pool[object]=k
@@ -4656,7 +4954,7 @@ local contents=serialise(k,false)
 if utf8.len(contents)>127 then
 contents=contents(":127")
 end
-print(idx1,v,contents)
+print(idx1,v,k,contents)
 indexed_cache[idx1]=k
 associated_data[k]=v
 end
@@ -5050,12 +5348,16 @@ contents1=serialise(k,false)
 if utf8.len(contents1)>127 then
 contents1=contents1(":127")
 end
+elseif type(k)=="string"and utf8.len(k)>127 then
+contents1=k(":127")
 end
 if type(v)=="table"or(type(v)=="userdata"and tostring(v):find("dual_Capable_Map")==1)then
 contents2=serialise(v,false)
 if utf8.len(contents2)>127 then
 contents2=contents2(":127")
 end
+elseif type(v)=="string"and utf8.len(v)>127 then
+contents2=v(":127")
 end
 idx1=1+idx1
 print(idx1,contents1 or k,contents2 or v)
@@ -5155,6 +5457,8 @@ contents=serialise(collected_individuals[idx1],false)
 if utf8.len(contents)>127 then
 contents=contents(":127")
 end
+elseif type(collected_individuals[idx1])=="string"and utf8.len(collected_individuals[idx1])>127 then
+contents=collected_individuals[idx1](":127")
 end
 print(idx1,contents or collected_individuals[idx1])
 until idx1>=#collected_individuals
@@ -5169,12 +5473,16 @@ contents1=serialise(k,false)
 if utf8.len(contents1)>127 then
 contents1=contents1(":127")
 end
+elseif type(k)=="string"and utf8.len(k)>127 then
+contents1=k(":127")
 end
 if type(v)=="table"or(type(v)=="userdata"and tostring(v):find("dual_Capable_Map")==1)then
 contents2=serialise(v,false)
 if utf8.len(contents2)>127 then
 contents2=contents2(":127")
 end
+elseif type(v)=="string"and utf8.len(v)>127 then
+contents2=v(":127")
 end
 print(idx1,contents1 or k,contents2 or v)
 if indexed_keys then
@@ -5403,11 +5711,6 @@ names[navigate[idx]]=nil
 end
 navigate=table.move(reset,1,#navigate,1,navigate)
 end
-if flush and #on_display>0 then
-on_display=table.move(on_display,1+#on_display-flush,#on_display,1,on_display)
-on_display=table.move(reset,1,#on_display-flush,1+flush,on_display)
-flush=nil
-end
 local idx1=0
 if type(pointer[unique_key_meta])=="userdata"and tostring(pointer[unique_key_meta]):find("dual_Capable_Map")==1 and pointer[unique_key_meta][unique_key_meta]=="collected_nodes"then
 for v,k in pointer[unique_key_meta]:__pairs(false)do
@@ -5427,11 +5730,25 @@ goto continue
 end
 idx1=1+idx1
 if type(v)=="userdata"and tostring(v):find("dual_Capable_Map")==1 then
-print(idx1,k,v)
+local contents,content=serialise(v,false)
+if utf8.len(contents)>127 then
+contents=contents(":127")
+end
+if type(k)=="string"and utf8.len(k)>127 then
+content=k(":127")
+end
+print(idx1,content or k,v,contents)
 navigate[idx1]=v
 names[v]=k
 elseif type(k)=="userdata"and tostring(k):find("dual_Capable_Map")==1 then
-print(idx1,v,k)
+local contents,content=serialise(k,false)
+if utf8.len(contents)>127 then
+contents=contents(":127")
+end
+if type(v)=="string"and utf8.len(v)>127 then
+content=v(":127")
+end
+print(idx1,content or v,k,contents)
 navigate[idx1]=k
 names[k]=v
 end
@@ -5447,7 +5764,11 @@ if recycled[v[1][idx2]]or(idx2>=#v[1]and not rawequal(v[1][idx2],pointer))then
 pointer[unique_key_parents][k]=nil
 goto continue
 end
-print_route[1+#print_route]=tostring(v[2][v[1][idx2]])
+local node
+if type(v[2][v[1][idx2]])=="string"and utf8.len(v[2][v[1][idx2]])>127 then
+node=v[2][v[1][idx2]](":127")
+end
+print_route[1+#print_route]=node or tostring(v[2][v[1][idx2]])
 end
 idx1=1+idx1
 names[v]=v[1][#v[1]-1]
@@ -5478,7 +5799,11 @@ goto continue1
 end
 goto continue2
 end
-print_route[1+#print_route]=tostring(v2[2][v2[1][idx2]])
+local node
+if type(v2[2][v2[1][idx2]])=="string"and utf8.len(v2[2][v2[1][idx2]])>127 then
+node=v2[2][v2[1][idx2]](":127")
+end
+print_route[1+#print_route]=node or tostring(v2[2][v2[1][idx2]])
 end
 idx1=1+idx1
 print(idx1,k1,v1,table.concat(print_route,"»"))
@@ -5505,7 +5830,11 @@ goto continue1
 end
 goto continue2
 end
-print_route[1+#print_route]=tostring(v2[2][v2[1][idx2]])
+local node
+if type(v2[2][v2[1][idx2]])=="string"and utf8.len(v2[2][v2[1][idx2]])>127 then
+node=v2[2][v2[1][idx2]](":127")
+end
+print_route[1+#print_route]=node or tostring(v2[2][v2[1][idx2]])
 end
 idx1=1+idx1
 print(idx1,"root"..v1,k1,table.concat(print_route,"»"))
@@ -5522,7 +5851,11 @@ end
 do
 local print_route={}
 for idx2=1,#routes[database_index]do
-print_route[1+#print_route]=tostring(names_en_route[database_index][routes[database_index][idx2]])
+local node
+if type(names_en_route[database_index][routes[database_index][idx2]])=="string"and utf8.len(names_en_route[database_index][routes[database_index][idx2]])>127 then
+node=names_en_route[database_index][routes[database_index][idx2]](":127")
+end
+print_route[1+#print_route]=node or tostring(names_en_route[database_index][routes[database_index][idx2]])
 end
 print(table.concat(print_route,"»"))
 end
@@ -5599,10 +5932,11 @@ recycled[cache_pointer[unique_key_parents]]=#recycled
 end
 elseif directive=="new"then
 database_index=1+#env
-env[database_index]=require(module_name).c_UpBinds.dual_Capable_Map{[unique_key_parents]={[unique_key_meta]="collected_nodes"}}
-env["root"..database_index]=env[database_index]
+env[database_index]=require(module_name).c_UpBinds.dual_Capable_Map{[unique_key_parents]=require(module_name).c_UpBinds.dual_Capable_Map{[unique_key_meta]="collected_nodes"}}
 routes[database_index]={env[database_index]}
 names_en_route[database_index]={[env[database_index]]="root"..database_index}
+catalogue[1+#catalogue]='root'..database_index..'=require(module_name).c_UpBinds.dual_Capable_Map{disambiguity=require(module_name).c_UpBinds.dual_Capable_Map{[select(2,require(module_name).c_UpBinds.dual_Capable_Map())]="collected_nodes"}}'
+catalogue[1+#catalogue]="n="..database_index
 local cache_pointer=pointer
 pointer=env[database_index]
 if dispose_on_leave and #routes[database_index]>1 and type(cache_pointer[unique_key_parents])=="userdata"and tostring(cache_pointer[unique_key_parents]):find("dual_Capable_Map")==1 and cache_pointer[unique_key_parents][unique_key_meta]=="collected_nodes"and not rawequal(recycled[recycled[cache_pointer[unique_key_parents]]],cache_pointer[unique_key_parents])then
@@ -5649,6 +5983,11 @@ names[navigate[idx2]]=nil
 end
 navigate=table.move(reset,1,#navigate,1,navigate)
 end
+if flush and #on_display>0 then
+on_display=table.move(on_display,1+flush,#on_display,1,on_display)
+on_display=table.move(reset,1,flush,1+#on_display-flush,on_display)
+flush=nil
+end
 idx1=0
 for v,k in pointer:__pairs(false)do
 if type(v)~="boolean"and type(v)~="number"and type(v)~="string"and type(k)~="boolean"and type(k)~="number"and type(k)~="string"then
@@ -5667,17 +6006,38 @@ goto continue
 end
 idx1=1+idx1
 if type(v)=="userdata"and tostring(v):find("dual_Capable_Map")==1 then
-print(idx1,k,v)
+local contents,content=serialise(v,false)
+if utf8.len(contents)>127 then
+contents=contents(":127")
+end
+if type(k)=="string"and utf8.len(k)>127 then
+content=k(":127")
+end
+print(idx1,content or k,v,contents)
 navigate[idx1]=v
 names[v]=k
 elseif type(k)=="userdata"and tostring(k):find("dual_Capable_Map")==1 then
-print(idx1,v,k)
+local contents,content=serialise(k,false)
+if utf8.len(contents)>127 then
+contents=contents(":127")
+end
+if type(v)=="string"and utf8.len(v)>127 then
+content=v(":127")
+end
+print(idx1,content or v,k,contents)
 navigate[idx1]=k
 names[k]=v
 else
 local couple={k,v}
 table.sort(couple,determine_Orientation)
-print(idx1,couple[1],couple[2])
+local content1,content2
+if type(couple[1])=="string"and utf8.len(couple[1])>127 then
+content1=couple[1](":127")
+end
+if type(couple[2])=="string"and utf8.len(couple[2])>127 then
+content2=couple[2](":127")
+end
+print(idx1,content1 or couple[1],content2 or couple[2])
 navigate[idx1]=couple[2]
 names[couple[2]]=couple[1]
 end
@@ -5734,13 +6094,24 @@ if cache[unique_key_extra]=="fresh_cache"then
 cache[unique_key_extra]=nil
 end
 cache_by_Index(directive,"copy")
+elseif directive=="peruse"then
+if #on_display>0 then
+for idx2=1,#on_display do
+local pipe=io.popen("less -F -R -S","w")
+pipe:write(on_display[idx2])
+pipe:close()
+end
+else
+warn("Nothing Is on Display!")
+goto cut_short2
+end
 elseif directive:find("display")==1 then
 if #navigate<=0 then
 warn("Nothing Is Here to Display!")
 goto cut_short2
 end
 if directive:match("flush$")then
-flush=0
+flush=#on_display
 end
 display_by_Index(directive)
 elseif directive:find("edit")==1 then
@@ -5836,7 +6207,7 @@ goto just_arrived
 if ambiguity_occurred then
 for idx2=1,#env do
 env[idx2].disambiguity=env[idx2][unique_key_parents]
-io.output((success and"/sdcard/Download/Cave/"or"./")..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone("pack with lib",interface.renewed)..keystone("pack with lib",interface.version)..idx2):write(table.concat(table.pack(serialise(env[idx2],true,"\t")),"\n"))
+io.output((io.popen("find /sdcard/Download/Cave -type d 2>/dev/null"):read()and"/sdcard/Download/Cave/"or"./")..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone("pack with lib",interface.renewed)..keystone("pack with lib",interface.version)..idx2):write(table.concat(table.pack(serialise(env[idx2],true,"\t")),"\n"))
 io.output():close()
 end
 return true
@@ -6033,7 +6404,24 @@ if type(task_queue)~='table'and math.tointeger(tonumber(task_serial))then
 local extra_globals={}
 for k,v in next,_ENV do
 if not rawequal(require(module_name).c_UpBinds.global_snapshot[k],v)then
-extra_globals[1+#extra_globals]=tostring(k)..' '..tostring(v)
+local contents1,contents2
+if type(k)=='table'or(type(k)=='userdata'and tostring(k):find('dual_Capable_Map')==1)then
+contents1=require(module_name).serialise(k,false)
+if utf8.len(contents1)>127 then
+contents1=contents1(':127')
+end
+elseif type(k)=='string'and utf8.len(k)>127 then
+contents1=k(':127')
+end
+if type(v)=='table'or(type(v)=='userdata'and tostring(v):find('dual_Capable_Map')==1)then
+contents2=require(module_name).serialise(v,false)
+if utf8.len(contents2)>127 then
+contents2=contents2(':127')
+end
+elseif type(v)=='string'and utf8.len(v)>127 then
+contents2=v(':127')
+end
+extra_globals[1+#extra_globals]=(contents1 or tostring(k))..' '..(contents2 or tostring(v))
 end
 end
 print('The Following Non-Standard Globals Exist:')
@@ -8202,8 +8590,8 @@ os.execute("rm -rvf $PREFIX/local/c_M")
 os.execute("mkdir -v -m +rwx $PREFIX/local/c_M")
 os.execute("export SOURCE_DATE_EPOCH="..interface.renewed)
 if os.execute('clang -x c "'..where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version)..'" -fPIC -fdata-sections -ffunction-sections -Wl,--gc-sections,--as-needed -ffp-contract=fast '..
---'-fsanitize=address,undefined -fsanitize-recover=address,undefined '..
-'-ggdb -O0 -Wall -o $PREFIX/local/c_M/lua_Console -L$PREFIX/local/lib -llua -L$PREFIX/lib -landroid-execinfo -pthread -lm')then
+--"-fsanitize=address,undefined -fsanitize-recover=address,undefined "..
+"-ggdb -O0 -Wall -o $PREFIX/local/c_M/lua_Console -L$PREFIX/local/lib -llua -L$PREFIX/lib -landroid-execinfo -pthread -lm")then
 os.execute([===[unset SOURCE_DATE_EPOCH
 unset LUA_INIT
 unset LUA_INIT_]===].._VERSION:match("%f[%s%.%d][%s%.%w]*"):gsub("%s",""):gsub("%.","_").."\n"..[===[export "PATH=$PREFIX/bin"
@@ -8227,18 +8615,18 @@ mainprogram_sum=directory_CheckSum(io.popen("echo $PREFIX"):read().."/local/c_M/
 
 --autorun part 3:
 status="pack with lib"
-local database_found,database_finder,database_path,database_location=pcall(directory_Match,'"'..(os.getenv("ANDROID_ROOT")=="/system"and where:match("^(.-/)[^/]+/$")or io.popen('cd /D "'..where..'.." && cd'):read().."\\")..(os.getenv("ANDROID_ROOT")=="/system"and'" -path *'..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version).."* -type f"or"*"..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version)..'*" /A:-D'))
+local database_found,database_finder,database_path,database_location=pcall(directory_Match,'"'..(os.getenv("ANDROID_ROOT")=="/system"and where:match("^(.-/)[^/]+/$")or io.popen('cd /D "'..where..'.." && cd'):read().."\\")..(os.getenv("ANDROID_ROOT")=="/system"and'" -path *'..keystone(cversion,crenewed)..keystone(crenewed,cversion)..keystone(status,crenewed)..keystone(status,cversion).."* -type f"or"*"..keystone(cversion,crenewed)..keystone(crenewed,cversion)..keystone(status,crenewed)..keystone(status,cversion)..'*" /A:-D'))
 status,code_line="ready for run",nil
 io.output(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
 if database_found then
 io.write("--range[15][",modulos[15][1]+3*6,"]\n")
 if database_location and database_path:find(database_location)==1 then
-io.write("local database_snapshot=[",("="):rep(15),"[",io.input(database_path):read("a"),"]",("="):rep(15),"]\n")
+io.write("local database_snapshot=",("%q"):format(io.input(database_path):read("a")),"\n")
 io.input():close()
 elseif type(database_finder)=="table"then
 io.write("local database_snapshots={")
 for idx=1,#database_finder//3 do
-io.write("[",("="):rep(15),"[",io.input(database_finder[3*idx-1]):read("a"),"]",("="):rep(15),3*(1+idx)>#database_finder and"]}\n"or"],\n")
+io.write(("%q"):format(io.input(database_finder[3*idx-1]):read("a")),3*(1+idx)>#database_finder and"}\n"or",\n")
 io.input():close()
 end
 end
