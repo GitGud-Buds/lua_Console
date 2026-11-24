@@ -2720,45 +2720,13 @@ end
 
 
 local function directory_Contrast(directory1,directory2,dof,rows,sieve,nc,xy,namecontent)
-dof=dof or 6
-rows=rows or 6
-sieve=sieve or 6
-local function pattern_MisAlign(captures,thresh,sieve,cap)
-local outcomes,loop,key,misalignment = {}
-repeat
-loop = 0
-repeat
-if not key then
-key = next(captures)
-loop = 1+loop
-end
-if key == thresh and captures[1+key] and key-captures[key] == 1+key-captures[1+key]then
-break
-end
-key = next(captures,key)
-until loop > 3
-if loop <= 3 then
-local stop = key
-while captures[1+stop] and stop-captures[stop] == 1+stop-captures[1+stop]do
-stop = 1+stop
-end
-misalignment = stop-captures[stop]
-if stop-key >= sieve then
-outcomes[key]={stop,misalignment}
-end
-thresh = stop
-else
-thresh = 1+thresh
-end
-until thresh >= cap
-return outcomes
-end
+dof,rows,sieve=math.abs(math.tointeger(tonumber(dof))or 6),math.abs(math.tointeger(tonumber(rows))or 6),math.abs(math.tointeger(tonumber(sieve))or 6)
 local directory_handle1,directory_path1,directory_location1=require(module_name).directory_Match(directory1)
 local directory_handle2,directory_path2,directory_location2,sum1,sum2,compare1,compare2
 if directory_path1 then
-sum1,compare1=require(module_name).directory_CheckSum(directory_location1 and directory1 and directory_path1 or directory_handle1,directory_location1 or directory_path1,nc,xy,namecontent)
+sum1,compare1=require(module_name).directory_CheckSum(directory_location1 and directory1 and directory_path1 or directory_handle1,directory_location1 or directory_path1,nc,xy,namecontent,true)
 else
-sum1,compare1=require(module_name).directory_CheckSum(directory_handle1[3]and directory1 and directory_handle1[2]or directory_handle1[1],directory_handle1[3]or directory_handle1[2],nc,xy,namecontent)
+sum1,compare1=require(module_name).directory_CheckSum(directory_handle1[3]and directory1 and directory_handle1[2]or directory_handle1[1],directory_handle1[3]or directory_handle1[2],nc,xy,namecontent,true)
 if directory2 then
 for idx=2,#directory_handle1,3 do
 if directory_handle1[idx]:find(directory2)==1 then
@@ -2774,105 +2742,221 @@ if not directory_handle2 and not directory_path2 then
 directory_handle2,directory_path2,directory_location2=require(module_name).directory_Match(directory2)
 end
 if directory_path2 then
-sum2,compare2=require(module_name).directory_CheckSum(directory_location2 and directory2 and directory_path2 or directory_handle2,directory_location2 or directory_path2,nc,xy,namecontent)
+sum2,compare2=require(module_name).directory_CheckSum(directory_location2 and directory2 and directory_path2 or directory_handle2,directory_location2 or directory_path2,nc,xy,namecontent,true)
 else
-sum2,compare2=require(module_name).directory_CheckSum(directory_handle2[3]and directory2 and directory_handle2[2]or directory_handle2[1],directory_handle2[3]or directory_handle2[2],nc,xy,namecontent)
+sum2,compare2=require(module_name).directory_CheckSum(directory_handle2[3]and directory2 and directory_handle2[2]or directory_handle2[1],directory_handle2[3]or directory_handle2[2],nc,xy,namecontent,true)
 end
-local loop,presence,results,captures,result,identical = 0,0, {}, {}
-if sum1 == sum2 then
-print("No difference found!")
+local interval_size,unique_key=compare1()
+interval_size=sieve<3 and 3 or sieve
+if sum1==sum2 then
+print("No Difference Found!")
 else
-for idx,k2,v2 in table_Player(compare2,{key_word=false,stateless=true})do
-if compare1[k2] == nil then
-result = k2.." in "..compare2.root_path.." unfound in "..compare1.root_path
-print(result)
-table.insert(results,result)
+local type_check_orientation=compare1:nLookUp(1)>=compare2:nLookUp(1)
+for k,v in compare2:__pairs(#compare2)do
+local found=compare1:nLookUp(k)
+if found==nil then
+print(k.." in "..compare2.root_path.." Unfound in "..compare1.root_path.."!")
+elseif type_check_orientation and type(found)~=type(v)then
+print(k.." in "..(type(found)=="number"and compare1.root_path or compare2.root_path).." Is a Directory!")
 end
 end
-for idx1,k1,v1 in table_Player(compare1,{key_word=false,stateless=true})do
-if compare2[k1] == nil then
-result = k1.." in "..compare1.root_path.." unfound in "..compare2.root_path
-print(result)
-table.insert(results,result)
-elseif compare2[k1] ~= v1 then
-if type(compare2[k1]) ~= type(v1)then
-if type(v1) == "number"then
-result = k1.." in "..compare1.root_path.." is a directory!"
-print(result)
-table.insert(results,result)
-elseif type(compare2[k1]) == "number"then
-result = k1.." in "..compare2.root_path.." is a directory!"
-print(result)
-table.insert(results,result)
+for k1,v1 in compare1:__pairs(#compare1)do
+local found=compare2:nLookUp(k1)
+if found==nil then
+print(k1.." in "..compare1.root_path.." Unfound in "..compare2.root_path.."!")
+elseif not type_check_orientation and type(found)~=type(v1)then
+print(k1.." in "..(type(found)=="number"and compare2.root_path or compare1.root_path).." Is a Directory!")
+end
+if type(v1)=="userdata"and tostring(v1):find("dual_Capable_Map")==1 then
+for k2,v2 in compare2[unique_key]:__pairs(#compare2[unique_key])do
+if v1:nLookUp("contentsum")==v2:nLookUp("contentsum")then
+if k1~=k2 then
+print("Oddly enough, "..k1.." in "..compare1.root_path.." and "..k2.." in "..compare2.root_path.." are in fact identical!")
+end
+elseif math.abs(#v1-#v2)<=dof then
+print("Comparing Potentially Similar Files "..k1.." and "..k2.."...")
+local matched,identical_row_map2,by_row_orientation,row_based_diff,unnecessary=0,{},#v1>=#v2
+for idx1=1,#v2 do
+local merged_keys=v1:lookUp(v2:nLookUp(idx1))
+if merged_keys==nil then
+print("No Match Found for Line "..idx1.." from "..k2.." of "..compare2.root_path.." in "..k1.." of "..compare1.root_path.."!")
+if not unnecessary then
+unnecessary=true
+end
+else
+matched=1+matched
+if type(merged_keys)=="table"and merged_keys[unique_key]=="merged_keys"then
+for idx2=1,#merged_keys do
+if merged_keys["inverse_"..merged_keys[unique_key]][merged_keys[idx2]]==idx2 and merged_keys[idx2]~=idx1 then
+identical_row_map2[merged_keys[idx2]]=idx1
 end
 end
-end
-for idx2,k2,v2 in table_Player(compare2,{key_word=false,stateless=true})do
-if type(v1) == type(v2) and type(v1) == "table"then
-if v1.contentsum == v2.contentsum then
-if k1 ~= k2 then
-result = "Oddly enough, "..k1.." in "..compare1.root_path.." and "..k2.." in "..compare2.root_path.." are in fact identical!"
-print(result)
-table.insert(results,result)
-end
-elseif math.abs(#v1-#v2) <= dof then
-for idx1,vlu1 in table_Player(v1,{stateless=true})do
-loop,identical = 1+loop,0
-for idx2,vlu2 in table_Player(v2,{stateless=true})do
-if vlu1 == vlu2 then
-identical = 1+identical
-if idx1 ~= idx2 then
-captures[idx1] = idx2
+elseif merged_keys~=idx1 then
+identical_row_map2[merged_keys]=idx1
 end
 end
+if not unnecessary and by_row_orientation and merged_keys~=idx1 and v2:nLookUp(idx1)~=v1:nLookUp(idx1)and(not row_based_diff or #row_based_diff<=dof)then
+if row_based_diff then
+row_based_diff[1+#row_based_diff]=idx1
+else
+row_based_diff={idx1}
 end
-if identical < 1 then
-result = "No match found for line "..idx1.." from "..k1.." of "..compare1.root_path.." in "..k2.." of "..compare2.root_path.."!"
-print(result)
-table.insert(results,result)
 end
-presence = identical+presence
-if loop > rows and 4*presence <= loop then
+if rows+2*matched<idx1 then
 break
 end
 end
-for k,v in next,pattern_MisAlign(captures,1,sieve,#v1)do
-result = "Lines from "..k.." to "..v[1].." in "..k1.." of "..compare1.root_path.." and lines from "..k-v[2].." to "..v[1]-v[2].." in "..k2.." of "..compare2.root_path.." have been misaligned!"
-print(result)
-table.insert(results,result)
+matched=0
+local identical_row_map1={}
+for idx1=1,#v1 do
+local merged_keys=v2:lookUp(v1:nLookUp(idx1))
+if merged_keys==nil then
+print("No Match Found for Line "..idx1.." from "..k1.." of "..compare1.root_path.." in "..k2.." of "..compare2.root_path.."!")
+if not unnecessary then
+unnecessary=true
 end
-loop,presence,captures = 0,0, {}
-for idx2,vlu2 in table_Player(v2,{stateless=true})do
-loop,identical = 1+loop,0
-for idx1,vlu1 in table_Player(v1,{stateless=true})do
-if vlu1 == vlu2 then
-identical = 1+identical
-if idx1 ~= idx2 then
-captures[idx2] = idx1
+else
+matched=1+matched
+if type(merged_keys)=="table"and merged_keys[unique_key]=="merged_keys"then
+for idx2=1,#merged_keys do
+if merged_keys["inverse_"..merged_keys[unique_key]][merged_keys[idx2]]==idx2 and merged_keys[idx2]~=idx1 then
+identical_row_map1[merged_keys[idx2]]=idx1
 end
 end
+elseif merged_keys~=idx1 then
+identical_row_map1[merged_keys]=idx1
 end
-if identical < 1 then
-result = "No match found for line "..idx2.." from "..k2.." of "..compare2.root_path.." in "..k1.." of "..compare1.root_path.."!"
-print(result)
-table.insert(results,result)
 end
-presence = identical+presence
-if loop > rows and 4*presence <= loop then
+if not unnecessary and not by_row_orientation and merged_keys~=idx1 and v1:nLookUp(idx1)~=v2:nLookUp(idx1)and(not row_based_diff or #row_based_diff<=dof)then
+if row_based_diff then
+row_based_diff[1+#row_based_diff]=idx1
+else
+row_based_diff={idx1}
+end
+end
+if rows+2*matched<idx1 then
 break
 end
 end
-for k,v in next,pattern_MisAlign(captures,1,sieve,#v2)do
-result = "Lines from "..k.." to "..v[1].." in "..k2.." of "..compare1.root_path.." and lines from "..k-v[2].." to "..v[1]-v[2].." in "..k1.." of "..compare2.root_path.." have been misaligned!"
-print(result)
-table.insert(results,result)
+local intervals,misalignment1,scan={},{}
+repeat
+local lineno1,probe2,probe1
+scan,lineno1=next(identical_row_map1,scan)
+if scan==nil or(intervals[scan//interval_size]and scan%interval_size<=intervals[scan//interval_size])then
+goto continue
+end
+probe2,probe1=scan,lineno1
+while identical_row_map1[probe2-1]and probe1-probe2==identical_row_map1[probe2-1]+1-probe2 do
+probe2,probe1=probe2-1,probe1-1
+end
+intervals[-1]=probe2
+misalignment1[-1],misalignment1[-2]=probe1,probe2
+probe2,probe1=scan,lineno1
+while identical_row_map1[1+probe2]and probe1-probe2==identical_row_map1[1+probe2]-1-probe2 do
+probe2,probe1=1+probe2,1+probe1
+end
+for idx=1+intervals[-1]//interval_size,probe2//interval_size-1 do
+intervals[idx]=interval_size
+end
+if not intervals[probe2//interval_size]or probe2%interval_size>intervals[probe2//interval_size]then
+intervals[probe2//interval_size]=probe2%interval_size
+end
+intervals[-1]=nil
+if probe2-misalignment1[-2]>sieve then
+local relative_distance=misalignment1[-2]-misalignment1[-1]
+local sign,misalignment,length,offset=relative_distance//math.abs(relative_distance),math.abs(relative_distance),probe2-misalignment1[-2],math.min(misalignment1[-2],misalignment1[-1])
+local bitwise=misalignment<=2^20 and length<=2^20 and offset<=2^23
+misalignment1[sign.." "..misalignment.." "..length.." "..offset]=bitwise and(sign<0 and sign<<63 or 0)+(misalignment<<43)+(length<<23)+offset or{sign,misalignment,length,offset}
+end
+misalignment1[-1],misalignment1[-2]=nil,nil
+::continue::
+until scan==nil
+intervals={}
+local misalignment2={}
+repeat
+local lineno2,probe1,probe2
+scan,lineno2=next(identical_row_map2,scan)
+if scan==nil or(intervals[scan//interval_size]and scan%interval_size<=intervals[scan//interval_size])then
+goto continue
+end
+probe1,probe2=scan,lineno2
+while identical_row_map2[probe1-1]and probe2-probe1==identical_row_map2[probe1-1]+1-probe1 do
+probe1,probe2=probe1-1,probe2-1
+end
+intervals[-1]=probe1
+misalignment2[-1],misalignment2[-2]=probe1,probe2
+probe1,probe2=scan,lineno2
+while identical_row_map2[1+probe1]and probe2-probe1==identical_row_map2[1+probe1]-1-probe1 do
+probe1,probe2=1+probe1,1+probe2
+end
+for idx=1+intervals[-1]//interval_size,probe1//interval_size-1 do
+intervals[idx]=interval_size
+end
+if not intervals[probe1//interval_size]or probe1%interval_size>intervals[probe1//interval_size]then
+intervals[probe1//interval_size]=probe1%interval_size
+end
+intervals[-1]=nil
+if probe1-misalignment2[-1]>sieve then
+local relative_distance=misalignment2[-1]-misalignment2[-2]
+local sign,misalignment,length,offset=relative_distance//math.abs(relative_distance),math.abs(relative_distance),probe1-misalignment2[-1],math.min(misalignment2[-1],misalignment2[-2])
+local bitwise=misalignment<=2^20 and length<=2^20 and offset<=2^23
+misalignment2[sign.." "..misalignment.." "..length.." "..offset]=bitwise and(sign<0 and sign<<63 or 0)+(misalignment<<43)+(length<<23)+offset or{sign,misalignment,length,offset}
+end
+misalignment2[-1],misalignment2[-2]=nil,nil
+::continue::
+until scan==nil
+for k3,v3 in next,misalignment1 do
+local symmetrical
+if type(v3)=="table"then
+if type(misalignment2[k3])=="table"then
+symmetrical=true
+for idx=1,4 do
+if misalignment2[k3][idx]~=v3[idx]then
+symmetrical=nil
+break
+end
+end
+end
+if not symmetrical then
+print("Lines from "..(v3[1]<0 and v3[4]or v3[2]+v3[4]).." till "..(v3[1]<0 and v3[3]+v3[4]or v3[2]+v3[3]+v3[4]).." in "..k2.." of "..compare2.root_path.." and lines from "..(v3[1]<0 and v3[2]+v3[4]or v3[4]).." till "..(v3[1]<0 and v3[2]+v3[3]+v3[4]or v3[3]+v3[4]).." in "..k1.." of "..compare1.root_path.." have been misaligned!")
+if not unnecessary then
+unnecessary=true
+end
+end
+elseif misalignment2[k3]==v3 then
+symmetrical=true
+else
+local sign,misalignment,length,offset=v3>>63==1,v3<<1>>44,(-1>>44)&(v3>>23),(-1>>41)&v3
+print("Lines from "..(sign and offset or misalignment+offset).." till "..(sign and length+offset or misalignment+length+offset).." in "..k2.." of "..compare2.root_path.." and lines from "..(sign and misalignment+offset or offset).." till "..(sign and misalignment+length+offset or length+offset).." in "..k1.." of "..compare1.root_path.." have been misaligned!")
+if not unnecessary then
+unnecessary=true
+end
+end
+if symmetrical then
+misalignment2[k3]=nil
+end
+end
+for k3,v3 in next,misalignment2 do
+if type(v3)=="table"then
+print("Lines from "..(v3[1]<0 and v3[4]or v3[2]+v3[4]).." till "..(v3[1]<0 and v3[3]+v3[4]or v3[2]+v3[3]+v3[4]).." in "..k1.." of "..compare1.root_path.." and lines from "..(v3[1]<0 and v3[2]+v3[4]or v3[4]).." till "..(v3[1]<0 and v3[2]+v3[3]+v3[4]or v3[3]+v3[4]).." in "..k2.." of "..compare2.root_path.." have been misaligned!")
+else
+local sign,misalignment,length,offset=v3>>63==1,v3<<1>>44,(-1>>44)&(v3>>23),(-1>>41)&v3
+print("Lines from "..(sign and offset or misalignment+offset).." till "..(sign and length+offset or misalignment+length+offset).." in "..k1.." of "..compare1.root_path.." and lines from "..(sign and misalignment+offset or offset).." till "..(sign and misalignment+length+offset or length+offset).." in "..k2.." of "..compare2.root_path.." have been misaligned!")
+end
+if not unnecessary then
+unnecessary=true
+end
+end
+if not unnecessary and row_based_diff then
+for idx=1,#row_based_diff do
+print("Line "..row_based_diff[idx].." in "..k1.." of "..compare1.root_path.." and "..k2.." of "..compare2.root_path.." are different respectively!")
 end
 end
 end
 end
 end
 end
-return results
+end
 end
 
 local consolidate_File={}
@@ -3891,8 +3975,8 @@ debug.setmetatable(consolidate_File,consolidate_File)
 
 
 local interface={
-version=1.6328125,
-renewed=1794715200,
+version=1.6640625,
+renewed=1795492800,
 ["Pointers in Practice"]="Deeming certain parameters tables or refering to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-invoke time.",
 replicate=replicate,
 zip=zip,
@@ -3921,8 +4005,8 @@ consolidate_File=consolidate_File
 --a few declarations:
 do
 local status="ready for run";
-local digestH=650016779434841500;
-local digestM=162120808;
+local digestH=-1292693279253166368;
+local digestM=-58637742;
 local required_name,find_self,where=...
 if os.getenv("ANDROID_ROOT")=="/system"then
 where=find_self:match("^(.-/)[^/]+$")
@@ -4252,10 +4336,10 @@ return(table.concat(assembler):gsub("%s+",""))
 end
 return table.concat(assembler)
 end
-local function meta_Hash(object,delve_guard,hashed,depth,sum,nb,xy,imba)
-delve_guard,hashed,depth,sum=math.tointeger(tonumber(delve_guard))or 1,type(hashed)=="table"and hashed or(type(delve_guard)=="table"and delve_guard or{}),depth or 1,math.tointeger(tonumber(sum))or 0
-nb=nb or function(n,byte)return byte+n*(n+byte-1)end --before Hornor optimisation: n^2-n+n*byte+byte
-xy=xy or function(x,y)return x^2+y*(x+y*(x+y-1))end --before Hornor optimisation: y^3-y^2+x*y^2+x*y+x^2
+local function meta_Hash(object,delve_guard,hashed,depth,sum,nc,xy,imba)
+delve_guard,hashed,depth,sum=math.tointeger(tonumber(delve_guard))or 1,(type(hashed)=="table"or(type(hashed)=="userdata"and tostring(hashed):find("dual_Capable_Map")==1))and hashed or((type(delve_guard)=="table"or(type(delve_guard)=="userdata"and tostring(delve_guard):find("dual_Capable_Map")==1))and delve_guard or{}),depth or 1,math.tointeger(tonumber(sum))or 0
+nc=type(nc)=="function"and nc or function(n,byte)return byte+n*(n+byte-1)end --before Hornor optimisation: n^2-n+n*byte+byte
+xy=type(xy)=="function"and xy or function(x,y)return x^2+y*(x+y*(x+y-1))end --before Hornor optimisation: y^3-y^2+x*y^2+x*y+x^2
 imba=imba or function(ref,content)
 local sign,smaller,larger=ref*content==0 and 0 or ref*content//math.abs(ref*content)
 if math.abs(ref)<math.abs(content)then
@@ -4286,14 +4370,14 @@ elseif type(object)=="string"then
 local x,y,n=0,1,0
 while n<#object do
 x,n=1+x,1+n
-sum=math.tointeger(nb(math.tointeger(xy(x,y)),object:byte(n)))+sum
+sum=math.tointeger(nc(math.tointeger(xy(x,y)),object:byte(n)))+sum
 if object:byte(n)==10 then
 x,y=0,1+y
 end
 end
 return sum
 elseif type(object)=="function"and debug.getinfo(object,"S").what~="C"then
-return meta_Hash(object:dump(),delve_guard,hashed,1+depth,sum,nb,xy,imba)
+return meta_Hash(object:dump(),delve_guard,hashed,1+depth,sum,nc,xy,imba)
 elseif io.type(object)=="file"then
 local y=0
 for file_line in object:lines()do
@@ -4302,34 +4386,34 @@ local x,linesum=0,0
 while x<#file_line do
 x=1+x
 if type(depth)=="string"then
-linesum=math.tointeger(nb(x,file_line:byte(x)))+linesum
+linesum=math.tointeger(nc(x,file_line:byte(x)))+linesum
 end
-sum=math.tointeger(nb(math.tointeger(xy(x,y)),file_line:byte(x)))+sum
+sum=math.tointeger(nc(math.tointeger(xy(x,y)),file_line:byte(x)))+sum
 end
 if type(depth)=="string"then
 hashed[depth][y]=linesum
 end
 end
 object:seek("set")
-if type(depth)=="string"then
-return y,sum
+if type(depth)=="string"or depth<=1 then
+return sum,y
 end
 return sum
 elseif type(object)=="table"or(type(object)=="userdata"and tostring(object):find("dual_Capable_Map")==1)then
 if hashed[object]and delve_guard+hashed[object]<depth then
-return meta_Hash(type(object).." - loophole patch",delve_guard,hashed,1+depth,sum,nb,xy,imba)
+return meta_Hash(type(object).." - loophole patch",delve_guard,hashed,1+depth,sum,nc,xy,imba)
 elseif not hashed[object]then
 hashed[object]=depth
 end
 for k,v in pairs(object)do
-sum=math.tointeger(imba(meta_Hash(k,delve_guard,hashed,1+depth,nil,nb,xy,imba),meta_Hash(v,delve_guard,hashed,1+depth,nil,nb,xy,imba)))+sum
+sum=math.tointeger(imba(meta_Hash(k,delve_guard,hashed,1+depth,nil,nc,xy,imba),meta_Hash(v,delve_guard,hashed,1+depth,nil,nc,xy,imba)))+sum
 end
 return math.tointeger(imba(2969,sum==0 and 2971 or sum))
 end
-return meta_Hash(tostring(object),delve_guard,hashed,1+depth,sum,nb,xy,imba)
+return meta_Hash(tostring(object),delve_guard,hashed,1+depth,sum,nc,xy,imba)
 end
-local function directory_CheckSum(directory,location,namecontent)
-namecontent=namecontent or function(namesum,contentsum)
+local function directory_CheckSum(directory,location,nc,xy,namecontent,by_contrast)
+namecontent=type(namecontent)=="function"and namecontent or function(namesum,contentsum)
 local sign,smaller,larger=namesum*contentsum==0 and 0 or namesum*contentsum//math.abs(namesum*contentsum)
 if math.abs(namesum)<math.abs(contentsum)then
 smaller,larger=math.abs(namesum),math.abs(contentsum)
@@ -4345,21 +4429,21 @@ power=1+power
 end
 return sign*math.ceil(larger/smaller^power)*(1+(larger-1)%smaller)
 end
-local sum,compare=0,{root_path=tostring(location)}
+local sum,compare=0,by_contrast and require(module_name).c_UpBinds.dual_Capable_Map{root_path=tostring(location)}or tostring(location)
 if io.type(directory)=="file"then
 if os.getenv("ANDROID_ROOT")=="/system"then
 local first_readout=directory:read()
-if first_readout~=compare.root_path then
-error("Incorrect Usage: First Readout - "..first_readout.." - Must Match Second Argument - "..compare.root_path.."!")
+if first_readout~=(by_contrast and compare.root_path or compare)then
+error("Incorrect Usage: First Readout - "..first_readout.." - Must Match Second Argument - "..(by_contrast and compare.root_path or compare).."!")
 end
 end
 for subdir in directory:lines()do
-local relative_path=subdir:match("^"..compare.root_path.."(.+)$")
+local relative_path=subdir:match("^"..(by_contrast and compare.root_path or compare).."(.+)$")
 if not relative_path then
-warn("Current item - ",subdir," - does not belong to the directory undergoing checksum - ",compare.root_path,"!")
+warn("Current item - ",subdir," - does not belong to the directory undergoing checksum - ",by_contrast and compare.root_path or compare,"!")
 goto next_item
 end
-local namesum,skip=meta_Hash(relative_path)
+local namesum,skip=meta_Hash(relative_path,nil,nil,nil,nil,nc,xy)
 if os.getenv("ANDROID_ROOT")=="/system"then
 skip=io.popen('find "'..subdir..'" -type d 2>/dev/null'):read()
 elseif os.getenv("OS")=="Windows_NT"then
@@ -4367,25 +4451,34 @@ skip=os.execute('dir "'..subdir..'" /A:D /S /B')
 end
 if not skip then
 print("Accessing File: "..subdir)
-compare[relative_path]={}
-local lines,contentsum=meta_Hash(io.input(subdir),nil,compare,relative_path)
+if by_contrast then
+compare[relative_path]=require(module_name).c_UpBinds.dual_Capable_Map{[select(2,require(module_name).c_UpBinds.dual_Capable_Map())]="collected_nodes"}
+end
+local contentsum,lines=meta_Hash(io.input(subdir),nil,not by_contrast or compare,by_contrast and relative_path,nil,nc,xy)
 sum=math.tointeger(namecontent(namesum,contentsum))+sum
+if by_contrast then
 compare[relative_path].contentsum=contentsum
+end
 io.input():close()
 print(lines.." Line"..(lines>1 and"s"or"").." Summed Up")
 else
 sum=sum-namesum
+if by_contrast then
 compare[relative_path]=-namesum
+end
+end
+if by_contrast then
+compare[1]=1+(compare[1]or 0)
 end
 ::next_item::
 end
 directory:close()
 elseif type(directory)=="string"then
-if directory:find(compare.root_path)~=1 then
-error("Incorrect Usage: Second Argument - "..compare.root_path.." - Must Be a PreFix of First Argument - "..directory.."!")
+if directory:find(by_contrast and compare.root_path or compare)~=1 then
+error("Incorrect Usage: Second Argument - "..(by_contrast and compare.root_path or compare).." - Must Be a PreFix of First Argument - "..directory.."!")
 end
-local relative_path=directory:match("^"..compare.root_path.."(.+)$")
-local namesum,skip=meta_Hash(relative_path)
+local relative_path=directory:match("^"..(by_contrast and compare.root_path or compare).."(.+)$")
+local namesum,skip=meta_Hash(relative_path,nil,nil,nil,nil,nc,xy)
 if os.getenv("ANDROID_ROOT")=="/system"then
 skip=io.popen('find "'..directory..'" -type d 2>/dev/null'):read()
 elseif os.getenv("OS")=="Windows_NT"then
@@ -4393,15 +4486,24 @@ skip=os.execute('dir "'..directory..'" /A:D /S /B')
 end
 if not skip then
 print("Accessing File: "..directory)
-compare[relative_path]={}
-local lines,contentsum=meta_Hash(io.input(directory),nil,compare,relative_path)
+if by_contrast then
+compare[relative_path]=require(module_name).c_UpBinds.dual_Capable_Map{[select(2,require(module_name).c_UpBinds.dual_Capable_Map())]="collected_nodes"}
+end
+local contentsum,lines=meta_Hash(io.input(directory),nil,not by_contrast or compare,by_contrast and relative_path,nil,nc,xy)
 sum=math.tointeger(namecontent(namesum,contentsum))+sum
+if by_contrast then
 compare[relative_path].contentsum=contentsum
+end
 io.input():close()
 print(lines.." Line"..(lines>1 and"s"or"").." Summed Up")
 else
 sum=sum-namesum
+if by_contrast then
 compare[relative_path]=-namesum
+end
+end
+if by_contrast then
+compare[1]=1
 end
 end
 print([===[Process Finished - Here You Are:
@@ -4427,12 +4529,12 @@ end
 end,"c")
 end
 across_recursion.stack_delve_depth=1+(across_recursion.stack_delve_depth or 0)
-print("About to Call Function: ",isclass and snapshot or tostring(self))
 local packed_args=isclass and table.pack(self,...)or table.pack(...)
+print("About to Call Function "..(isclass and snapshot or tostring(self)).." with Argument"..(packed_args.n>1 and"s:"or":"),table.unpack(packed_args,1,packed_args.n))
 local call_results=table.pack(xpcall(isclass and object or rawget(debug.getmetatable(self),"__func"),function(errobj)
-return serialise(errobj,"\t").."\n"..debug.traceback(across_recursion.stack_delve_depth.."\t"..(isclass and snapshot or tostring(self)),3)
+return debug.traceback(((type(errobj)=="table"or(type(errobj)=="userdata"and tostring(errobj):find("dual_Capable_Map")==1))and serialise(errobj,"\t")or tostring(errobj)).."\t"..across_recursion.stack_delve_depth.."\t"..(isclass and snapshot or tostring(self)),3)
 end,table.unpack(packed_args,1,packed_args.n)))
-print("Exited from Function: ",isclass and snapshot or tostring(self))
+print("Exited from Function "..(isclass and snapshot or tostring(self)).." Returning Result"..(call_results.n>2 and"s:"or":"),table.unpack(call_results,2,call_results.n))
 across_recursion.stack_delve_depth=across_recursion.stack_delve_depth-1
 if call_results[1]then
 if call_stacks and across_recursion.stack_delve_depth<=0 then
@@ -7678,6 +7780,7 @@ io.output(where..keystone(interface.version,interface.renewed)..keystone(interfa
 #include<setjmp.h>
 #include<signal.h>
 #include<execinfo.h>
+#include<elfutils/libdwfl.h>
 #include<fcntl.h>
 #include<sys/stat.h>
 #include<lua.h>
@@ -7745,7 +7848,7 @@ if(!lua_next(L,-4)){
 lua_copy(L,6,-2);
 lua_rawset(L,5);
 }else
-luaL_unref(L,7,luaL_checkinteger(L,-4));
+luaL_unref(L,7,lua_tointeger(L,-4));
 }else{
 lua_pushnil(L);
 lua_copy(L,6,-2);
@@ -7845,7 +7948,7 @@ int natural_LookUp(lua_State *L){
 if(lua_rawequal(L,lua_upvalueindex(1),1))
 return 0;
 lua_settop(L,2);
-struct ref_couple *refs=luaL_checkudata(L,-2,"dual_Capable_Map");
+struct ref_couple *refs=luaL_checkudata(L,1,"dual_Capable_Map");
 lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ref);
 lua_pushvalue(L,-2);
 lua_rawget(L,-2);
@@ -7884,7 +7987,7 @@ int lookUp(lua_State *L){
 if(lua_rawequal(L,lua_upvalueindex(1),1))
 return 0;
 lua_settop(L,2);
-struct ref_couple *refs=luaL_checkudata(L,-2,"dual_Capable_Map");
+struct ref_couple *refs=luaL_checkudata(L,1,"dual_Capable_Map");
 lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ivrs_ref);
 lua_insert(L,-2);
 lua_rawget(L,-2);
@@ -7952,6 +8055,8 @@ return 0;
 }
 
 int natural_Generator_Function(lua_State *L){
+if(lua_isnone(L,lua_upvalueindex(1)))
+return 0;
 lua_settop(L,2);
 skip_upvalue:
 if(lua_next(L,lua_upvalueindex(1))){
@@ -7973,11 +8078,12 @@ lua_pop(L,1);
 }
 return 2;
 }
-lua_pushnil(L);
-return 1;
+return 0;
 }
 
 int generator_Function(lua_State *L){
+if(lua_isnone(L,lua_upvalueindex(1)))
+return 0;
 merged_emerges:
 if(lua_istable(L,lua_upvalueindex(2))&&(lua_pushvalue(L,lua_upvalueindex(5)),lua_rawget(L,lua_upvalueindex(2)))==LUA_TSTRING &&(lua_pushliteral(L,"merged_keys"),lua_rawequal(L,-2,-1))&& lua_isinteger(L,lua_upvalueindex(3))){
 lua_pushliteral(L,"inverse_");
@@ -8080,15 +8186,16 @@ return 2;
 }
 }
 }
-lua_pushnil(L);
-return 1;
+return 0;
 }
 
 int generator_Factory(lua_State *L){
-if(lua_rawequal(L,lua_upvalueindex(1),1))
-return 0;
+if(lua_rawequal(L,lua_upvalueindex(1),1)){
+lua_pushcfunction(L,(lua_isboolean(L,2)&& !lua_toboolean(L,2))?generator_Function:natural_Generator_Function);
+return 1;
+}
 lua_settop(L,2);
-struct ref_couple *refs=luaL_checkudata(L,-2,"dual_Capable_Map");
+struct ref_couple *refs=luaL_checkudata(L,1,"dual_Capable_Map");
 lua_rawgeti(L,LUA_REGISTRYINDEX,(lua_isboolean(L,-1)&& !lua_toboolean(L,-1))?refs->ivrs_ref:refs->ref);
 if(lua_isboolean(L,-2)&& !lua_toboolean(L,-2)){
 lua_pushnil(L);
@@ -8167,9 +8274,10 @@ int set_Attribute_Index(lua_State *L){
 if(lua_rawequal(L,lua_upvalueindex(1),1))
 goto dummy_userdata;
 lua_settop(L,3);
-luaL_checkudata(L,-3,"dual_Capable_Map");
-lua_Integer index=luaL_checkinteger(L,-2);
-lua_setiuservalue(L,-3,1+(index-1)%2);
+luaL_checkudata(L,1,"dual_Capable_Map");
+int index=luaL_checkinteger(L,2);
+if(!lua_setiuservalue(L,-3,index))
+fprintf(stderr,"Non-Existent Attribute Slot #%d!",index);
 dummy_userdata:
 return 0;
 }
@@ -8178,9 +8286,10 @@ int get_Attribute_Index(lua_State *L){
 if(lua_rawequal(L,lua_upvalueindex(1),1))
 return 0;
 lua_settop(L,2);
-luaL_checkudata(L,-2,"dual_Capable_Map");
-lua_Integer index=luaL_checkinteger(L,-1);
-lua_getiuservalue(L,-2,1+(index-1)%2);
+luaL_checkudata(L,1,"dual_Capable_Map");
+int index=luaL_checkinteger(L,2);
+if(lua_getiuservalue(L,-2,index)==LUA_TNONE)
+fprintf(stderr,"Non-Existent Attribute Slot #%d!",index);
 return 1;
 }
 
@@ -8188,7 +8297,7 @@ int get_Length(lua_State *L){
 if(lua_rawequal(L,lua_upvalueindex(1),1))
 return 0;
 lua_settop(L,1);
-struct ref_couple *refs=luaL_checkudata(L,-1,"dual_Capable_Map");
+struct ref_couple *refs=luaL_checkudata(L,1,"dual_Capable_Map");
 lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ref);
 lua_pushinteger(L,lua_rawlen(L,-1));
 return 1;
@@ -8202,7 +8311,7 @@ struct ref_couple *refs=luaL_checkudata(L,1,"dual_Capable_Map");
 lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ivrs_ref);
 lua_rawgeti(L,LUA_REGISTRYINDEX,refs->ref);
 lua_getglobal(L,"module_name");
-luaL_requiref(L,luaL_checkstring(L,-1),NULL,0);
+luaL_requiref(L,luaL_optstring(L,-1,"]===],required_name,[===["),NULL,0);
 lua_getfield(L,-1,"serialise");
 int ctop=lua_gettop(L);
 lua_pushvalue(L,-1);
@@ -8227,7 +8336,7 @@ int unbind_Tables(lua_State *L){
 if(lua_rawequal(L,lua_upvalueindex(1),1))
 goto dummy_userdata;
 lua_settop(L,2);
-struct ref_couple *refs=luaL_checkudata(L,-2,"dual_Capable_Map");
+struct ref_couple *refs=luaL_checkudata(L,1,"dual_Capable_Map");
 luaL_unref(L,LUA_REGISTRYINDEX,refs->ivrs_ref);
 luaL_unref(L,LUA_REGISTRYINDEX,refs->ref);
 lua_pushnil(L);
@@ -8254,7 +8363,7 @@ const luaL_Reg dual_Capable_Map[]={
 int chdir_Conveyed(lua_State *L){
 lua_settop(L,1);
 int error_number=errno;
-if(chdir(luaL_checkstring(L,-1))){
+if(chdir(luaL_checkstring(L,1))){
 lua_pushboolean(L,0);
 lua_pushstring(L,strerror(errno));
 errno=error_number;
@@ -8266,7 +8375,7 @@ return 1;
 
 int sleep_Conveyed(lua_State *L){
 lua_settop(L,2);
-lua_Integer seconds=luaL_checknumber(L,-2);
+lua_Integer seconds=luaL_checknumber(L,1);
 lua_Integer nanoseconds=lua_isnumber(L,-1)?lua_tonumber(L,-1):1000000000*(lua_tonumber(L,-2)-seconds);
 if(nanoseconds<0 || nanoseconds>=1000000000){
 seconds+=nanoseconds/1000000000;
@@ -8300,8 +8409,8 @@ return 1;
 }
 
 int primality(lua_State *L){
-lua_Integer till=luaL_checkinteger(L,1);
-lua_Integer from=luaL_checkinteger(L,2);
+lua_Integer till=lua_tointeger(L,-2);
+lua_Integer from=lua_tointeger(L,-1);
 while(from<till){
 ++from;
 _Bool boolean=1;
@@ -8321,10 +8430,14 @@ return 0;
 
 int prime_Generator(lua_State *L){
 lua_settop(L,2);
-lua_insert(L,1);
+lua_Integer from=luaL_checkinteger(L,1);
+luaL_argcheck(L,from>=2,1,"the generator works from 2 on");
+luaL_argcheck(L,({lua_Integer till=luaL_checkinteger(L,2);
+till>=from;}),2,"upper bracket smaller than lower bracket");
+lua_insert(L,-2);
 lua_pushinteger(L,1);
 lua_arith(L,LUA_OPSUB);
-lua_pushcfunction(L,&primality);
+lua_pushcfunction(L,primality);
 lua_insert(L,1);
 return 3;
 }
@@ -8440,7 +8553,7 @@ lua_concat(L,2);
 lua_error(L);
 }
 size_t string_length;
-const char *string_itself=luaL_checklstring(L,-3,&string_length);
+const char *string_itself=luaL_checklstring(L,1,&string_length);
 UTF8_LENGTH;
 if(lua_isinteger(L,-2)){
 UTF8_OFFSETS(-2,-1);
@@ -8503,11 +8616,7 @@ lua_newtable(L);\
 luaL_setfuncs(L,dual_Capable_Map,5);\
 lua_setmetatable(L,-2);\
 lua_setfield(L,-2,"dual_Capable_Map");\
-int idx=-1;\
-while(++idx,c_UpBinds[idx].name || c_UpBinds[idx].func){\
-lua_pushcfunction(L,c_UpBinds[idx].func);\
-lua_setfield(L,-2,c_UpBinds[idx].name);\
-}\
+luaL_setfuncs(L,c_UpBinds,0);\
 lua_rotate(L,-6,-2);\
 lua_setfield(L,-3,"global_snapshot");\
 lua_pop(L,5);\
@@ -8520,6 +8629,7 @@ struct sigaction current_action;
 
 int errMsg_Handler(lua_State *L){
 lua_settop(L,1);
+if(lua_istable(L,-1)|| luaL_testudata(L,-1,"dual_Capable_Map")){
 lua_getglobal(L,"module_name");
 luaL_requiref(L,luaL_optstring(L,-1,"]===],required_name,[===["),NULL,0);
 lua_getfield(L,-1,"serialise");
@@ -8527,12 +8637,8 @@ lua_insert(L,1);
 lua_pop(L,2);
 lua_pushliteral(L,"\t");
 PCALL_ERRH(2,1,0,"Error Serialising Object: %s!",CUSTOM_GOTO,premature_end);
-lua_getglobal(L,"debug");
-lua_getfield(L,-1,"traceback");
-lua_insert(L,1);
-lua_pushinteger(L,2);
-lua_replace(L,-2);
-PCALL_ERRH(2,1,0,"Error Performing TraceBack: %s!",CUSTOM_GOTO,premature_end);
+}
+luaL_traceback(L,L,lua_tostring(L,-1),2);
 return 1;
 premature_end:
 return 0;
@@ -8862,7 +8968,7 @@ lua_pushvalue(L,-4);
 lua_pushvalue(L,-4);
 PCALL_ERRH(2,1,-4,"Error Acquiring Task from Start of the Queue: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Acquiring Task from Start of the Queue: %s!");
 size_t length_of_task_script;
-const char *cache_task_script=luaL_checklstring(L,-1,&length_of_task_script);
+const char *cache_task_script=lua_tolstring(L,-1,&length_of_task_script);
 char *task_script=calloc(3+length_of_task_script,1);
 strcpy(task_script,cache_task_script);
 task_queue.tasks[task_queue.end]=task_script;
@@ -8955,7 +9061,7 @@ lua_pushvalue(L,-4);
 lua_pushvalue(L,-4);
 PCALL_ERRH(2,1,-4,"Error Acquiring Task from Start of the Queue: %s!",RAISE_APPROPRIATE_LUA_ERROR,"Error Acquiring Task from Start of the Queue: %s!");
 size_t length_of_task_script;
-const char *cache_task_script=luaL_checklstring(L,-1,&length_of_task_script);
+const char *cache_task_script=lua_tolstring(L,-1,&length_of_task_script);
 char *task_script=calloc(3+length_of_task_script,1);
 strcpy(task_script,cache_task_script);
 pthread_mutex_lock(&task_queue_lock);
@@ -9013,6 +9119,8 @@ goto premature_end;\
 #define CLEANUP_AFTERMATH(CURRENT_OR_LAST,RECORDED_STACK_FRAME) do{\
 if(states->tracks[strlen(states->tracks)-CURRENT_OR_LAST]==1){\
 int ctopx=lua_gettop(L);\
+if(2*states->frames[strlen(states->frames)-CURRENT_OR_LAST]<(strlen(states->frames)>CURRENT_OR_LAST?states->frames[strlen(states->frames)-1-CURRENT_OR_LAST]:(states->frames[strlen(states->frames)-CURRENT_OR_LAST]>5?5:3))+ctopx)\
+ctopx=2*states->frames[strlen(states->frames)-CURRENT_OR_LAST]-(strlen(states->frames)>CURRENT_OR_LAST?states->frames[strlen(states->frames)-1-CURRENT_OR_LAST]:(states->frames[strlen(states->frames)-CURRENT_OR_LAST]>5?5:3));\
 lua_pushglobaltable(L);\
 for(int idx2=ctopx;idx2>=RECORDED_STACK_FRAME;idx2--){\
 lua_pushvalue(L,states->frames[strlen(states->frames)-CURRENT_OR_LAST]+idx2-ctopx);\
@@ -9344,6 +9452,10 @@ goto premature_end;
 }
 int ctop=lua_gettop(L);
 CLEANUP_AFTERMATH(1,ctop);
+if(states->tracks[strlen(states->tracks)-1]==1){
+states->tracks[strlen(states->tracks)-1]=0;
+states->frames[strlen(states->frames)-1]=0;
+}
 }else{
 lua_newtable(L);
 if(1+strlen(states->tracks)>=DEPTH){
@@ -9365,6 +9477,10 @@ PCALL_ERRH(lua_gettop(L)-states->frames[strlen(states->frames)-1],states->tracks
 CLEANUP_AFTERMATH(2,states->frames[strlen(states->frames)-1]);
 states->tracks[strlen(states->tracks)-1]=0;
 states->frames[strlen(states->frames)-1]=0;
+if(states->tracks[strlen(states->tracks)-1]==1){
+states->tracks[strlen(states->tracks)-1]=0;
+states->frames[strlen(states->frames)-1]=0;
+}
 }else if(!strcmp(args[idx1],"}")){
 if(strlen(states->tracks)<=0 ||(states->tracks[strlen(states->tracks)-1]!=4 && states->tracks[strlen(states->tracks)-1]!=5)){
 fprintf(stderr,"Terminator MisMatch - %s Found where %s Expected!",track_categories[4],track_categories[strlen(states->tracks)>0?states->tracks[strlen(states->tracks)-1]:0]);
@@ -9381,6 +9497,10 @@ lua_rawset(L,states->frames[strlen(states->frames)-1]);
 CLEANUP_AFTERMATH(2,states->frames[strlen(states->frames)-1]);
 states->tracks[strlen(states->tracks)-1]=0;
 states->frames[strlen(states->frames)-1]=0;
+if(states->tracks[strlen(states->tracks)-1]==1){
+states->tracks[strlen(states->tracks)-1]=0;
+states->frames[strlen(states->frames)-1]=0;
+}
 }else if(args[idx1][strlen(args[idx1])-1]=='>'){
 if(strlen(states->tracks)<=0 || states->tracks[strlen(states->tracks)-1]<7){
 fprintf(stderr,"Terminator MisMatch - %s Found where %s Expected!",track_categories[7],track_categories[strlen(states->tracks)>0?states->tracks[strlen(states->tracks)-1]:0]);
@@ -9398,6 +9518,10 @@ PCALL_ERRH(0,LUA_MULTRET,0,"Error Executing Command-InLine Script: %s!",CUSTOM_G
 CLEANUP_AFTERMATH(2,states->frames[strlen(states->frames)-1]);
 states->tracks[strlen(states->tracks)-1]=0;
 states->frames[strlen(states->frames)-1]=0;
+if(states->tracks[strlen(states->tracks)-1]==1){
+states->tracks[strlen(states->tracks)-1]=0;
+states->frames[strlen(states->frames)-1]=0;
+}
 }else{
 last_stage:
 if(strlen(states->tracks)>0 && states->tracks[strlen(states->tracks)-1]==4)
@@ -9446,6 +9570,10 @@ lua_pushstring(L,args[idx1]);
 }
 int ctop=lua_gettop(L);
 CLEANUP_AFTERMATH(1,ctop);
+if(states->tracks[strlen(states->tracks)-1]==1){
+states->tracks[strlen(states->tracks)-1]=0;
+states->frames[strlen(states->frames)-1]=0;
+}
 }
 }
 }
@@ -9466,6 +9594,8 @@ luaL_error(L,"Lua Script Aborted According to User Request!");
 }
 }
 
+Dwfl *dwfl;
+
 void versatile_SigHandler(int signum){
 if(signum==SIGINT){
 if(signal_counter<3)
@@ -9475,14 +9605,21 @@ siglongjmp(context_for_jump,1);
 }else if(signum==SIGABRT || signum==SIGSEGV || signum==SIGBUS || signum==SIGILL || signum==SIGFPE){
 int stack_depth;
 void *preliminary_info[27];
-char **stack_traceback;
 stack_depth=backtrace(preliminary_info,27);
-stack_traceback=backtrace_symbols(preliminary_info,stack_depth);
-if(stack_traceback){
 fprintf(stderr,"Trace Back to Stack Depth #%d:\n",stack_depth);
-for(int idx=0;idx<stack_depth;idx++)
-fprintf(stderr,"%d\t%s\n",idx,stack_traceback[idx]);
-free(stack_traceback);
+for (int idx=0;idx<stack_depth;idx++){
+Dwarf_Addr addr=(Dwarf_Addr)preliminary_info[idx]-(idx>0);
+Dwfl_Module *mod=dwfl_addrmodule(dwfl,addr);
+if(!mod)
+continue;
+const char *name=dwfl_module_addrname(mod,addr);
+Dwfl_Line *line=dwfl_module_getsrc(mod,addr);
+if(line){
+int lineno;
+const char *file=dwfl_lineinfo(line,&addr,&lineno,NULL,NULL,NULL);
+fprintf(stderr,"%d\t%s - %d: in function %s\n",idx,file,lineno,name?:"??");
+}else
+fprintf(stderr,"%d\t<unknown source>: in function %s\n",idx,name?:"??");
 }
 renewed_action.sa_handler=SIG_DFL;
 sigaction(signum,&renewed_action,NULL);
@@ -9494,6 +9631,13 @@ char stack_dump[1024*1024];
 char *tail=stack_dump;
 
 int main(int n,char *args[]){
+static Dwfl_Callbacks callbacks={
+.find_elf=dwfl_linux_proc_find_elf,
+.find_debuginfo=dwfl_standard_find_debuginfo
+};
+dwfl=dwfl_begin(&callbacks);
+dwfl_linux_proc_report(dwfl,getpid());
+dwfl_report_end(dwfl,NULL,NULL);
 int segment=0;
 for(int idx=0;idx<n;idx++){
 if(idx<n-1 && idx>1 && *args[idx]=='|'&& strlen(args[idx])==1)
@@ -9694,7 +9838,7 @@ os.execute("mkdir -v -m +rwx $PREFIX/local/c_M")
 os.execute("export SOURCE_DATE_EPOCH="..interface.renewed)
 if os.execute('clang -x c "'..where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version)..'" -fPIC -fdata-sections -ffunction-sections -Wl,--gc-sections,--as-needed -ffp-contract=fast '..
 --"-fsanitize=address,undefined -fsanitize-recover=address,undefined "..
-"-ggdb -O0 -Wall -o $PREFIX/local/c_M/lua_Console -L$PREFIX/local/lib -llua -L$PREFIX/lib -landroid-execinfo -pthread -lm")then
+"-ggdb -O0 -Wall -o $PREFIX/local/c_M/lua_Console -L$PREFIX/local/lib -llua -L$PREFIX/lib -ldw -lelf -landroid-execinfo -pthread -lm")then
 os.execute([===[unset SOURCE_DATE_EPOCH
 unset LUA_INIT
 unset LUA_INIT_]===].._VERSION:match("%f[%s%.%d][%s%.%w]*"):gsub("%s",""):gsub("%.","_").."\n"..[===[export "PATH=$PREFIX/bin"
@@ -9712,7 +9856,7 @@ print("Main Program Correctly Set Up!")
 else
 error("Error Setting Up Main Program!")
 end
-os.remove(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
+--os.remove(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
 mainprogram_sum=directory_CheckSum(io.popen("echo $PREFIX"):read().."/local/c_M/lua_Console",io.popen("echo $PREFIX"):read().."/local/c_M/")
 ::not_bother::
 
