@@ -1,58 +1,5 @@
 --range[15][18]
 local database_snapshots={"local c=require(module_name).c_UpBinds.dual_Capable_Map{\
-\9[\"local meta_Script=[===[\\\
-require(module_name).arithmetiCalc.initcalc=_\\\
-require(module_name).arithmetiCalc.imptalgo=require(module_name).algorithms\\\
-local x,y,z,a,b,c=require(module_name).arithmetiCalc(0,0,0,0,0,0)\\\
-local initial_states={\\\
-sizes={0.3,0.3},\\\
-axes={\\\
-{1,-math.sqrt(3)},\\\
-{math.sqrt(3),-1},\\\
-{2,0},\\\
-{math.sqrt(3),1},\\\
-{1,math.sqrt(3)},\\\
-{0,2}\\\
-},\\\
-dimenses={\\\
-{%d,%d,var=x},\\\
-{%d,%d,var=y},\\\
-{%d,%d,var=z},\\\
-{%d,%d,var=a},\\\
-{%d,%d,var=b},\\\
-{%d,%d,var=c}\\\
-}\\\
-}\\\
-for _,perm in require(module_name).permutation_Generator({x,y,z,a,b,c},{1,stateless=true})do\\\
-initial_states.relations=require(module_name).true_Iterator({-2,2,-2,2,-2,2,-2,2,-2,2,step1=4,step2=4,step3=4,step4=4,step5=4,function(states)\\\
-local comprehended={}\\\
-for idx=1,#perm-1 do\\\
-comprehended[idx]={perm[idx],\\\"==\\\",states.ctrls[idx],dof=0.1}\\\
-end\\\
-comprehended[1+#comprehended]={perm[#perm],\\\">=\\\",-2}\\\
-comprehended[1+#comprehended]={perm[#perm],\\\"<=\\\",2}\\\
-return comprehended\\\
-end},_,initial_states.relations)\\\
-end\\\
-print(require(module_name).serialise(initial_states.relations,\\\"\\\\t\\\"))\\\
-return require(module_name).dimensional_Animator(initial_states)\\\
-]===]\\\
-local scripts={}\\\
-for idx1=-3,0,3 do\\\
-for idx2=-3,0,3 do\\\
-for idx3=-3,0,3 do\\\
-for idx4=-3,0,3 do\\\
-for idx5=-3,0,3 do\\\
-for idx6=-3,0,3 do\\\
-scripts[1+#scripts]=string.format(meta_Script,idx1,3+idx1,idx2,3+idx2,idx3,3+idx3,idx4,3+idx4,idx5,3+idx5,idx6,3+idx6)\\\
-end\\\
-end\\\
-end\\\
-end\\\
-end\\\
-end\\\
-local collect=require(module_name).c_UpBinds.thread_Consolidator(scripts)\\\
-require(module_name).plot_Pixels(collect)\"]=\"hexeract\",\
 \9[\"local loaded_module=require(module_name)\\\
 loaded_module.arithmetiCalc.initcalc=nil\\\
 loaded_module.arithmetiCalc.imptalgo=loaded_module.algorithms\\\
@@ -242,34 +189,64 @@ n=1+n\\\
 until not status\\\
 coroutine.close(threads[1])\\\
 coroutine.close(threads[2])\\\
-os.execute('magick -loop 0 -dispose previous -delay 10 /sdcard/Fonts/*.bmp \\\"/sdcard/Download/rotated Animation.gif\\\"')\"]=\"rotated Parabolae\"\
+os.execute('magick -loop 0 -dispose previous -delay 10 /sdcard/Fonts/*.bmp \\\"/sdcard/Download/rotated Animation.gif\\\"')\"]=\"rotated Parabolae\",\
+\9[\"local meta_Script=[===[\\\
+require(module_name).arithmetiCalc.initcalc=_\\\
+require(module_name).arithmetiCalc.imptalgo=require(module_name).algorithms\\\
+local x,y,z,a,b,c=require(module_name).arithmetiCalc(0,0,0,0,0,0)\\\
+local initial_states={\\\
+sizes={0.3,0.3},\\\
+axes={\\\
+{1,-math.sqrt(3)},\\\
+{math.sqrt(3),-1},\\\
+{2,0},\\\
+{math.sqrt(3),1},\\\
+{1,math.sqrt(3)},\\\
+{0,2}\\\
+},\\\
+dimenses={\\\
+{%d,%d,var=x},\\\
+{%d,%d,var=y},\\\
+{%d,%d,var=z},\\\
+{%d,%d,var=a},\\\
+{%d,%d,var=b},\\\
+{%d,%d,var=c}\\\
+}\\\
+}\\\
+for _,perm in require(module_name).permutation_Generator({x,y,z,a,b,c},{1,stateless=true})do\\\
+initial_states.relations=require(module_name).true_Iterator({-2,2,-2,2,-2,2,-2,2,-2,2,step1=4,step2=4,step3=4,step4=4,step5=4,function(states)\\\
+local comprehended={}\\\
+for idx=1,#perm-1 do\\\
+comprehended[idx]={perm[idx],\\\"==\\\",states.ctrls[idx],dof=0.1}\\\
+end\\\
+comprehended[1+#comprehended]={perm[#perm],\\\">=\\\",-2}\\\
+comprehended[1+#comprehended]={perm[#perm],\\\"<=\\\",2}\\\
+return comprehended\\\
+end},_,initial_states.relations)\\\
+end\\\
+print(require(module_name).serialise(initial_states.relations,\\\"\\\\t\\\"))\\\
+return require(module_name).dimensional_Animator(initial_states)\\\
+]===]\\\
+local scripts={}\\\
+for idx1=-3,0,3 do\\\
+for idx2=-3,0,3 do\\\
+for idx3=-3,0,3 do\\\
+for idx4=-3,0,3 do\\\
+for idx5=-3,0,3 do\\\
+for idx6=-3,0,3 do\\\
+scripts[1+#scripts]=string.format(meta_Script,idx1,3+idx1,idx2,3+idx2,idx3,3+idx3,idx4,3+idx4,idx5,3+idx5,idx6,3+idx6)\\\
+end\\\
+end\\\
+end\\\
+end\\\
+end\\\
+end\\\
+local collect=require(module_name).c_UpBinds.thread_Consolidator(scripts)\\\
+require(module_name).plot_Pixels(collect)\"]=\"hexeract\"\
 }\
 local b=require(module_name).c_UpBinds.dual_Capable_Map{\
-\9[\"local dictation,arg1,arg2,arg3=...\\\
-local loaded_module=require(module_name)\\\
-if dictation==\\\"d\\\"then\\\
-io.input(io.stdin):read()\\\
-loaded_module.directory_Contrast(_,_,arg1 or 27,arg2 or 27,arg3)\\\
-elseif dictation==\\\"f\\\"then\\\
-io.input(io.stdin):read()\\\
-local results=loaded_module.directory_Match()\\\
-loaded_module.directory_Contrast('\\\"'..results[2]..'\\\"','\\\"'..results[5]..'\\\"',arg1 or 27,arg2 or 27,arg3)\\\
-elseif dictation==\\\"s\\\"then\\\
-loaded_module.directory_Contrast(\\\"/sdcard/Download/Codes/\\\",\\\"/sdcard/Download/Codes/\\\",arg1 or 27,arg2 or 27,arg3)\\\
-end\"]=\"directory Contrast\",\
-\9[\"Theoretical\"]=c,\
-\9[\"io.input(io.stdin):read()\\\
-local line_number,bool,problematic,directory=0,true,{},select(2,require(module_name).directory_Match())\\\
-for file_line in io.input(directory):lines(\\\"L\\\")do\\\
-line_number=1+line_number\\\
-if string.match(file_line,\\\"%s+\\\\n$\\\")then\\\
-bool=false\\\
-problematic[1+#problematic]=line_number\\\
-end\\\
-end\\\
-io.input(directory):close()\\\
-print(bool)\\\
-print(require(module_name).serialise(problematic,true))\"]=\"space before EOL\",\
+}\
+local a=require(module_name).c_UpBinds.dual_Capable_Map{\
 \9[\"os.execute(\\\"rm -rvf $PREFIX/local/cTinkering\\\")\\\
 os.execute(\\\"mkdir -v -m +rwx $PREFIX/local/cTinkering\\\")\\\
 io.output(os.getenv(\\\"PREFIX\\\")..\\\"/local/cTinkering/cSrc\\\"):write([===[\\\
@@ -290,11 +267,36 @@ print(\\\"\\\\n------\\\")\\\
 os.execute(\\\"$PREFIX/local/cTinkering/cProgram\\\")\\\
 print(\\\"------\\\\n\\\")\\\
 end\\\
-os.execute(\\\"rm -rvf $PREFIX/local/cTinkering\\\")\"]=\"c WhiteBoard\"\
-}\
-local a=require(module_name).c_UpBinds.dual_Capable_Map{\
+os.execute(\\\"rm -rvf $PREFIX/local/cTinkering\\\")\"]=\"c WhiteBoard\",\
+\9[\"Theoretical\"]=c,\
+\9[\"local dictation,arg1,arg2,arg3=...\\\
+local loaded_module=require(module_name)\\\
+if dictation==\\\"d\\\"then\\\
+io.input(io.stdin):read()\\\
+loaded_module.directory_Contrast(_,_,arg1 or 27,arg2 or 27,arg3)\\\
+elseif dictation==\\\"f\\\"then\\\
+io.input(io.stdin):read()\\\
+local results=loaded_module.directory_Match()\\\
+loaded_module.directory_Contrast('\\\"'..results[2]..'\\\"','\\\"'..results[5]..'\\\"',arg1 or 27,arg2 or 27,arg3)\\\
+elseif dictation==\\\"s\\\"then\\\
+loaded_module.directory_Contrast(\\\"/sdcard/Download/Codes/\\\",\\\"/sdcard/Download/Codes/\\\",arg1 or 27,arg2 or 27,arg3)\\\
+end\"]=\"directory Contrast\",\
+\9[\"io.input(io.stdin):read()\\\
+local line_number,bool,problematic,directory=0,true,{},select(2,require(module_name).directory_Match())\\\
+for file_line in io.input(directory):lines(\\\"L\\\")do\\\
+line_number=1+line_number\\\
+if string.match(file_line,\\\"%s+\\\\n$\\\")then\\\
+bool=false\\\
+problematic[1+#problematic]=line_number\\\
+end\\\
+end\\\
+io.input(directory):close()\\\
+print(bool)\\\
+print(require(module_name).serialise(problematic,true))\"]=\"space before EOL\"\
 }\
 local _=require(module_name).c_UpBinds.dual_Capable_Map{\
+\9[\"Applets\"]=a,\
+\9[\"disambiguity\"]=b,\
 \9[\"chcp 65001\\13\\\
 @echo off\\13\\\
 setlocal enabledelayedexpansion\\13\\\
@@ -316,121 +318,70 @@ set \\\"directory!index!=\\\"\\13\\\
 set \\\"temp=\\\"\\13\\\
 )\\13\\\
 cmd\\13\\\
-pause\"]=\"lua_Console.bat\",\
-\9[\"disambiguity\"]=a,\
-\9[\"Applets\"]=b\
+pause\"]=\"lua_Console.bat\"\
 }\
 return _",
 "local m=require(module_name).c_UpBinds.dual_Capable_Map{\
+\9[\"正弦定理\"]=\"解斜三角形\",\
+\9[\"已知f₂(x)=ax+b，若f₁(m)=f₁(n+m)，求函数f₁(f₂(x))一对可能的等值对应x值所需满足的规律\"]=\"抽象函数变换\",\
+\9[\"approach to factorisation of abcx³+(bcd+ace+abf)x²y+(cde+aef+bdf)xy²+defy³ alike integral expressions\"]=\"factorisation\",\
+\9[\"平面几何证明、解题重要手段\"]=\"methodological thread\",\
+\9[\"代数证明、解题意识\"]=\"methodological thread\",\
+\9[\"有序分组组合的分布与总数\"]=\"有序分组组合\",\
+\9[\"approach to factorisation of abx²+(ad+bc)xy+cdy² alike integral expressions\"]=\"factorisation\",\
+\9[\"勾股数的求法\"]=\"解直角三角形\",\
+\9[\"余弦定理\"]=\"解斜三角形\",\
+\9[\"已知条件不全——除了点在函数对应图像上——的解题方法\"]=\"methodological thread\",\
+\9[\"一个n边形共有多少条对角线？\"]=\"有序分组组合\",\
+\9[\"命题的构成与判断\"]=\"逻辑\"\
 }\
 local l=require(module_name).c_UpBinds.dual_Capable_Map{\
-\9[\"表格的实质为对应关系——将多维表格按1维铺展开、合并单元格用重复内容填充处理，每1行即为1条对应关系、1个所谓维度“交叉点”——对此对应关系进行逐级排序后合并单元格就能一睹对应关系的树林\\\
-总计、备注等运算应视作所涉及“交叉点”的集合，仅针对当前二维表格的构型才有意义\\\
-二维表格表头为维度、数据区域┛（包括行标、列标和数据）分属三个维度坐标、数据区域每一格为坐标值\\\
-含多级表头的二维表格实质为铺展开的对应关系unpivoted与二维表格pivoted的混合——多级行、列标为前者，数据区域为后者\"]=\"excel\"\
+\9[\"对数运算性质\"]=\"illustrated\",\
+\9[\"如何找到一个角度，使得更高维度能以夹角两两相同的方式均匀分布在当前维度？\"]=\"speculation\",\
+\9[\"如何区别、理解单位转换与进制转换？\"]=\"speculation\",\
+\9[\"一元二次方程配方法推导求根公式\"]=\"illustrated\"\
 }\
 local k=require(module_name).c_UpBinds.dual_Capable_Map{\
 }\
 local j=require(module_name).c_UpBinds.dual_Capable_Map{\
 }\
 local i=require(module_name).c_UpBinds.dual_Capable_Map{\
-\9[\"代数证明、解题意识\"]=\"methodological thread\",\
-\9[\"有序分组组合的分布与总数\"]=\"有序分组组合\",\
-\9[\"已知条件不全——除了点在函数对应图像上——的解题方法\"]=\"methodological thread\",\
-\9[\"approach to factorisation of abx²+(ad+bc)xy+cdy² alike integral expressions\"]=\"factorisation\",\
-\9[\"命题的构成与判断\"]=\"逻辑\",\
-\9[\"勾股数的求法\"]=\"解直角三角形\",\
-\9[\"平面几何证明、解题重要手段\"]=\"methodological thread\",\
-\9[\"一个n边形共有多少条对角线？\"]=\"有序分组组合\",\
-\9[\"余弦定理\"]=\"解斜三角形\",\
-\9[\"approach to factorisation of abcx³+(bcd+ace+abf)x²y+(cde+aef+bdf)xy²+defy³ alike integral expressions\"]=\"factorisation\",\
-\9[\"已知f₂(x)=ax+b，若f₁(m)=f₁(n+m)，求函数f₁(f₂(x))一对可能的等值对应x值所需满足的规律\"]=\"抽象函数变换\",\
-\9[\"正弦定理\"]=\"解斜三角形\"\
 }\
 local h=require(module_name).c_UpBinds.dual_Capable_Map{\
-\9[\"对数运算性质\"]=\"illustrated\",\
-\9[\"如何区别、理解单位转换与进制转换？\"]=\"speculation\",\
-\9[\"如何找到一个角度，使得更高维度能以夹角两两相同的方式均匀分布在当前维度？\"]=\"speculation\",\
-\9[\"一元二次方程配方法推导求根公式\"]=\"illustrated\"\
+\9[\"表格的实质为对应关系——将多维表格按1维铺展开、合并单元格用重复内容填充处理，每1行即为1条对应关系、1个所谓维度“交叉点”——对此对应关系进行逐级排序后合并单元格就能一睹对应关系的树林\\\
+总计、备注等运算应视作所涉及“交叉点”的集合，仅针对当前二维表格的构型才有意义\\\
+二维表格表头为维度、数据区域┛（包括行标、列标和数据）分属三个维度坐标、数据区域每一格为坐标值\\\
+含多级表头的二维表格实质为铺展开的对应关系unpivoted与二维表格pivoted的混合——多级行、列标为前者，数据区域为后者\"]=\"excel\"\
 }\
 local g=require(module_name).c_UpBinds.dual_Capable_Map{\
-\9[\"Lua\"]=j,\
-\9[\"A∪B is equivalent to A is true or B is true when A is false - latter expression is redundant and obviated by former\"]=\"logical or\",\
-\9[\"Python\"]=k,\
-\9[\"Threads\"]=l,\
-\9[\"sign_bit=1&(integer>>(bit_depth-1))\\\
-if sign_bit~=0 then\\\
-arithmetically_shifted_integer=logically_shifted_integer|((-1)<<(bit_depth-shift_count))\\\
-end\"]=\"arithmetic right shift\",\
-\9[\"C\\\\C++\"]=m\
 }\
 local f=require(module_name).c_UpBinds.dual_Capable_Map{\
-}\
-local e=require(module_name).c_UpBinds.dual_Capable_Map{\
-\9[\"具备以下任意两个条件的直线必然具备其余三条：\\\
-经过圆心；\\\
-垂直于弦；\\\
-平分弦（被平分的弦不是直径）；\\\
-平分弦所对应的优弧；\\\
-平分弦所对应的劣弧\"]=\"平面几何特征、推断\",\
-\9[\"(a,b)与(b,-a)分别是直线ax+by+c=0（一般式）的一个法向量和一个方向向量\"]=\"直线的方程所蕴含的方向信息\",\
-\9[\"已知抛物线顶点坐标，通常设函数解析式为顶点式（或配方式）\"]=\"如何确定二次函数解析式\",\
-\9[\"已知抛物线上任意三点坐标，通常设函数解析式为一般式（或三点式）\"]=\"如何确定二次函数解析式\",\
-\9[\"1   -1   +1   -6   +6   -2   +2   -3   +3=5×3      5x²+13xy-6y²\\\
-  ×   or   or   or   or   or   or   or     + =13       ||\\\
-5   +6   -6   +1   -1   +3   -3   +2   -2=1×(-2)   (x+3y)(5x-2y)\\\
-cross multiplication\"]=\"approach to factorisation of abx²+(ad+bc)xy+cdy² alike integral expressions\",\
-\9[\"同弧或等弧所对应的所有圆周角均相等\"]=\"平面几何特征、推断\",\
-\9[\"Label If Any\"]=h,\
-\9[\"p=>q且q≠>p则p成立为q成立的充分不必要条件、q成立为p成立的必要不充分条件——p<=>q则p成立、q成立互为充要条件\"]=\"命题的构成与判断\",\
-\9[\"诸如度、分、秒与IPv4地址等表示方法可一定程度上理解为用十进制表示的60进制3位数与256进制4位数\\\
-单位转换可一定程度上理解为将某进制下多位数强行压缩至某一位，与用3.5628万表示35628同理——只不过后者单位转换率恰好是进制数的倍数，直接移动小数点即可，无需再作比例缩放\\\
-用进制方法表示是由自然而然、均匀铺开一个值到各位，使得每位数均不超过进制数且为整数而得——如上相同例子也可强制去均匀化、表示为2.3万12.5千1百2.8十——从这种意义上讲进制表示方法的个十百千每一位亦可视作单位，但此做法不符合进制的标准表示方法\\\
-任意进制间转换可以采用\\\
-目标进制个位=当前进制表示的值%目标进制数\\\
-目标进制十位=（当前进制表示的值%目标进制数^2-已得出的个位）/目标进制数\\\
-...\\\
-目标进制千位=（当前进制表示的值%目标进制数^4-当前进制表示的值%目标进制数^3）/目标进制数^3=（当前进制表示的值%目标进制数^4-已得出的百位×目标进制数^2-已得出的十位×目标进制数-已得出的个位）/目标进制数^3\\\
-的除、余法模式运算——如果愿意直接作目标进制乘、加法则相对简单\"]=\"如何区别、理解单位转换与进制转换？\",\
-\9[\"四边形、矩形、菱形、正方形内嵌的中点四边形依次分别为平行四边形、菱形、矩形、正方形\"]=\"平面几何特征、推断\",\
-\9[\"作辅助线：\\\
-最短距离问题——利用轴对称作出起点或终点关于折返直线的对称点，根据“两点之间线段最短”来解决\"]=\"平面几何证明、解题重要手段\",\
-\9[\"若a>1、为奇数，b,c是两个连续的自然数，且a²=b+c，则a,b,c是一组勾股数\"]=\"勾股数的求法\",\
-\9[\"对角线互相平分的四边形是平行四边形\"]=\"平面几何特征、推断\",\
-\9[\"对任意三角形有a/sinA=b/sinB=c/sinC\"]=\"正弦定理\",\
-\9[\"从圆外一点引圆的两条切线，它们的切线长相等，此点和圆心的连线平分两条切线的夹角\"]=\"平面几何特征、推断\",\
-\9[\"邻补角、对顶角、同位角、内错角、同旁内角、外角\"]=\"平面几何特征、推断\",\
-\9[\"对角互补的四边形四个顶点在同一个圆上\"]=\"平面几何特征、推断\",\
-\9[\"夹在两条平行线间的平行线段相等\"]=\"平面几何特征、推断\",\
-\9[\"三角形周长与内切圆半径乘积的一半等于这个三角形的面积\"]=\"平面几何特征、推断\",\
-\9[\"原命题p=>q与逆否命题非q=>非p同真同假，逆命题q=>p与否命题非p=>非q同真同假——两对命题真假相互独立\"]=\"命题的构成与判断\",\
-\9[\"直角三角形斜边的中线等于斜边的一半\"]=\"平面几何特征、推断\",\
-\9[\"Class 1\"]=i,\
-\9[\"相似三角形对应线段（对应高、对应中线、对应角平分线等）的比等于相似比\"]=\"平面几何特征、推断\",\
-\9[\"对任意三角形有b²=a²+c²-2ac×cosB——余弦定理是勾股定理的推广\"]=\"余弦定理\",\
-\9[\"位似图形上任意一对对应点到位似中心的距离之比等于位似比\"]=\"平面几何特征、推断\",\
+\9[\"m×n维的有序分组组合总数为mⁿ——其中m为可能状态数（很明显m=2时两互斥状态一般为出现、不出现）或分组数（任一分组可暂时被分配为0），n为元素总数——含n个元素的集合，其所有子集共有2ⁿ个，它等于Cₙ⁰+Cₙ¹+Cₙ²+...+Cₙⁿ\"]=\"有序分组组合的分布与总数\",\
 \9[\"一个顶点与所有其它顶点的连线有n-1条，除去构成多边形的边的两条——n个顶点共有n(n-3)条，但每条被数了两遍——故一个n边形共有n(n-3)/2条对角线\"]=\"一个n边形共有多少条对角线？\",\
-\9[\"不在同一条直线上的三个点确定一个圆\"]=\"平面几何特征、推断\",\
-\9[\"两个数的和为定值则当且仅当两个数相等时它们的几何平均数达到最大（等于它们的算术平均数）\"]=\"算术平均数与几何平均数的关系\",\
-\9[\"三角形的外角等于与它不相邻的两个内角的和\"]=\"平面几何特征、推断\",\
-\9[\"logₐ(M×N)=logₐM+logₐN\\\
-——————\\\
-    M             \\\
-logₐ-=logₐM--logₐN\\\
-    N             \\\
-——————\\\
-      n n      \\\
-log  N =-×logₐN\\\
-   aᵐ   m      \\\
-——————\\\
-换底公式及推论：\\\
-      logₐN \\\
-logₑN=-----;\\\
-      logₐe \\\
-logₑh×logₕd=logₑd;\\\
-logₑh×logₐe=logₐh\\\
-以上所有底数大于0且不等于1、真数大于0\"]=\"对数运算性质\",\
 \9[\"三角形三个内角的角平分线交于一点——为三角形的内心、至三角形三条边的距离相等、等于内切圆的半径\"]=\"平面几何特征、推断\",\
+\9[\"两个数的积为定值则当且仅当两个数相等时它们的算术平均数达到最小（等于它们的几何平均数）\"]=\"算术平均数与几何平均数的关系\",\
+\9[\"三角形一个内角和与之不相邻的两个外角的角平分线交于一点、至三角形三条边的距离相等\"]=\"平面几何特征、推断\",\
+\9[\"圆内接四边形的对角互补\"]=\"平面几何特征、推断\",\
+\9[\"原命题p=>q与逆否命题非q=>非p同真同假，逆命题q=>p与否命题非p=>非q同真同假——两对命题真假相互独立\"]=\"命题的构成与判断\",\
+\9[\"已知抛物线上任意三点坐标，通常设函数解析式为一般式（或三点式）\"]=\"如何确定二次函数解析式\",\
+\9[\"三角形的外角等于与它不相邻的两个内角的和\"]=\"平面几何特征、推断\",\
+\9[\"a   d=bcd                             abcx³+(bcd+ace+abf)x²y+(cde+aef+bdf)xy²+defy³\\\
+| × |= +              cde                                  ||\\\
+b   e=ace=bcd+ace+abf  +                          (ax+dy)(bx+ey)(cx+fy)\\\
+| × |= +              aef=cde+aef+bdf\\\
+c   f=abf              +\\\
+     =                bdf\\\
+cross&bar multiplication\"]=\"approach to factorisation of abcx³+(bcd+ace+abf)x²y+(cde+aef+bdf)xy²+defy³ alike integral expressions\",\
+\9[\"Label If Any\"]=l,\
+\9[\"弧度为l/r=2π×n°/360°\"]=\"平面几何特征、推断\",\
+\9[\"对角线互相平分的四边形是平行四边形\"]=\"平面几何特征、推断\",\
+\9[\"已知抛物线顶点坐标，通常设函数解析式为顶点式（或配方式）\"]=\"如何确定二次函数解析式\",\
+\9[\"三角形三条中线交于一点——为三角形的重心、在平面坐标系中其任一坐标等于三角形三个顶点对应坐标的平均数\"]=\"平面几何特征、推断\",\
+\9[\"代数式变幻的中间形式可能更利于证明或解题，所以：\\\
+避免盲目化解、转换单一代数式至最终形式；\\\
+两头开工交会于某一等价条件\"]=\"代数证明、解题意识\",\
+\9[\"直角三角形斜边的中线等于斜边的一半\"]=\"平面几何特征、推断\",\
+\9[\"若对于一次函数y=k₁x+b₁和y=k₂x+b₂(k₁,k₂≠0)有k₁·k₂=-1，则两函数对应图像互相垂直。\"]=\"两个一次函数对应图像互相垂直的条件\",\
 \9[\"   2        \\\
 a×x +b×x+c=0\\\
 ——————\\\
@@ -470,63 +421,115 @@ Anyway x=    b --4×a×c,a≠0\\\
 ——————\\\
  2            \\\
 b --4×a×c<0无实根\"]=\"一元二次方程配方法推导求根公式\",\
-\9[\"设此点坐标为(t,f(t))\"]=\"已知条件不全——除了点在函数对应图像上——的解题方法\",\
-\9[\"-α、180°±α和360°-α的三角函数值等于α的同名函数值，之前加上将α当作锐角时原函数值的符号\"]=\"正弦、余弦的诱导公式\",\
-\9[\"同圆或等圆中两个圆心角、两条弧或两条弦中有一组量相等，这组量所对应的其余各组量也分别相等\"]=\"平面几何特征、推断\",\
-\9[\"平行四边形的对角线互相平分\"]=\"平面几何特征、推断\",\
+\9[\"bᵐ÷bⁿ=bᵐ×b⁻ⁿ=bᵐ⁻ⁿ\"]=\"指数幂的运算性质\",\
+\9[\"设m=ax+b则f₁(f₂(x))=f₁(ax+b)=f₁(n+ax+b)=f₁(a(x+n/a)+b)=f₁(f₂(x+n/a))\"]=\"已知f₂(x)=ax+b，若f₁(m)=f₁(n+m)，求函数f₁(f₂(x))一对可能的等值对应x值所需满足的规律\",\
+\9[\"logₐ(M×N)=logₐM+logₐN\\\
+——————\\\
+    M             \\\
+logₐ-=logₐM--logₐN\\\
+    N             \\\
+——————\\\
+      n n      \\\
+log  N =-×logₐN\\\
+   aᵐ   m      \\\
+——————\\\
+换底公式及推论：\\\
+      logₐN \\\
+logₑN=-----;\\\
+      logₐe \\\
+logₑh×logₕd=logₑd;\\\
+logₑh×logₐe=logₐh\\\
+以上所有底数大于0且不等于1、真数大于0\"]=\"对数运算性质\",\
+\9[\"三角形周长与内切圆半径乘积的一半等于这个三角形的面积\"]=\"平面几何特征、推断\",\
+\9[\"邻补角、对顶角、同位角、内错角、同旁内角、外角\"]=\"平面几何特征、推断\",\
+\9[\"对任意三角形有b²=a²+c²-2ac×cosB——余弦定理是勾股定理的推广\"]=\"余弦定理\",\
 \9[\"一条弧所对应的所有圆周角均等于对应同一条弧的圆心角的一半\"]=\"平面几何特征、推断\",\
+\9[\"Class 1\"]=m,\
+\9[\"对任意三角形有a/sinA=b/sinB=c/sinC\"]=\"正弦定理\",\
+\9[\"更高维度的维度数若为当前维度象限数的约数情况则较为理想\"]=\"如何找到一个角度，使得更高维度能以夹角两两相同的方式均匀分布在当前维度？\",\
+\9[\"同弧或等弧所对应的所有圆周角均相等\"]=\"平面几何特征、推断\",\
 \9[\"若对于一元二次方程ax²+bx+c=0,a≠0有b²-4ac≥0，则其实数根x₁,x₂满足x₁+x₂=-b/a,x₁x₂=c/a。\"]=\"一元二次方程判别式和根与系数的关系\",\
+\9[\"两条直线被一组平行线所截得的对应线段成比例\"]=\"平面几何特征、推断\",\
+\9[\"不在同一条直线上的三个点确定一个圆\"]=\"平面几何特征、推断\",\
 \9[\"弧长l=2πr×n°/360°；\\\
 扇形面积S=lr/2；\\\
 已知n、r、l、S中任意二者即可求得其余二者\"]=\"平面几何特征、推断\",\
-\9[\"满足以下任意两个条件的直线必然满足另外一条：\\\
-垂直于切线；\\\
-过切点；\\\
-过圆心\"]=\"平面几何特征、推断\",\
-\9[\"a   d=bcd                             abcx³+(bcd+ace+abf)x²y+(cde+aef+bdf)xy²+defy³\\\
-| × |= +              cde                                  ||\\\
-b   e=ace=bcd+ace+abf  +                          (ax+dy)(bx+ey)(cx+fy)\\\
-| × |= +              aef=cde+aef+bdf\\\
-c   f=abf              +\\\
-     =                bdf\\\
-cross&bar multiplication\"]=\"approach to factorisation of abcx³+(bcd+ace+abf)x²y+(cde+aef+bdf)xy²+defy³ alike integral expressions\",\
-\9[\"两条直线被一组平行线所截得的对应线段成比例\"]=\"平面几何特征、推断\",\
-\9[\"若将二次函数解析式y=ax²+bx+c,a≠0由一般式转化为顶点式y=a(x-h)²+k,a≠0，则a决定了抛物线的形状、大小，h、k决定了抛物线的位置，(h,k)为抛物线顶点坐标\"]=\"如何决定二次函数对应几何图像的形状、大小及位置？\",\
-\9[\"三角形一个内角和与之不相邻的两个外角的角平分线交于一点、至三角形三条边的距离相等\"]=\"平面几何特征、推断\",\
-\9[\"若对于一次函数y=k₁x+b₁和y=k₂x+b₂(k₁,k₂≠0)有k₁·k₂=-1，则两函数对应图像互相垂直。\"]=\"两个一次函数对应图像互相垂直的条件\",\
-\9[\"更高维度的维度数若为当前维度或维度数、或象限数的倍数，则找到的均匀分布方式并不理想——对于任一维度会存在一对位维度与其反向重合\"]=\"如何找到一个角度，使得更高维度能以夹角两两相同的方式均匀分布在当前维度？\",\
-\9[\"∵(bᵐ′ⁿ)ⁿ=b⁽ᵐ′ⁿ⁾ˣⁿ=bᵐ\\\
-∴bᵐ′ⁿ=ⁿ√bᵐ\"]=\"指数幂的运算性质\",\
+\9[\"(a,b)与(b,-a)分别是直线ax+by+c=0（一般式）的一个法向量和一个方向向量\"]=\"直线的方程所蕴含的方向信息\",\
+\9[\"已知抛物线与x轴的两个交点坐标或与x轴的一个交点坐标和对称轴，通常设函数解析式为交点式（或两根式）：\\\
+y=a(x-x₁)(x-x₂),a≠0\"]=\"如何确定二次函数解析式\",\
 \9[\"(a/b)ᵐ=(a×b⁻¹)ᵐ=aᵐ×b⁻ᵐ=aᵐ/bᵐ\"]=\"指数幂的运算性质\",\
-\9[\"m×n维的有序分组组合总数为mⁿ——其中m为可能状态数（很明显m=2时两互斥状态一般为出现、不出现）或分组数（任一分组可暂时被分配为0），n为元素总数——含n个元素的集合，其所有子集共有2ⁿ个，它等于Cₙ⁰+Cₙ¹+Cₙ²+...+Cₙⁿ\"]=\"有序分组组合的分布与总数\",\
-\9[\"圆内接四边形的对角互补\"]=\"平面几何特征、推断\",\
-\9[\"三角形中位线与第三条边的中线互相平分\"]=\"平面几何特征、推断\",\
-\9[\"代数式变幻的中间形式可能更利于证明或解题，所以：\\\
-避免盲目化解、转换单一代数式至最终形式；\\\
-两头开工交会于某一等价条件\"]=\"代数证明、解题意识\",\
-\9[\"三角形三条边的垂直平分线交于一点——为三角形的外心、至三角形三个顶点的距离相等、等于外接圆的半径，视三角形为锐角、直角还是钝角三角形依次分别位于三角形内部、斜边终点上、外部\"]=\"平面几何特征、推断\",\
-\9[\"两个数的积为定值则当且仅当两个数相等时它们的算术平均数达到最小（等于它们的几何平均数）\"]=\"算术平均数与几何平均数的关系\",\
+\9[\"设此点坐标为(t,f(t))\"]=\"已知条件不全——除了点在函数对应图像上——的解题方法\",\
+\9[\"p=>q且q≠>p则p成立为q成立的充分不必要条件、q成立为p成立的必要不充分条件——p<=>q则p成立、q成立互为充要条件\"]=\"命题的构成与判断\",\
 \9[\"二次函数y=ax²+bx+c配方先化为y=a(x²+bx/a)+c(a≠0)的形式\\\
 然后在括号内加减(b/2a)²，即y=a[x²+bx/a+(b/2a)²-(b/2a)²]+c,a≠0\\\
 最后化为y=a[x-(-b/2a)]²+(4ac-b²)/4a,a≠0得顶点坐标为(-b/2a,(4ac-b²)/4a)\\\
 也可使用对称点法——若已知与x轴平行的任意一条直线与抛物线的两个交点坐标，则连接它们所得线段的垂直平分线即为对称轴\"]=\"二次函数对称轴和顶点坐标的求法\",\
+\9[\"夹在两条平行线间的平行线段相等\"]=\"平面几何特征、推断\",\
+\9[\"诸如度、分、秒与IPv4地址等表示方法可一定程度上理解为用十进制表示的60进制3位数与256进制4位数\\\
+单位转换可一定程度上理解为将某进制下多位数强行压缩至某一位，与用3.5628万表示35628同理——只不过后者单位转换率恰好是进制数的倍数，直接移动小数点即可，无需再作比例缩放\\\
+用进制方法表示是由自然而然、均匀铺开一个值到各位，使得每位数均不超过进制数且为整数而得——如上相同例子也可强制去均匀化、表示为2.3万12.5千1百2.8十——从这种意义上讲进制表示方法的个十百千每一位亦可视作单位，但此做法不符合进制的标准表示方法\\\
+任意进制间转换可以采用\\\
+目标进制个位=当前进制表示的值%目标进制数\\\
+目标进制十位=（当前进制表示的值%目标进制数^2-已得出的个位）/目标进制数\\\
+...\\\
+目标进制千位=（当前进制表示的值%目标进制数^4-当前进制表示的值%目标进制数^3）/目标进制数^3=（当前进制表示的值%目标进制数^4-已得出的百位×目标进制数^2-已得出的十位×目标进制数-已得出的个位）/目标进制数^3\\\
+的除、余法模式运算——如果愿意直接作目标进制乘、加法则相对简单\"]=\"如何区别、理解单位转换与进制转换？\",\
+\9[\"若a>1、为奇数，b,c是两个连续的自然数，且a²=b+c，则a,b,c是一组勾股数\"]=\"勾股数的求法\",\
+\9[\"∵(bᵐ′ⁿ)ⁿ=b⁽ᵐ′ⁿ⁾ˣⁿ=bᵐ\\\
+∴bᵐ′ⁿ=ⁿ√bᵐ\"]=\"指数幂的运算性质\",\
+\9[\"两个数的和为定值则当且仅当两个数相等时它们的几何平均数达到最大（等于它们的算术平均数）\"]=\"算术平均数与几何平均数的关系\",\
+\9[\"若将二次函数解析式y=ax²+bx+c,a≠0由一般式转化为顶点式y=a(x-h)²+k,a≠0，则a决定了抛物线的形状、大小，h、k决定了抛物线的位置，(h,k)为抛物线顶点坐标\"]=\"如何决定二次函数对应几何图像的形状、大小及位置？\",\
+\9[\"-α、180°±α和360°-α的三角函数值等于α的同名函数值，之前加上将α当作锐角时原函数值的符号\"]=\"正弦、余弦的诱导公式\",\
+\9[\"三角形三条边的垂直平分线交于一点——为三角形的外心、至三角形三个顶点的距离相等、等于外接圆的半径，视三角形为锐角、直角还是钝角三角形依次分别位于三角形内部、斜边终点上、外部\"]=\"平面几何特征、推断\",\
+\9[\"反比例函数可视作相应象限内面积为比例系数绝对值|k|的所有矩形与原点对角顶点的集合\"]=\"反比例函数比例系数的几何意义\",\
+\9[\"作辅助线：\\\
+最短距离问题——利用轴对称作出起点或终点关于折返直线的对称点，根据“两点之间线段最短”来解决\"]=\"平面几何证明、解题重要手段\",\
+\9[\"同圆或等圆中两个圆心角、两条弧或两条弦中有一组量相等，这组量所对应的其余各组量也分别相等\"]=\"平面几何特征、推断\",\
+\9[\"位似图形上任意一对对应点到位似中心的距离之比等于位似比\"]=\"平面几何特征、推断\",\
+\9[\"满足以下任意两个条件的直线必然满足另外一条：\\\
+垂直于切线；\\\
+过切点；\\\
+过圆心\"]=\"平面几何特征、推断\",\
+\9[\"四边形、矩形、菱形、正方形内嵌的中点四边形依次分别为平行四边形、菱形、矩形、正方形\"]=\"平面几何特征、推断\",\
+\9[\"对角互补的四边形四个顶点在同一个圆上\"]=\"平面几何特征、推断\",\
+\9[\"更高维度的维度数若为当前维度或维度数、或象限数的倍数，则找到的均匀分布方式并不理想——对于任一维度会存在一对位维度与其反向重合\"]=\"如何找到一个角度，使得更高维度能以夹角两两相同的方式均匀分布在当前维度？\",\
 \9[\"b⁻⁽ᵐ′ⁿ⁾=1/bᵐ′ⁿ(a>0,b>0)\"]=\"指数幂的运算性质\",\
-\9[\"bᵐ÷bⁿ=bᵐ×b⁻ⁿ=bᵐ⁻ⁿ\"]=\"指数幂的运算性质\",\
+\9[\"1   -1   +1   -6   +6   -2   +2   -3   +3=5×3      5x²+13xy-6y²\\\
+  ×   or   or   or   or   or   or   or     + =13       ||\\\
+5   +6   -6   +1   -1   +3   -3   +2   -2=1×(-2)   (x+3y)(5x-2y)\\\
+cross multiplication\"]=\"approach to factorisation of abx²+(ad+bc)xy+cdy² alike integral expressions\",\
+\9[\"三角形中位线与第三条边的中线互相平分\"]=\"平面几何特征、推断\",\
+\9[\"具备以下任意两个条件的直线必然具备其余三条：\\\
+经过圆心；\\\
+垂直于弦；\\\
+平分弦（被平分的弦不是直径）；\\\
+平分弦所对应的优弧；\\\
+平分弦所对应的劣弧\"]=\"平面几何特征、推断\",\
+\9[\"平行四边形的对角线互相平分\"]=\"平面几何特征、推断\",\
+\9[\"从圆外一点引圆的两条切线，它们的切线长相等，此点和圆心的连线平分两条切线的夹角\"]=\"平面几何特征、推断\",\
 \9[\"三角形的三边关系：\\\
 任意两边的和大于第三边；\\\
 任意两边的差小于第三边\"]=\"平面几何特征、推断\",\
-\9[\"已知抛物线与x轴的两个交点坐标或与x轴的一个交点坐标和对称轴，通常设函数解析式为交点式（或两根式）：\\\
-y=a(x-x₁)(x-x₂),a≠0\"]=\"如何确定二次函数解析式\",\
-\9[\"弧度为l/r=2π×n°/360°\"]=\"平面几何特征、推断\",\
-\9[\"反比例函数可视作相应象限内面积为比例系数绝对值|k|的所有矩形与原点对角顶点的集合\"]=\"反比例函数比例系数的几何意义\",\
-\9[\"更高维度的维度数若为当前维度象限数的约数情况则较为理想\"]=\"如何找到一个角度，使得更高维度能以夹角两两相同的方式均匀分布在当前维度？\",\
-\9[\"三角形三条中线交于一点——为三角形的重心、在平面坐标系中其任一坐标等于三角形三个顶点对应坐标的平均数\"]=\"平面几何特征、推断\",\
-\9[\"设m=ax+b则f₁(f₂(x))=f₁(ax+b)=f₁(n+ax+b)=f₁(a(x+n/a)+b)=f₁(f₂(x+n/a))\"]=\"已知f₂(x)=ax+b，若f₁(m)=f₁(n+m)，求函数f₁(f₂(x))一对可能的等值对应x值所需满足的规律\"\
+\9[\"相似三角形对应线段（对应高、对应中线、对应角平分线等）的比等于相似比\"]=\"平面几何特征、推断\"\
+}\
+local e=require(module_name).c_UpBinds.dual_Capable_Map{\
+\9[\"sign_bit=1&(integer>>(bit_depth-1))\\\
+if sign_bit~=0 then\\\
+arithmetically_shifted_integer=logically_shifted_integer|((-1)<<(bit_depth-shift_count))\\\
+end\"]=\"arithmetic right shift\",\
+\9[\"A∪B is equivalent to A is true or B is true when A is false - latter expression is redundant and obviated by former\"]=\"logical or\",\
+\9[\"Threads\"]=h,\
+\9[\"C\\\\C++\"]=i,\
+\9[\"且置0\\\
+或置1\\\
+排斥或同0异1\"]=\"bitwise operations\",\
+\9[\"Python\"]=j,\
+\9[\"Lua\"]=k\
 }\
 local d=require(module_name).c_UpBinds.dual_Capable_Map{\
-\9[\"Mathematics\"]=e,\
-\9[\"disambiguity\"]=f,\
-\9[\"Coding\"]=g\
+\9[\"Coding\"]=e,\
+\9[\"Mathematics\"]=f,\
+\9[\"disambiguity\"]=g\
 }\
 return d"}
 --range[15][15]
@@ -1090,7 +1093,7 @@ gen_func=states[args or"args"][2*layer]
 elseif type(states[args or"args"]["customgen"..layer])=="function"then
 gen_func,invar_state,ctrl_var_init=states[args or"args"]["customgen"..layer](states[args or"args"][2*layer-1],states[args or"args"][2*layer])
 else
-gen_func,invar_state,ctrl_var_init=table_Player(states[args or"args"][2*layer-1],states[args or"args"][2*layer])
+gen_func,invar_state,ctrl_var_init=ipairs(states[args or"args"][2*layer-1],states[args or"args"][2*layer])
 end
 for ctrl,yield1,yield2 in gen_func,invar_state,ctrl_var_init do
 if states[args or"args"]["bhrconds"..layer](states,layer,ctrl,yield1,yield2)then
@@ -1150,31 +1153,16 @@ initial_states=initial_states or{}
 comprehension=comprehension or{}
 initial_states[args or"args"]=params
 initial_states[results or"results"]=comprehension
-local bool,bool1=true,true
+local bool=true
 for layer=1,#params-1 do
-if params["customgen"..layer]or type(params[layer])~="table"or next(params[layer],#params[layer]>0 and #params[layer]or nil)or #params[layer]==0 then
+if params["customgen"..layer]or((type(params[layer])~="table"or(next(params[layer],#params[layer]>0 and #params[layer]or nil)~=nil and #params[layer]==0))and(type(params[layer])~="userdata"or tostring(params[layer]):find("dual_Capable_Map")~=1 or(params[layer]:__pairs(#params[layer])()~=nil and #params[layer]==0)))then
 bool=false
-if layer%2==1 then
-bool1=false
+break
 end
 end
-end
-if bool==true then
-local uniform={stateless=true}
+if bool then
 for idx=#params,2,-1 do
-table.insert(params,idx,uniform)
-end
-elseif bool1==true and #params%2==1 then
-local bool2=true
-for idx=2,#params-1,2 do
-if params["customgen"..idx/2]or type(params[idx])~="table"or not next(params[idx],#params[idx]>0 and #params[idx]or nil)or #params[idx]>0 then
-bool2=false
-end
-end
-if bool2==true then
-for idx=2,#params-1,2 do
-params[idx].stateless=true
-end
+table.insert(params,idx,false)
 end
 end
 local states,layer,ctrl,yield1,yield2=iter(initial_states)
@@ -1926,7 +1914,7 @@ local posits=true_Iterator{1,1+#ks,function(states)return table.unpack(states.ct
 for num_of_grps=1,type(ogrps[layer])=="string"and utf8.len(ogrps[layer])or #ogrps[layer]do
 for grp_lyot in group_Generator(type(ogrps[layer])=="string"and utf8.len(ogrps[layer])or #ogrps[layer],num_of_grps)do
 for pos in grouped_Combination_Generator(posits,{#grp_lyot,stateless=true})do
-local srtd_pos,keys,list=true_Iterator{pos,{j=#grp_lyot,stateless=true},function(states)return table.unpack(states.yields1)end},replicate(ks),replicate(lis)
+local srtd_pos,keys,list=true_Iterator{pos,{j=#grp_lyot,stateless=true},customgen1=table_Player,function(states)return table.unpack(states.yields1)end},replicate(ks),replicate(lis)
 table.sort(srtd_pos)
 for idx1=type(ogrps[layer])=="string"and utf8.len(ogrps[layer])or #ogrps[layer],1,-1 do
 local sum,fnl_pos=0
@@ -1984,16 +1972,16 @@ return nil
 end
 end
 
-local function uni_Inc_Rand(a, b, precision)
-precision = precision or 1e6
-local range = b-a
-local randint = math.random(0,precision)
+local function uni_Inc_Rand(a,b,precision)
+precision=precision or 1e6
+local range=b-a
+local randint=math.random(0,precision)
 return a+(range*randint)/precision
 end
 
 local function kahan_Product(values)
 local product,c=1.0,1.0
-for v in table_Player(values) do
+for _,v in ipairs(values)do
 local y=v/c
 local t=product*y
 c=(t/product)/y
@@ -2003,12 +1991,12 @@ return product
 end
 
 local function kahan_Sum(values)
-local sum, c = 0.0, 0.0
-for v in table_Player(values)do
-local y = v - c
-local t = sum + y
-c = (t - sum) - y
-sum = t
+local sum,c=0.0,0.0
+for _,v in ipairs(values)do
+local y=v-c
+local t=sum+y
+c=(t-sum)-y
+sum=t
 end
 return sum
 end
@@ -2774,85 +2762,117 @@ if k1~=k2 then
 print("Oddly enough, "..k1.." in "..compare1.root_path.." and "..k2.." in "..compare2.root_path.." are in fact identical!")
 end
 elseif math.abs(#v1-#v2)<=dof then
-print("Comparing Potentially Similar Files "..k1.." and "..k2.."...")
-local matched,identical_row_map2,by_row_orientation,row_based_diff,unnecessary=0,{},#v1>=#v2
+print("Comparing Potentially Similar Files "..k1.." in "..compare1.root_path.." and "..k2.." in "..compare2.root_path.." ...")
+local something_that_counts,by_row_orientation,identical_row_map2,row_based_diff=0,#v1>=#v2
 for idx1=1,#v2 do
 local merged_keys=v1:lookUp(v2:nLookUp(idx1))
 if merged_keys==nil then
 print("No Match Found for Line "..idx1.." from "..k2.." of "..compare2.root_path.." in "..k1.." of "..compare1.root_path.."!")
-if not unnecessary then
-unnecessary=true
-end
 else
-matched=1+matched
+something_that_counts=1+something_that_counts
 if type(merged_keys)=="table"and merged_keys[unique_key]=="merged_keys"then
+local fully_occupied,cache_last=true
 for idx2=1,#merged_keys do
 if merged_keys["inverse_"..merged_keys[unique_key]][merged_keys[idx2]]==idx2 and merged_keys[idx2]~=idx1 then
+if identical_row_map2 then
+if not identical_row_map2:nLookUp(merged_keys[idx2])and not identical_row_map2:lookUp(idx1)then
 identical_row_map2[merged_keys[idx2]]=idx1
+fully_occupied=false
+break
 end
+else
+identical_row_map2=require(module_name).c_UpBinds.dual_Capable_Map{[merged_keys[idx2]]=idx1,[unique_key]="collected_nodes"}
+end
+cache_last=merged_keys[idx2]
+end
+end
+if fully_occupied then
+identical_row_map2[cache_last]=idx1
 end
 elseif merged_keys~=idx1 then
+if identical_row_map2 then
+if not identical_row_map2:nLookUp(merged_keys)and not identical_row_map2:lookUp(idx1)then
 identical_row_map2[merged_keys]=idx1
 end
+else
+identical_row_map2=require(module_name).c_UpBinds.dual_Capable_Map{[merged_keys]=idx1,[unique_key]="collected_nodes"}
 end
-if not unnecessary and by_row_orientation and merged_keys~=idx1 and v2:nLookUp(idx1)~=v1:nLookUp(idx1)and(not row_based_diff or #row_based_diff<=dof)then
+end
+end
+if by_row_orientation and merged_keys~=idx1 and v2:nLookUp(idx1)~=v1:nLookUp(idx1)and(not row_based_diff or #row_based_diff<=dof)then
 if row_based_diff then
 row_based_diff[1+#row_based_diff]=idx1
 else
 row_based_diff={idx1}
 end
 end
-if rows+2*matched<idx1 then
+if rows+2*something_that_counts<idx1 then
 break
 end
 end
-matched=0
-local identical_row_map1={}
+something_that_counts=0
+local identical_row_map1
 for idx1=1,#v1 do
 local merged_keys=v2:lookUp(v1:nLookUp(idx1))
 if merged_keys==nil then
 print("No Match Found for Line "..idx1.." from "..k1.." of "..compare1.root_path.." in "..k2.." of "..compare2.root_path.."!")
-if not unnecessary then
-unnecessary=true
-end
 else
-matched=1+matched
+something_that_counts=1+something_that_counts
 if type(merged_keys)=="table"and merged_keys[unique_key]=="merged_keys"then
+local fully_occupied,cache_last=true
 for idx2=1,#merged_keys do
 if merged_keys["inverse_"..merged_keys[unique_key]][merged_keys[idx2]]==idx2 and merged_keys[idx2]~=idx1 then
+if identical_row_map1 then
+if not identical_row_map1:nLookUp(merged_keys[idx2])and not identical_row_map1:lookUp(idx1)then
 identical_row_map1[merged_keys[idx2]]=idx1
+fully_occupied=false
+break
 end
+else
+identical_row_map1=require(module_name).c_UpBinds.dual_Capable_Map{[merged_keys[idx2]]=idx1,[unique_key]="collected_nodes"}
+end
+cache_last=merged_keys[idx2]
+end
+end
+if fully_occupied then
+identical_row_map1[cache_last]=idx1
 end
 elseif merged_keys~=idx1 then
+if identical_row_map1 then
+if not identical_row_map1:nLookUp(merged_keys)and not identical_row_map1:lookUp(idx1)then
 identical_row_map1[merged_keys]=idx1
 end
+else
+identical_row_map1=require(module_name).c_UpBinds.dual_Capable_Map{[merged_keys]=idx1,[unique_key]="collected_nodes"}
 end
-if not unnecessary and not by_row_orientation and merged_keys~=idx1 and v1:nLookUp(idx1)~=v2:nLookUp(idx1)and(not row_based_diff or #row_based_diff<=dof)then
+end
+end
+if not by_row_orientation and merged_keys~=idx1 and v1:nLookUp(idx1)~=v2:nLookUp(idx1)and(not row_based_diff or #row_based_diff<=dof)then
 if row_based_diff then
 row_based_diff[1+#row_based_diff]=idx1
 else
 row_based_diff={idx1}
 end
 end
-if rows+2*matched<idx1 then
+if rows+2*something_that_counts<idx1 then
 break
 end
 end
-local intervals,misalignment1,scan={},{}
+local intervals,misalignment1,gen_func,scan={},{},pairs(identical_row_map1),nil
 repeat
 local lineno1,probe2,probe1
-scan,lineno1=next(identical_row_map1,scan)
+scan,lineno1=gen_func(nil,scan)
 if scan==nil or(intervals[scan//interval_size]and scan%interval_size<=intervals[scan//interval_size])then
 goto continue
 end
 probe2,probe1=scan,lineno1
-while identical_row_map1[probe2-1]and probe1-probe2==identical_row_map1[probe2-1]+1-probe2 do
+while v2:nLookUp(probe2-1)and v1:nLookUp(probe1-1)and v2:nLookUp(probe2-1)==v1:nLookUp(probe1-1)do
 probe2,probe1=probe2-1,probe1-1
 end
 intervals[-1]=probe2
 misalignment1[-1],misalignment1[-2]=probe1,probe2
 probe2,probe1=scan,lineno1
-while identical_row_map1[1+probe2]and probe1-probe2==identical_row_map1[1+probe2]-1-probe2 do
+while v2:nLookUp(1+probe2)and v1:nLookUp(1+probe1)and v2:nLookUp(1+probe2)==v1:nLookUp(1+probe1)do
 probe2,probe1=1+probe2,1+probe1
 end
 for idx=1+intervals[-1]//interval_size,probe2//interval_size-1 do
@@ -2871,22 +2891,22 @@ end
 misalignment1[-1],misalignment1[-2]=nil,nil
 ::continue::
 until scan==nil
-intervals={}
+intervals,gen_func={},pairs(identical_row_map2)
 local misalignment2={}
 repeat
 local lineno2,probe1,probe2
-scan,lineno2=next(identical_row_map2,scan)
+scan,lineno2=gen_func(nil,scan)
 if scan==nil or(intervals[scan//interval_size]and scan%interval_size<=intervals[scan//interval_size])then
 goto continue
 end
 probe1,probe2=scan,lineno2
-while identical_row_map2[probe1-1]and probe2-probe1==identical_row_map2[probe1-1]+1-probe1 do
+while v1:nLookUp(probe1-1)and v2:nLookUp(probe2-1)and v1:nLookUp(probe1-1)==v2:nLookUp(probe2-1)do
 probe1,probe2=probe1-1,probe2-1
 end
 intervals[-1]=probe1
 misalignment2[-1],misalignment2[-2]=probe1,probe2
 probe1,probe2=scan,lineno2
-while identical_row_map2[1+probe1]and probe2-probe1==identical_row_map2[1+probe1]-1-probe1 do
+while v1:nLookUp(1+probe1)and v2:nLookUp(1+probe2)and v1:nLookUp(1+probe1)==v2:nLookUp(1+probe2)do
 probe1,probe2=1+probe1,1+probe2
 end
 for idx=1+intervals[-1]//interval_size,probe1//interval_size-1 do
@@ -2905,6 +2925,7 @@ end
 misalignment2[-1],misalignment2[-2]=nil,nil
 ::continue::
 until scan==nil
+local unnecessary
 for k3,v3 in next,misalignment1 do
 local symmetrical
 if type(v3)=="table"then
@@ -3975,8 +3996,8 @@ debug.setmetatable(consolidate_File,consolidate_File)
 
 
 local interface={
-version=1.6640625,
-renewed=1795492800,
+version=1.6953125,
+renewed=1795838400,
 ["Pointers in Practice"]="Deeming certain parameters tables or refering to pre-specific upvalues are the only 2 approaches to dynamic, alterable values determined at each function-invoke time.",
 replicate=replicate,
 zip=zip,
@@ -4005,8 +4026,8 @@ consolidate_File=consolidate_File
 --a few declarations:
 do
 local status="ready for run";
-local digestH=-1292693279253166368;
-local digestM=-58637742;
+local digestH=-1773735075779124315;
+local digestM=243753186;
 local required_name,find_self,where=...
 if os.getenv("ANDROID_ROOT")=="/system"then
 where=find_self:match("^(.-/)[^/]+$")
@@ -5046,7 +5067,7 @@ idx1=tonumber(sub_directive:match("^%s-r?%s-(%d+)$"))
 if idx1 then
 idx1=1+(idx1-1)%#indexed_cache
 else
-warn("Invalid Input with No Integer Index Extracted - Proceeding as Usual...")
+warn("Invalid Input with No Integer Index Extracted - Proceeding as Usual ...")
 end
 if type(indexed_cache[idx1])=="userdata"and tostring(indexed_cache[idx1]):find("dual_Capable_Map")==1 and(sub_directive:find("%s-r")==1 or(tonumber(associated_data[indexed_cache[idx1]])or tonumber(associated_data[indexed_cache[idx1]]:match("^root(%d+)")))~=database_index)then
 replica=replicate(indexed_cache[idx1])
@@ -5622,625 +5643,6 @@ return false
 end
 end
 
-local function found_to_Index(directive,cue,upper_bound)
-local idx1=#navigate
-if cue=="find"and directive:find(cue.."%s-.+%s-@$")==1 then
-if type(pointer[unique_key_parents])=="userdata"and tostring(pointer[unique_key_parents]):find("dual_Capable_Map")==1 and pointer[unique_key_parents][unique_key_meta]=="collected_nodes"then
-for k,v in pointer[unique_key_parents]:__pairs(#pointer[unique_key_parents])do
-local print_route={}
-for idx2=1,#v[1]do
-if recycled[v[1][idx2]]or(idx2>=#v[1]and not rawequal(v[1][idx2],pointer))then
-pointer[unique_key_parents][k]=nil
-goto continue
-end
-local node_name
-if type(v[2][v[1][idx2]])=="string"and utf8.len(v[2][v[1][idx2]])>127 then
-node_name=v[2][v[1][idx2]](":127")
-end
-print_route[1+#print_route]=node_name or tostring(v[2][v[1][idx2]])
-end
-idx1=1+idx1
-names[v]=v[1][#v[1]-1]
-print(idx1,names[v],table.concat(print_route,"»"))
-navigate[idx1]=v
-::continue::
-end
-end
-if type(cache[unique_key_meta])=="userdata"and tostring(cache[unique_key_meta]):find("dual_Capable_Map")==1 and cache[unique_key_meta][unique_key_meta]=="collected_nodes"then
-local cache_v1
-for v1,k1 in cache[unique_key_meta]:__pairs(false)do
-if rawequal(cache_v1,v1)then
-goto value_repetition
-end
-if type(v1)=="userdata"and tostring(v1):find("dual_Capable_Map")==1 and type(v1[unique_key_parents])=="userdata"and tostring(v1[unique_key_parents]):find("dual_Capable_Map")==1 and v1[unique_key_parents][unique_key_meta]=="collected_nodes"then
-for k2,v2 in v1[unique_key_parents]:__pairs(#v1[unique_key_parents])do
-local print_route={}
-for idx2=1,#v2[1]do
-if recycled[v2[1][idx2]]or(idx2>=#v2[1]and not rawequal(v2[1][idx2],v1))then
-local expired_foothold
-if idx2>=#v2[1]and rawequal(v2[1][idx2],v1)then
-cache[k1]=nil
-expired_foothold=true
-end
-v1[unique_key_parents][k2]=nil
-if expired_foothold then
-goto continue1
-end
-goto continue2
-end
-local node_name
-if type(v2[2][v2[1][idx2]])=="string"and utf8.len(v2[2][v2[1][idx2]])>127 then
-node_name=v2[2][v2[1][idx2]](":127")
-end
-print_route[1+#print_route]=node_name or tostring(v2[2][v2[1][idx2]])
-end
-idx1=1+idx1
-print(idx1,k1,v1,table.concat(print_route,"»"))
-navigate[idx1]=v2
-names[v2]=v1
-::continue2::
-end
-end
-::value_repetition::
-if type(k1)=="userdata"and tostring(k1):find("dual_Capable_Map")==1 and type(k1[unique_key_parents])=="userdata"and tostring(k1[unique_key_parents]):find("dual_Capable_Map")==1 and k1[unique_key_parents][unique_key_meta]=="collected_nodes"then
-for k2,v2 in k1[unique_key_parents]:__pairs(#k1[unique_key_parents])do
-local print_route={}
-for idx2=1,#v2[1]do
-if recycled[v2[1][idx2]]or(idx2>=#v2[1]and not rawequal(v2[1][idx2],k1))then
-local expired_foothold
-if idx2>=#v2[1]and rawequal(v2[1][idx2],k1)then
-cache[k1]=nil
-expired_foothold=true
-end
-k1[unique_key_parents][k2]=nil
-if expired_foothold then
-goto continue1
-end
-goto continue2
-end
-local node_name
-if type(v2[2][v2[1][idx2]])=="string"and utf8.len(v2[2][v2[1][idx2]])>127 then
-node_name=v2[2][v2[1][idx2]](":127")
-end
-print_route[1+#print_route]=node_name or tostring(v2[2][v2[1][idx2]])
-end
-idx1=1+idx1
-print(idx1,"root"..v1,k1,table.concat(print_route,"»"))
-navigate[idx1]=v2
-names[v2]=k1
-::continue2::
-end
-end
-cache_v1=v1
-::continue1::
-end
-end
-print("Where to Begin Search?")
-::stream_redirected::
-local sub_directive=io.type(io.input())=="file"and io.input():read()
-if not sub_directive then
-if sub_directive==nil then
-io.input():close()
-end
-if type(stream_stack)=="table"and #stream_stack>0 then
-io.input(table.remove(stream_stack))
-if #stream_stack<=1 then
-stream_stack=stream_stack[1]
-end
-elseif io.type(stream_stack)then
-io.input(stream_stack)
-stream_stack=nil
-else
-io.input(io.stdin)
-end
-goto stream_redirected
-end
-idx1=math.tointeger(tonumber(sub_directive))
-else
-idx1=tonumber(directive:match(cue.."%s-.+%s-@%s-(%d+)$"))
-end
-local probebase_index,probe_route,probe_names_en_route,probe
-if #navigate>0 and idx1 then
-idx1=1+(idx1-1)%#navigate
-if idx1>upper_bound then
-probebase_index=tonumber(navigate[idx1][2][navigate[idx1][1][1]]:match("^root(%d+)$"))
-probe_names_en_route=replicate(navigate[idx1][2],1)
-probe_route=replicate(navigate[idx1][1],1)
-if rawequal(probe_route[#probe_route],pointer)then
-probe_names_en_route[probe_route[#probe_route]]=nil
-table.remove(probe_route)
-end
-probe=names[navigate[idx1]]
-elseif type(navigate[idx1])=="userdata"and tostring(navigate[idx1]):find("dual_Capable_Map")==1 then
-probe_names_en_route=replicate(names_en_route[database_index],1)
-probe_route=replicate(routes[database_index],1)
-if type(navigate[idx1][unique_key_parents])~="userdata"or tostring(navigate[idx1][unique_key_parents]):find("dual_Capable_Map")~=1 or navigate[idx1][unique_key_parents][unique_key_meta]~="collected_nodes"then
-navigate[idx1][unique_key_parents]=require(module_name).c_UpBinds.dual_Capable_Map{[unique_key_meta]="collected_nodes"}
-end
-if names[navigate[idx1-1]]==names[navigate[idx1]]or names[navigate[1+idx1]]==names[navigate[idx1]]then
-if not env[database_index][unique_key_parents]:lookUp(navigate[idx1])then
-table.insert(env[database_index][unique_key_parents],navigate[idx1])
-end
-probe_names_en_route[navigate[idx1]]="root"..database_index..".disambiguity["..env[database_index][unique_key_parents]:lookUp(navigate[idx1]).."]"
-else
-probe_names_en_route[navigate[idx1]]=names[navigate[idx1]]
-end
-probe_route[1+#probe_route]=navigate[idx1]
-navigate[idx1][unique_key_parents][assemble_Route(nil,true)]={replicate(probe_route,1),replicate(probe_names_en_route,1)}
-probe=navigate[idx1]
-end
-else
-probe_names_en_route=replicate(names_en_route[database_index],1)
-probe_route=replicate(routes[database_index],1)
-probe=pointer
-end
-local target,exact
-if directive:find(cue.."%s-exfc%s-@?%s-%d*$")==1 then
-idx1,exact=0,true
-local indexed_cache,associated_data,pool={},{},{}
-for k,v in pairs(cache)do
-if math.type(k)=="integer"and k>0 and k<=#cache then
-idx1=1+idx1
-local content
-if type(v)=="string"and utf8.len(v)>127 then
-content=v(":127")
-end
-print(idx1,content or v)
-indexed_cache[idx1]=v
-elseif type(k)=="userdata"and tostring(k):find("dual_Capable_Map")==1 then
-if k[unique_key_meta]=="collected_nodes"then
-for idx2=1,#k do
-local object,content1,content2=load("return "..v.."["..("%q"):format(k[idx2]).."]","Fetch from Cache Entry "..v.." #"..idx2,nil,env)()
-if object==nil or(type(object)=="table"and object[unique_key_meta]=="merged_keys")then
-pool[1+#pool]={k,k[idx2]}
-goto continue1
-elseif type(object)=="string"and utf8.len(object)>127 then
-content2=object(":127")
-end
-if type(k[idx2])=="string"and utf8.len(k[idx2])>127 then
-content1=k[idx2](":127")
-end
-idx1=1+idx1
-print(idx1,v,content1 or k[idx2],content2 or object)
-indexed_cache[idx1]=object
-associated_data[object]=v.."["..("%q"):format(k[idx2]).."]"
-pool[object]={k,k[idx2]}
-::continue1::
-end
-else
-if recycled[k]then
-cache[k]=nil
-goto continue2
-end
-idx1=1+idx1
-local contents=serialise(k,false)
-if utf8.len(contents)>127 then
-contents=contents(":127")
-end
-print(idx1,"root"..v,k,contents)
-indexed_cache[idx1]=k
-associated_data[k]=v
-end
-elseif type(k)~="table"and(type(v)~="userdata"or tostring(v):find("dual_Capable_Map")~=1)then
-local object,content1,content2=load("return "..v.."["..("%q"):format(k).."]","Fetch from Cache Entry "..v,nil,env)()
-if object==nil or(type(object)=="table"and object[unique_key_meta]=="merged_keys")then
-pool[1+#pool]=k
-goto continue2
-elseif type(object)=="string"and utf8.len(object)>127 then
-content2=object(":127")
-end
-if type(k)=="string"and utf8.len(k)>127 then
-content1=k(":127")
-end
-idx1=1+idx1
-print(idx1,v,content1 or k,content2 or object)
-indexed_cache[idx1]=object
-associated_data[object]=v.."["..("%q"):format(k).."]"
-pool[object]=k
-end
-::continue2::
-end
-for idx2=1,#pool do
-if type(pool[idx2])=="table"then
-local merged_keys=pool[idx2][1]:lookUp(pool[idx2][2])
-if type(merged_keys)=="table"and merged_keys[unique_key_meta]=="merged_keys"then
-for idx3=1,#merged_keys do
-if merged_keys["inverse_"..merged_keys[unique_key_meta]][merged_keys[idx3]]==idx3 then
-merged_keys=idx3
-break
-end
-end
-end
-table.remove(pool[idx2][1],merged_keys)
-if #pool[idx2][1]<=0 then
-cache[pool[idx2][1]]=nil
-end
-else
-cache[pool[idx2]]=nil
-end
-end
-local empty,next_key=true,pairs(cache)()
-if next_key~=nil and(math.type(next_key)~="integer"or next_key<-5 or next_key>0)then
-empty=false
-end
-for idx2=0,-5,-1 do
-if cache:nLookUp(idx2)then
-next_key=cache:__pairs()(false,idx2)
-if empty and(next_key~=nil and(math.type(next_key)~="integer"or next_key<-5 or next_key>0))then
-empty=false
-end
-end
-if recycled[cache:nLookUp(idx2)]then
-cache[idx2]=nil
-end
-end
-if empty then
-return upper_bound,"Cache Is Empty!"
-end
-::cut_short::
-print("Which Exactly to Match?")
-::stream_redirected::
-target=io.type(io.input())=="file"and io.input():read()
-if not target then
-if target==nil then
-io.input():close()
-end
-if type(stream_stack)=="table"and #stream_stack>0 then
-io.input(table.remove(stream_stack))
-if #stream_stack<=1 then
-stream_stack=stream_stack[1]
-end
-elseif io.type(stream_stack)then
-io.input(stream_stack)
-stream_stack=nil
-else
-io.input(io.stdin)
-end
-goto stream_redirected
-end
-idx1=math.tointeger(tonumber(target))
-if idx1 then
-idx1=1+(idx1-1)%#indexed_cache
-else
-warn("Invalid Input with No Integer Index Extracted - Please Try Again!")
-goto cut_short
-end
-target=indexed_cache[idx1]
-if type(associated_data[indexed_cache[idx1]])=="string"then
-if type(pool[indexed_cache[idx1]])=="table"then
-local merged_keys=pool[indexed_cache[idx1]][1]:lookUp(pool[indexed_cache[idx1]][2])
-if type(merged_keys)=="table"and merged_keys[unique_key_meta]=="merged_keys"then
-for idx2=1,#merged_keys do
-if merged_keys["inverse_"..merged_keys[unique_key_meta]][merged_keys[idx2]]==idx2 then
-merged_keys=idx2
-break
-end
-end
-end
-table.remove(pool[indexed_cache[idx1]][1],merged_keys)
-if #pool[indexed_cache[idx1]][1]<=1 then
-cache[pool[indexed_cache[idx1]][1]:nLookUp(1)]=associated_data[indexed_cache[idx1]]
-cache[pool[indexed_cache[idx1]][1]]=nil
-end
-else
-cache[pool[indexed_cache[idx1]]]=nil
-end
-elseif math.type(associated_data[indexed_cache[idx1]])=="integer"then
-cache[indexed_cache[idx1]]=nil
-else
-local merged_keys=cache:lookUp(indexed_cache[idx1])
-if type(merged_keys)=="table"and merged_keys[unique_key_meta]=="merged_keys"then
-for idx2=1,#merged_keys do
-if merged_keys["inverse_"..merged_keys[unique_key_meta]][merged_keys[idx2]]==idx2 then
-merged_keys=idx2
-break
-end
-end
-end
-table.remove(cache,merged_keys)
-end
-elseif #navigate>0 and directive:find(cue.."%s-ex%s-[kv]%s-%d+%s-@?%s-%d*$")==1 then
-local which
-exact,which,idx1=true,directive:match("^"..cue.."%s-ex%s-([kv])%s-(%d+)%s-@?%s-%d*$")
-if tonumber(idx1)then
-idx1=1+(tonumber(idx1)-1)%#navigate
-else
-return upper_bound,"Invalid Input with No Integer Index Extracted - Please Try Another!"
-end
-if idx1>upper_bound or which=="k"then
-target=names[navigate[idx1]]
-elseif which=="v"then
-target=navigate[idx1]
-end
-elseif directive:find(cue.."%s-.+%s-@?%s-%d*$")==1 then
-target=directive:match("^"..cue.."%s-(.+)%s-@?%s-%d*$")
-if target=="true"then
-target=true
-elseif target=="false"then
-target=false
-elseif tonumber(target)then
-target=math.tointeger(tonumber(target))or tonumber(target)
-elseif target:find('".-"$')==1 then
-target=target:sub(2,-2)
-end
-else
-return upper_bound,"Incorrect Usage"..(#navigate>0 and""or" - Target Required for Requested Search").."!"
-end
-if #navigate>0 then
-for idx2=1,#navigate do
-names[navigate[idx2]]=nil
-end
-navigate=table.move(reset,1,#navigate,1,navigate)
-end
-idx1,collected_routes,collected_names_en_route=0,{},{}
-local onset,searched,how,whence,gen_func,k,v,target_is_node,target_representation=#probe_route,{},{},{}
-if type(target)=="userdata"and tostring(target):find("dual_Capable_Map")==1 then
-target_is_node=true
-elseif type(target)=="string"and utf8.len(target)>5 then
-target_representation=target(":3").."..."..target(utf8.len(target)-1 ..":")
-end
-local chosen
-::next_node::
-if chosen then
-if type(probe[unique_key_parents])=="userdata"and tostring(probe[unique_key_parents]):find("dual_Capable_Map")==1 and probe[unique_key_parents][unique_key_meta]=="collected_nodes"then
-for k,v in probe[unique_key_parents]:__pairs(#probe[unique_key_parents])do
-local print_route={}
-for idx2=1,#v[1]do
-if recycled[v[1][idx2]]or(idx2>=#v[1]and not rawequal(v[1][idx2],probe))then
-probe[unique_key_parents][k]=nil
-goto continue
-end
-local node_name
-if type(v[2][v[1][idx2]])=="string"then
-local first,last=v[2][v[1][idx2]]:find(tostring(target))
-if first and last then
-local start,stop=utf8.offset(v[2][v[1][idx2]],-61,first),select(2,utf8.offset(v[2][v[1][idx2]],61,1+last))
-node_name=v[2][v[1][idx2]]:sub(start,first-1)..(target_representation or tostring(target))..v[2][v[1][idx2]]:sub(1+last,stop)
-elseif utf8.len(v[2][v[1][idx2]])>127 then
-node_name=v[2][v[1][idx2]](":127")
-end
-end
-print_route[1+#print_route]=node_name or tostring(v[2][v[1][idx2]])
-end
-idx1=1+idx1
-print(idx1,probe,table.concat(print_route,"»"))
-navigate[idx1]=v
-names[v]=probe
-::continue::
-end
-end
-chosen=nil
-end
-local merged_keys=probe[target]
-if type(merged_keys)=="table"and merged_keys[unique_key_meta]=="merged_keys"then
-for idx2=1,#merged_keys do
-if merged_keys["inverse_"..merged_keys[unique_key_meta]][merged_keys[idx2]]==idx2 then
-if target_is_node and type(merged_keys[idx2])~="boolean"and type(merged_keys[idx2])~="number"and type(merged_keys[idx2])~="string"then
-local contents1,contents2=serialise(merged_keys[idx2],false),serialise(target,false)
-if utf8.len(contents1)>127 then
-contents1=contents1(":127")
-end
-if utf8.len(contents2)>127 then
-contents2=contents2(":127")
-end
-warn("Invalid DataBase Pair - ",contents1," and ",contents2," - They Have Been Recycled!")
-recycled[merged_keys[idx2]]=1+(recycled[merged_keys[idx2]]or 0)
-recycled[target]=1+(recycled[target]or 0)
-probe[merged_keys[idx2]]=nil
-goto continue
-end
-if cue=="find"then
-idx1=1+idx1
-collected_routes[idx1]=replicate(probe_route,1)
-collected_names_en_route[idx1]=replicate(probe_names_en_route,1)
-end
-if type(merged_keys[idx2])=="userdata"and tostring(merged_keys[idx2]):find("dual_Capable_Map")==1 and cue=="find"then
-local contents,content=serialise(merged_keys[idx2],false)
-if utf8.len(contents)>127 then
-contents=contents(":127")
-end
-if type(target)=="string"and utf8.len(target)>127 then
-content=target(":127")
-end
-print(idx1,content or target,merged_keys[idx2],contents)
-navigate[idx1]=merged_keys[idx2]
-names[merged_keys[idx2]]=target
-elseif target_is_node and cue=="find"then
-local contents,content=serialise(target,false)
-if utf8.len(contents)>127 then
-contents=contents(":127")
-end
-if type(merged_keys[idx2])=="string"and utf8.len(merged_keys[idx2])>127 then
-content=merged_keys[idx2](":127")
-end
-print(idx1,content or merged_keys[idx2],target,contents)
-navigate[idx1]=target
-names[target]=merged_keys[idx2]
-elseif cue=="find"then
-local couple={merged_keys[idx2],target}
-table.sort(couple,determine_Orientation)
-local content1,content2
-if type(couple[1])=="string"and utf8.len(couple[1])>127 then
-content1=couple[1](":127")
-end
-if type(couple[2])=="string"and utf8.len(couple[2])>127 then
-content2=couple[2](":127")
-end
-print(idx1,content1 or couple[1],content2 or couple[2])
-navigate[idx1]=couple[2]
-names[couple[2]]=couple[1]
-end
-end
-::continue::
-end
-elseif merged_keys~=nil then
-if target_is_node and type(merged_keys)~="boolean"and type(merged_keys)~="number"and type(merged_keys)~="string"then
-local contents1,contents2=serialise(merged_keys,false),serialise(target,false)
-if utf8.len(contents1)>127 then
-contents1=contents1(":127")
-end
-if utf8.len(contents2)>127 then
-contents2=contents2(":127")
-end
-warn("Invalid DataBase Pair - ",contents1," and ",contents2," - They Have Been Recycled!")
-recycled[merged_keys]=1+(recycled[merged_keys]or 0)
-recycled[target]=1+(recycled[target]or 0)
-local orientation=predicate_Orientation(probe,merged_keys,target)
-if orientation then
-probe[merged_keys]=nil
-elseif orientation==false then
-probe[target]=nil
-end
-goto continue
-end
-if cue=="find"then
-idx1=1+idx1
-collected_routes[idx1]=replicate(probe_route,1)
-collected_names_en_route[idx1]=replicate(probe_names_en_route,1)
-end
-if type(merged_keys)=="userdata"and tostring(merged_keys):find("dual_Capable_Map")==1 and cue=="find"then
-local contents,content=serialise(merged_keys,false)
-if utf8.len(contents)>127 then
-contents=contents(":127")
-end
-if type(target)=="string"and utf8.len(target)>127 then
-content=target(":127")
-end
-print(idx1,content or target,merged_keys,contents)
-navigate[idx1]=merged_keys
-names[merged_keys]=target
-elseif target_is_node and cue=="find"then
-local contents,content=serialise(target,false)
-if utf8.len(contents)>127 then
-contents=contents(":127")
-end
-if type(merged_keys)=="string"and utf8.len(merged_keys)>127 then
-content=merged_keys(":127")
-end
-print(idx1,content or merged_keys,target,contents)
-navigate[idx1]=target
-names[target]=merged_keys
-elseif cue=="find"then
-local couple={merged_keys,target}
-table.sort(couple,determine_Orientation)
-local content1,content2
-if type(couple[1])=="string"and utf8.len(couple[1])>127 then
-content1=couple[1](":127")
-end
-if type(couple[2])=="string"and utf8.len(couple[2])>127 then
-content2=couple[2](":127")
-end
-print(idx1,content1 or couple[1],content2 or couple[2])
-navigate[idx1]=couple[2]
-names[couple[2]]=couple[1]
-end
-::continue::
-end
-gen_func=pairs(exact and probe[unique_key_meta]or probe)
-::next_pair::
-k,v=gen_func(nil,k)
-if k==nil then
-if #probe_route>onset then
-probe_names_en_route[probe_route[#probe_route]]=nil
-probe_route[#probe_route]=nil
-probe=probe_route[#probe_route]
-gen_func=table.remove(how)
-k=table.remove(whence)
-goto next_pair
-end
-return collected_routes,collected_names_en_route,cue=="find"or 0
-end
-if type(k)~="boolean"and type(k)~="number"and type(k)~="string"and type(v)~="boolean"and type(v)~="number"and type(v)~="string"then
-local contents1,contents2=serialise(k,false),serialise(v,false)
-if utf8.len(contents1)>127 then
-contents1=contents1(":127")
-end
-if utf8.len(contents2)>127 then
-contents2=contents2(":127")
-end
-warn("Invalid DataBase Pair - ",contents1," and ",contents2," - They Have Been Recycled!")
-recycled[k]=1+(recycled[k]or 0)
-recycled[v]=1+(recycled[v]or 0)
-probe[k]=nil
-goto next_pair
-end
-local couple,is_node
-if type(k)=="userdata"and tostring(k):find("dual_Capable_Map")==1 then
-couple={v,k}
-is_node=true
-elseif type(v)=="userdata"and tostring(v):find("dual_Capable_Map")==1 then
-couple={k,v}
-is_node=true
-else
-couple={k,v}
-table.sort(couple,determine_Orientation)
-end
-if not target_is_node and not exact and couple[1]~=target and not rawequal(couple[2],target)and(tostring(couple[1]):match(tostring(target))or tostring(couple[2]):match(tostring(target)))then
-if cue=="scout"then
-chosen=true
-elseif cue=="find"then
-local content,contents
-if type(couple[1])=="string"then
-local start1,stop1=couple[1]:find(tostring(target))
-if start1 and stop1 then
-local start,stop=utf8.offset(couple[1],-61,start1),select(2,utf8.offset(couple[1],61,1+stop1))
-content=couple[1]:sub(start,start1-1)..(target_representation or tostring(target))..couple[1]:sub(1+stop1,stop)
-elseif utf8.len(couple[1])>127 then
-content=couple[1](":127")
-end
-end
-if is_node then
-contents=serialise(couple[2],false)
-if utf8.len(contents)>127 then
-contents=contents(":127")
-end
-elseif type(couple[2])=="string"then
-local start2,stop2=couple[2]:find(tostring(target))
-if start2 and stop2 then
-local start,stop=utf8.offset(couple[2],-61,start2),select(2,utf8.offset(couple[2],61,1+stop2))
-contents=couple[2]:sub(start,start2-1)..(target_representation or tostring(target))..couple[2]:sub(1+stop2,stop)
-elseif utf8.len(couple[2])>127 then
-contents=couple[2](":127")
-end
-end
-idx1=1+idx1
-collected_routes[idx1]=replicate(probe_route,1)
-collected_names_en_route[idx1]=replicate(probe_names_en_route,1)
-print(idx1,content or couple[1],is_node and(tostring(couple[2]).."\t"..contents)or(contents or couple[2]))
-navigate[idx1]=couple[2]
-names[couple[2]]=couple[1]
-end
-end
-if exact or is_node then
-local cache_probe=probe
-if type(couple[2][unique_key_parents])~="userdata"or tostring(couple[2][unique_key_parents]):find("dual_Capable_Map")~=1 or couple[2][unique_key_parents][unique_key_meta]~="collected_nodes"then
-couple[2][unique_key_parents]=require(module_name).c_UpBinds.dual_Capable_Map{[unique_key_meta]="collected_nodes"}
-end
-merged_keys=probe:lookUp(couple[2])
-if type(merged_keys)=="table"and merged_keys[unique_key_meta]=="collected_nodes"then
-if not env[probebase_index][unique_key_parents]:lookUp(couple[2])then
-table.insert(env[probebase_index][unique_key_parents],couple[2])
-end
-probe_names_en_route[couple[2]]="root"..probebase_index..".disambiguity["..env[probebase_index][unique_key_parents]:lookUp(couple[2]).."]"
-else
-probe_names_en_route[couple[2]]=couple[1]
-end
-probe_route[1+#probe_route]=couple[2]
-couple[2][unique_key_parents][assemble_Route(nil,true)]={replicate(probe_route,1),replicate(probe_names_en_route,1)}
-probe=couple[2]
-if dispose_on_leave and #probe_route>1 and type(cache_pointer[unique_key_parents])=="userdata"and tostring(cache_pointer[unique_key_parents]):find("dual_Capable_Map")==1 and cache_pointer[unique_key_parents][unique_key_meta]=="collected_nodes"and recycled:nLookUp(cache_pointer[unique_key_parents])~=recycled:lookUp(cache_pointer[unique_key_parents])then
-cache_pointer[unique_key_parents]=require(module_name).c_UpBinds.dual_Capable_Map{[unique_key_meta]="collected_nodes"}
-recycled[1+#recycled]=cache_pointer[unique_key_parents]
-recycled[cache_pointer[unique_key_parents]]=#recycled
-end
-how[1+#how]=gen_func
-whence[1+#whence]=k
-k=nil
-goto next_node
-end
-goto next_pair
-end
-
 local function edit_by_Index(directive)
 local index=tonumber(directive:match("^edit%s-[kv]%s-f?%s-(%d+)$"))
 if index then
@@ -6803,6 +6205,636 @@ end
 return false
 end
 
+local function found_to_Index(directive,cue,upper_bound)
+local idx1=#navigate
+if cue=="find"and directive:find(cue.."%s-.+%s-@$")==1 then
+if type(pointer[unique_key_parents])=="userdata"and tostring(pointer[unique_key_parents]):find("dual_Capable_Map")==1 and pointer[unique_key_parents][unique_key_meta]=="collected_nodes"then
+for k,v in pointer[unique_key_parents]:__pairs(#pointer[unique_key_parents])do
+local print_route={}
+for idx2=1,#v[1]do
+if recycled[v[1][idx2]]or(idx2>=#v[1]and not rawequal(v[1][idx2],pointer))then
+pointer[unique_key_parents][k]=nil
+goto continue
+end
+local node_name
+if type(v[2][v[1][idx2]])=="string"and utf8.len(v[2][v[1][idx2]])>127 then
+node_name=v[2][v[1][idx2]](":127")
+end
+print_route[1+#print_route]=node_name or tostring(v[2][v[1][idx2]])
+end
+idx1=1+idx1
+names[v]=v[1][#v[1]-1]
+print(idx1,names[v],table.concat(print_route,"»"))
+navigate[idx1]=v
+::continue::
+end
+end
+if type(cache[unique_key_meta])=="userdata"and tostring(cache[unique_key_meta]):find("dual_Capable_Map")==1 and cache[unique_key_meta][unique_key_meta]=="collected_nodes"then
+local cache_v1
+for v1,k1 in cache[unique_key_meta]:__pairs(false)do
+if rawequal(cache_v1,v1)then
+goto value_repetition
+end
+if type(v1)=="userdata"and tostring(v1):find("dual_Capable_Map")==1 and type(v1[unique_key_parents])=="userdata"and tostring(v1[unique_key_parents]):find("dual_Capable_Map")==1 and v1[unique_key_parents][unique_key_meta]=="collected_nodes"then
+for k2,v2 in v1[unique_key_parents]:__pairs(#v1[unique_key_parents])do
+local print_route={}
+for idx2=1,#v2[1]do
+if recycled[v2[1][idx2]]or(idx2>=#v2[1]and not rawequal(v2[1][idx2],v1))then
+local expired_foothold
+if idx2>=#v2[1]and rawequal(v2[1][idx2],v1)then
+cache[k1]=nil
+expired_foothold=true
+end
+v1[unique_key_parents][k2]=nil
+if expired_foothold then
+goto continue1
+end
+goto continue2
+end
+local node_name
+if type(v2[2][v2[1][idx2]])=="string"and utf8.len(v2[2][v2[1][idx2]])>127 then
+node_name=v2[2][v2[1][idx2]](":127")
+end
+print_route[1+#print_route]=node_name or tostring(v2[2][v2[1][idx2]])
+end
+idx1=1+idx1
+print(idx1,k1,v1,table.concat(print_route,"»"))
+navigate[idx1]=v2
+names[v2]=v1
+::continue2::
+end
+end
+::value_repetition::
+if type(k1)=="userdata"and tostring(k1):find("dual_Capable_Map")==1 and type(k1[unique_key_parents])=="userdata"and tostring(k1[unique_key_parents]):find("dual_Capable_Map")==1 and k1[unique_key_parents][unique_key_meta]=="collected_nodes"then
+for k2,v2 in k1[unique_key_parents]:__pairs(#k1[unique_key_parents])do
+local print_route={}
+for idx2=1,#v2[1]do
+if recycled[v2[1][idx2]]or(idx2>=#v2[1]and not rawequal(v2[1][idx2],k1))then
+local expired_foothold
+if idx2>=#v2[1]and rawequal(v2[1][idx2],k1)then
+cache[k1]=nil
+expired_foothold=true
+end
+k1[unique_key_parents][k2]=nil
+if expired_foothold then
+goto continue1
+end
+goto continue2
+end
+local node_name
+if type(v2[2][v2[1][idx2]])=="string"and utf8.len(v2[2][v2[1][idx2]])>127 then
+node_name=v2[2][v2[1][idx2]](":127")
+end
+print_route[1+#print_route]=node_name or tostring(v2[2][v2[1][idx2]])
+end
+idx1=1+idx1
+print(idx1,"root"..v1,k1,table.concat(print_route,"»"))
+navigate[idx1]=v2
+names[v2]=k1
+::continue2::
+end
+end
+cache_v1=v1
+::continue1::
+end
+end
+print("Where to Begin Search?")
+::stream_redirected::
+local sub_directive=io.type(io.input())=="file"and io.input():read()
+if not sub_directive then
+if sub_directive==nil then
+io.input():close()
+end
+if type(stream_stack)=="table"and #stream_stack>0 then
+io.input(table.remove(stream_stack))
+if #stream_stack<=1 then
+stream_stack=stream_stack[1]
+end
+elseif io.type(stream_stack)then
+io.input(stream_stack)
+stream_stack=nil
+else
+io.input(io.stdin)
+end
+goto stream_redirected
+end
+idx1=math.tointeger(tonumber(sub_directive))
+else
+idx1=tonumber(directive:match(cue.."%s-.+%s-@%s-(%d+)$"))
+end
+local probebase_index,probe_route,probe_names_en_route,probe
+if #navigate>0 and idx1 then
+idx1=1+(idx1-1)%#navigate
+if idx1>upper_bound then
+probebase_index=tonumber(navigate[idx1][2][navigate[idx1][1][1]]:match("^root(%d+)$"))
+probe_names_en_route=replicate(navigate[idx1][2],1)
+probe_route=replicate(navigate[idx1][1],1)
+if rawequal(probe_route[#probe_route],pointer)then
+probe_names_en_route[probe_route[#probe_route]]=nil
+table.remove(probe_route)
+end
+probe=names[navigate[idx1]]
+elseif type(navigate[idx1])=="userdata"and tostring(navigate[idx1]):find("dual_Capable_Map")==1 then
+probe_names_en_route=replicate(names_en_route[database_index],1)
+probe_route=replicate(routes[database_index],1)
+if type(navigate[idx1][unique_key_parents])~="userdata"or tostring(navigate[idx1][unique_key_parents]):find("dual_Capable_Map")~=1 or navigate[idx1][unique_key_parents][unique_key_meta]~="collected_nodes"then
+navigate[idx1][unique_key_parents]=require(module_name).c_UpBinds.dual_Capable_Map{[unique_key_meta]="collected_nodes"}
+end
+if names[navigate[idx1-1]]==names[navigate[idx1]]or names[navigate[1+idx1]]==names[navigate[idx1]]then
+if not env[database_index][unique_key_parents]:lookUp(navigate[idx1])then
+table.insert(env[database_index][unique_key_parents],navigate[idx1])
+end
+probe_names_en_route[navigate[idx1]]="root"..database_index..".disambiguity["..env[database_index][unique_key_parents]:lookUp(navigate[idx1]).."]"
+else
+probe_names_en_route[navigate[idx1]]=names[navigate[idx1]]
+end
+probe_route[1+#probe_route]=navigate[idx1]
+navigate[idx1][unique_key_parents][assemble_Route(nil,true)]={replicate(probe_route,1),replicate(probe_names_en_route,1)}
+probe=navigate[idx1]
+end
+else
+probe_names_en_route=replicate(names_en_route[database_index],1)
+probe_route=replicate(routes[database_index],1)
+probe=pointer
+end
+local target,exact
+if directive:find(cue.."%s-exfc%s-@?%s-%d*$")==1 then
+idx1,exact=0,true
+local indexed_cache,associated_data,pool={},{},{}
+for k,v in pairs(cache)do
+if math.type(k)=="integer"and k>0 and k<=#cache then
+idx1=1+idx1
+local content
+if type(v)=="string"and utf8.len(v)>127 then
+content=v(":127")
+end
+print(idx1,content or v)
+indexed_cache[idx1]=v
+elseif type(k)=="userdata"and tostring(k):find("dual_Capable_Map")==1 then
+if k[unique_key_meta]=="collected_nodes"then
+for idx2=1,#k do
+local object,content1,content2=load("return "..v.."["..("%q"):format(k[idx2]).."]","Fetch from Cache Entry "..v.." #"..idx2,nil,env)()
+if object==nil or(type(object)=="table"and object[unique_key_meta]=="merged_keys")then
+pool[1+#pool]={k,k[idx2]}
+goto continue1
+elseif type(object)=="string"and utf8.len(object)>127 then
+content2=object(":127")
+end
+if type(k[idx2])=="string"and utf8.len(k[idx2])>127 then
+content1=k[idx2](":127")
+end
+idx1=1+idx1
+print(idx1,v,content1 or k[idx2],content2 or object)
+indexed_cache[idx1]=object
+associated_data[object]=v.."["..("%q"):format(k[idx2]).."]"
+pool[object]={k,k[idx2]}
+::continue1::
+end
+else
+if recycled[k]then
+cache[k]=nil
+goto continue2
+end
+idx1=1+idx1
+local contents=serialise(k,false)
+if utf8.len(contents)>127 then
+contents=contents(":127")
+end
+print(idx1,"root"..v,k,contents)
+indexed_cache[idx1]=k
+associated_data[k]=v
+end
+elseif type(k)~="table"and(type(v)~="userdata"or tostring(v):find("dual_Capable_Map")~=1)then
+local object,content1,content2=load("return "..v.."["..("%q"):format(k).."]","Fetch from Cache Entry "..v,nil,env)()
+if object==nil or(type(object)=="table"and object[unique_key_meta]=="merged_keys")then
+pool[1+#pool]=k
+goto continue2
+elseif type(object)=="string"and utf8.len(object)>127 then
+content2=object(":127")
+end
+if type(k)=="string"and utf8.len(k)>127 then
+content1=k(":127")
+end
+idx1=1+idx1
+print(idx1,v,content1 or k,content2 or object)
+indexed_cache[idx1]=object
+associated_data[object]=v.."["..("%q"):format(k).."]"
+pool[object]=k
+end
+::continue2::
+end
+for idx2=1,#pool do
+if type(pool[idx2])=="table"then
+local merged_keys=pool[idx2][1]:lookUp(pool[idx2][2])
+if type(merged_keys)=="table"and merged_keys[unique_key_meta]=="merged_keys"then
+for idx3=1,#merged_keys do
+if merged_keys["inverse_"..merged_keys[unique_key_meta]][merged_keys[idx3]]==idx3 then
+merged_keys=idx3
+break
+end
+end
+end
+table.remove(pool[idx2][1],merged_keys)
+if #pool[idx2][1]<=0 then
+cache[pool[idx2][1]]=nil
+end
+else
+cache[pool[idx2]]=nil
+end
+end
+local empty,next_key=true,pairs(cache)()
+if next_key~=nil and(math.type(next_key)~="integer"or next_key<-5 or next_key>0)then
+empty=false
+end
+for idx2=0,-5,-1 do
+if cache:nLookUp(idx2)then
+next_key=cache:__pairs()(false,idx2)
+if empty and(next_key~=nil and(math.type(next_key)~="integer"or next_key<-5 or next_key>0))then
+empty=false
+end
+end
+if recycled[cache:nLookUp(idx2)]then
+cache[idx2]=nil
+end
+end
+if empty then
+return upper_bound,"Cache Is Empty!"
+end
+::cut_short::
+print("Which Exactly to Match?")
+::stream_redirected::
+target=io.type(io.input())=="file"and io.input():read()
+if not target then
+if target==nil then
+io.input():close()
+end
+if type(stream_stack)=="table"and #stream_stack>0 then
+io.input(table.remove(stream_stack))
+if #stream_stack<=1 then
+stream_stack=stream_stack[1]
+end
+elseif io.type(stream_stack)then
+io.input(stream_stack)
+stream_stack=nil
+else
+io.input(io.stdin)
+end
+goto stream_redirected
+end
+idx1=math.tointeger(tonumber(target))
+if idx1 then
+idx1=1+(idx1-1)%#indexed_cache
+else
+warn("Invalid Input with No Integer Index Extracted - Please Try Again!")
+goto cut_short
+end
+target=indexed_cache[idx1]
+if type(associated_data[indexed_cache[idx1]])=="string"then
+if type(pool[indexed_cache[idx1]])=="table"then
+local merged_keys=pool[indexed_cache[idx1]][1]:lookUp(pool[indexed_cache[idx1]][2])
+if type(merged_keys)=="table"and merged_keys[unique_key_meta]=="merged_keys"then
+for idx2=1,#merged_keys do
+if merged_keys["inverse_"..merged_keys[unique_key_meta]][merged_keys[idx2]]==idx2 then
+merged_keys=idx2
+break
+end
+end
+end
+table.remove(pool[indexed_cache[idx1]][1],merged_keys)
+if #pool[indexed_cache[idx1]][1]<=1 then
+cache[pool[indexed_cache[idx1]][1]:nLookUp(1)]=associated_data[indexed_cache[idx1]]
+cache[pool[indexed_cache[idx1]][1]]=nil
+end
+else
+cache[pool[indexed_cache[idx1]]]=nil
+end
+elseif math.type(associated_data[indexed_cache[idx1]])=="integer"then
+cache[indexed_cache[idx1]]=nil
+else
+local merged_keys=cache:lookUp(indexed_cache[idx1])
+if type(merged_keys)=="table"and merged_keys[unique_key_meta]=="merged_keys"then
+for idx2=1,#merged_keys do
+if merged_keys["inverse_"..merged_keys[unique_key_meta]][merged_keys[idx2]]==idx2 then
+merged_keys=idx2
+break
+end
+end
+end
+table.remove(cache,merged_keys)
+end
+elseif #navigate>0 and directive:find(cue.."%s-ex%s-[kv]%s-%d+%s-@?%s-%d*$")==1 then
+local which
+exact,which,idx1=true,directive:match("^"..cue.."%s-ex%s-([kv])%s-(%d+)%s-@?%s-%d*$")
+if tonumber(idx1)then
+idx1=1+(tonumber(idx1)-1)%#navigate
+else
+return upper_bound,"Invalid Input with No Integer Index Extracted - Please Try Another!"
+end
+if idx1>upper_bound or which=="k"then
+target=names[navigate[idx1]]
+elseif which=="v"then
+target=navigate[idx1]
+end
+elseif directive:find(cue.."%s-.+%s-@?%s-%d*$")==1 then
+target=directive:match("^"..cue.."%s*(.-)%s*@?%s-%d*$")
+if target=="true"then
+target=true
+elseif target=="false"then
+target=false
+elseif tonumber(target)then
+target=math.tointeger(tonumber(target))or tonumber(target)
+elseif target:find('".-"$')==1 then
+target=target:sub(2,-2)
+end
+else
+return upper_bound,"Incorrect Usage"..(#navigate>0 and""or" - Target Required for Requested Search").."!"
+end
+if #navigate>0 then
+for idx2=1,#navigate do
+names[navigate[idx2]]=nil
+end
+navigate=table.move(reset,1,#navigate,1,navigate)
+end
+idx1,collected_routes,collected_names_en_route=0,{},{}
+local onset,searched,how,whence,gen_func,k,v,target_is_node,target_representation=#probe_route,{},{},{}
+if type(target)=="userdata"and tostring(target):find("dual_Capable_Map")==1 then
+target_is_node=true
+elseif type(target)=="string"and utf8.len(target)>6 then
+target_representation=target(":3")..".."..target(utf8.len(target)-2 ..":")
+end
+local chosen
+::next_node::
+if chosen then
+if type(probe[unique_key_parents])=="userdata"and tostring(probe[unique_key_parents]):find("dual_Capable_Map")==1 and probe[unique_key_parents][unique_key_meta]=="collected_nodes"then
+for k,v in probe[unique_key_parents]:__pairs(#probe[unique_key_parents])do
+local print_route={}
+for idx2=1,#v[1]do
+if recycled[v[1][idx2]]or(idx2>=#v[1]and not rawequal(v[1][idx2],probe))then
+probe[unique_key_parents][k]=nil
+goto continue
+end
+local node_name
+if type(v[2][v[1][idx2]])=="string"then
+local first,last=v[2][v[1][idx2]]:find(tostring(target))
+if first and last then
+local start,stop=utf8.offset(v[2][v[1][idx2]],-61,first),select(2,utf8.offset(v[2][v[1][idx2]],61,1+last))
+node_name=v[2][v[1][idx2]]:sub(start or 1,first-1)..(target_representation or tostring(target))..v[2][v[1][idx2]]:sub(1+last,stop or #v[2][v[1][idx2]])
+elseif utf8.len(v[2][v[1][idx2]])>127 then
+node_name=v[2][v[1][idx2]](":127")
+end
+end
+print_route[1+#print_route]=node_name or tostring(v[2][v[1][idx2]])
+end
+idx1=1+idx1
+print(idx1,probe,table.concat(print_route,"»"))
+navigate[idx1]=v
+names[v]=probe
+::continue::
+end
+end
+chosen=nil
+end
+for idx2=1,2 do
+local merged_keys
+if idx2<2 then
+merged_keys=probe:nLookUp(target)
+else
+merged_keys=probe:lookUp(target)
+end
+if type(merged_keys)=="table"and merged_keys[unique_key_meta]=="merged_keys"then
+for idx3=1,#merged_keys do
+if merged_keys["inverse_"..merged_keys[unique_key_meta]][merged_keys[idx3]]==idx3 then
+if target_is_node and type(merged_keys[idx3])~="boolean"and type(merged_keys[idx3])~="number"and type(merged_keys[idx3])~="string"then
+local contents1,contents2=serialise(merged_keys[idx3],false),serialise(target,false)
+if utf8.len(contents1)>127 then
+contents1=contents1(":127")
+end
+if utf8.len(contents2)>127 then
+contents2=contents2(":127")
+end
+warn("Invalid DataBase Pair - ",contents1," and ",contents2," - They Have Been Recycled!")
+recycled[merged_keys[idx3]]=1+(recycled[merged_keys[idx3]]or 0)
+recycled[target]=1+(recycled[target]or 0)
+probe[merged_keys[idx3]]=nil
+goto continue
+end
+if cue=="find"then
+idx1=1+idx1
+collected_routes[idx1]=replicate(probe_route,1)
+collected_names_en_route[idx1]=replicate(probe_names_en_route,1)
+end
+if type(merged_keys[idx3])=="userdata"and tostring(merged_keys[idx3]):find("dual_Capable_Map")==1 and cue=="find"then
+local contents,content=serialise(merged_keys[idx3],false)
+if utf8.len(contents)>127 then
+contents=contents(":127")
+end
+if type(target)=="string"and utf8.len(target)>127 then
+content=target(":127")
+end
+print(idx1,content or target,merged_keys[idx3],contents)
+navigate[idx1]=merged_keys[idx3]
+names[merged_keys[idx3]]=target
+elseif target_is_node and cue=="find"then
+local contents,content=serialise(target,false)
+if utf8.len(contents)>127 then
+contents=contents(":127")
+end
+if type(merged_keys[idx3])=="string"and utf8.len(merged_keys[idx3])>127 then
+content=merged_keys[idx3](":127")
+end
+print(idx1,content or merged_keys[idx3],target,contents)
+navigate[idx1]=target
+names[target]=merged_keys[idx3]
+elseif cue=="find"then
+local content1,content2
+if type(target)=="string"and utf8.len(target)>127 then
+content1=target(":127")
+end
+if type(merged_keys[idx3])=="string"and utf8.len(merged_keys[idx3])>127 then
+content2=merged_keys[idx3](":127")
+end
+print(idx1,content1 or target,content2 or merged_keys[idx3])
+navigate[idx1]=merged_keys[idx3]
+names[merged_keys[idx3]]=target
+end
+end
+::continue::
+end
+elseif merged_keys~=nil then
+if target_is_node and type(merged_keys)~="boolean"and type(merged_keys)~="number"and type(merged_keys)~="string"then
+local contents1,contents2=serialise(merged_keys,false),serialise(target,false)
+if utf8.len(contents1)>127 then
+contents1=contents1(":127")
+end
+if utf8.len(contents2)>127 then
+contents2=contents2(":127")
+end
+warn("Invalid DataBase Pair - ",contents1," and ",contents2," - They Have Been Recycled!")
+recycled[merged_keys]=1+(recycled[merged_keys]or 0)
+recycled[target]=1+(recycled[target]or 0)
+if idx2<2 then
+probe[target]=nil
+else
+probe[merged_keys]=nil
+end
+goto continue
+end
+if cue=="find"then
+idx1=1+idx1
+collected_routes[idx1]=replicate(probe_route,1)
+collected_names_en_route[idx1]=replicate(probe_names_en_route,1)
+end
+if type(merged_keys)=="userdata"and tostring(merged_keys):find("dual_Capable_Map")==1 and cue=="find"then
+local contents,content=serialise(merged_keys,false)
+if utf8.len(contents)>127 then
+contents=contents(":127")
+end
+if type(target)=="string"and utf8.len(target)>127 then
+content=target(":127")
+end
+print(idx1,content or target,merged_keys,contents)
+navigate[idx1]=merged_keys
+names[merged_keys]=target
+elseif target_is_node and cue=="find"then
+local contents,content=serialise(target,false)
+if utf8.len(contents)>127 then
+contents=contents(":127")
+end
+if type(merged_keys)=="string"and utf8.len(merged_keys)>127 then
+content=merged_keys(":127")
+end
+print(idx1,content or merged_keys,target,contents)
+navigate[idx1]=target
+names[target]=merged_keys
+elseif cue=="find"then
+local couple={merged_keys,target}
+table.sort(couple,determine_Orientation)
+local content1,content2
+if type(couple[1])=="string"and utf8.len(couple[1])>127 then
+content1=couple[1](":127")
+end
+if type(couple[2])=="string"and utf8.len(couple[2])>127 then
+content2=couple[2](":127")
+end
+print(idx1,content1 or couple[1],content2 or couple[2])
+navigate[idx1]=couple[2]
+names[couple[2]]=couple[1]
+end
+::continue::
+end
+end
+gen_func=pairs(exact and probe[unique_key_meta]or probe,false)
+::next_pair::
+v,k=gen_func(nil,v)
+if v==nil then
+if #probe_route>onset then
+probe_names_en_route[probe_route[#probe_route]]=nil
+probe_route[#probe_route]=nil
+probe=probe_route[#probe_route]
+gen_func=table.remove(how)
+v=table.remove(whence)
+goto next_pair
+end
+return collected_routes,collected_names_en_route,cue=="find"or 0
+end
+if type(k)~="boolean"and type(k)~="number"and type(k)~="string"and type(v)~="boolean"and type(v)~="number"and type(v)~="string"then
+local contents1,contents2=serialise(k,false),serialise(v,false)
+if utf8.len(contents1)>127 then
+contents1=contents1(":127")
+end
+if utf8.len(contents2)>127 then
+contents2=contents2(":127")
+end
+warn("Invalid DataBase Pair - ",contents1," and ",contents2," - They Have Been Recycled!")
+recycled[k]=1+(recycled[k]or 0)
+recycled[v]=1+(recycled[v]or 0)
+probe[k]=nil
+goto next_pair
+end
+local couple,is_node
+if type(k)=="userdata"and tostring(k):find("dual_Capable_Map")==1 then
+couple={v,k}
+is_node=true
+elseif type(v)=="userdata"and tostring(v):find("dual_Capable_Map")==1 then
+couple={k,v}
+is_node=true
+else
+local merged_keys=(exact and probe[unique_key_meta]or probe):lookUp(v)
+couple={v,k}
+if type(merged_keys)~="table"or merged_keys[unique_key_meta]~="merged_keys"then
+table.sort(couple,determine_Orientation)
+end
+end
+if not target_is_node and not exact and couple[1]~=target and not rawequal(couple[2],target)and(tostring(couple[1]):match(tostring(target))or tostring(couple[2]):match(tostring(target)))then
+if cue=="scout"then
+chosen=true
+elseif cue=="find"then
+local content,contents
+if type(couple[1])=="string"then
+local start1,stop1=couple[1]:find(tostring(target))
+if start1 and stop1 then
+local start,stop=utf8.offset(couple[1],-61,start1),select(2,utf8.offset(couple[1],61,1+stop1))
+content=couple[1]:sub(start or 1,start1-1)..(target_representation or tostring(target))..couple[1]:sub(1+stop1,stop or #couple[1])
+elseif utf8.len(couple[1])>127 then
+content=couple[1](":127")
+end
+end
+if is_node then
+contents=serialise(couple[2],false)
+if utf8.len(contents)>127 then
+contents=contents(":127")
+end
+elseif type(couple[2])=="string"then
+local start2,stop2=couple[2]:find(tostring(target))
+if start2 and stop2 then
+local start,stop=utf8.offset(couple[2],-61,start2),select(2,utf8.offset(couple[2],61,1+stop2))
+contents=couple[2]:sub(start or 1,start2-1)..(target_representation or tostring(target))..couple[2]:sub(1+stop2,stop or #couple[2])
+elseif utf8.len(couple[2])>127 then
+contents=couple[2](":127")
+end
+end
+idx1=1+idx1
+collected_routes[idx1]=replicate(probe_route,1)
+collected_names_en_route[idx1]=replicate(probe_names_en_route,1)
+print(idx1,content or couple[1],is_node and(tostring(couple[2]).."\t"..contents)or(contents or couple[2]))
+navigate[idx1]=couple[2]
+names[couple[2]]=couple[1]
+end
+end
+if exact or is_node then
+local cache_probe=probe
+if type(couple[2][unique_key_parents])~="userdata"or tostring(couple[2][unique_key_parents]):find("dual_Capable_Map")~=1 or couple[2][unique_key_parents][unique_key_meta]~="collected_nodes"then
+couple[2][unique_key_parents]=require(module_name).c_UpBinds.dual_Capable_Map{[unique_key_meta]="collected_nodes"}
+end
+local merged_keys=probe:lookUp(couple[2])
+if type(merged_keys)=="table"and merged_keys[unique_key_meta]=="merged_keys"then
+if not env[probebase_index][unique_key_parents]:lookUp(couple[2])then
+table.insert(env[probebase_index][unique_key_parents],couple[2])
+end
+probe_names_en_route[couple[2]]="root"..probebase_index..".disambiguity["..env[probebase_index][unique_key_parents]:lookUp(couple[2]).."]"
+else
+probe_names_en_route[couple[2]]=couple[1]
+end
+probe_route[1+#probe_route]=couple[2]
+local assembler={tostring(probe_route[1])}
+for idx2=2,#probe_route do
+assembler[1+#assembler]="["..tostring(probe_route[idx2]).."]"
+end
+couple[2][unique_key_parents][table.concat(assembler)]={replicate(probe_route,1),replicate(probe_names_en_route,1)}
+probe=couple[2]
+if dispose_on_leave and #probe_route>1 and type(cache_pointer[unique_key_parents])=="userdata"and tostring(cache_pointer[unique_key_parents]):find("dual_Capable_Map")==1 and cache_pointer[unique_key_parents][unique_key_meta]=="collected_nodes"and recycled:nLookUp(cache_pointer[unique_key_parents])~=recycled:lookUp(cache_pointer[unique_key_parents])then
+cache_pointer[unique_key_parents]=require(module_name).c_UpBinds.dual_Capable_Map{[unique_key_meta]="collected_nodes"}
+recycled[1+#recycled]=cache_pointer[unique_key_parents]
+recycled[cache_pointer[unique_key_parents]]=#recycled
+end
+how[1+#how]=gen_func
+whence[1+#whence]=v
+v=nil
+goto next_node
+end
+goto next_pair
+end
+
 ::just_arrived::
 if #navigate>0 then
 for idx=1,#navigate do
@@ -7170,8 +7202,10 @@ print(idx1,content or v,k,contents)
 navigate[idx1]=k
 names[k]=v
 else
-local couple={k,v}
+local merged_keys,couple=pointer:lookUp(v),{v,k}
+if type(merged_keys)~="table"or merged_keys[unique_key_meta]~="merged_keys"then
 table.sort(couple,determine_Orientation)
+end
 local content1,content2
 if type(couple[1])=="string"and utf8.len(couple[1])>127 then
 content1=couple[1](":127")
@@ -7473,6 +7507,10 @@ else
 status=cstatus
 if status=="ready for run"or(status=="checksum"and digestH==digestM)then
 warn("⚠️Main program, crucial chunks of the library or both have been tampered - deploy, run or whatever at your own risk!")
+if household_sum==digestH then
+status="checksum"
+os.remove(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
+end
 elseif status=="off maintenance"then
 status="checksum"
 os.remove(where..keystone(interface.version,interface.renewed)..keystone(interface.renewed,interface.version)..keystone(status,interface.renewed)..keystone(status,interface.version))
@@ -7671,7 +7709,7 @@ if attempt then
 print('Working Directory Redirected to '..redirectory..'!')
 goto step_back
 end
-warn(feedback,' - Proceeding with Working Directory UnAltered...')
+warn(feedback,' - Proceeding with Working Directory UnAltered ...')
 end
 goto cut_short
 end
@@ -7690,7 +7728,7 @@ handle:close()
 end
 ::cut_short::
 if quit then
-error('Making Exit...')
+error('Making Exit ...')
 end
 end
 if type(task_queue)~='table'or #task_queue<=0 then
@@ -8442,12 +8480,47 @@ lua_insert(L,1);
 return 3;
 }
 
+volatile sig_atomic_t signal_counter=0;
+
+void capi_Count_Hook_Function(lua_State *L,lua_Debug *hook_arg){
+if(hook_arg->event==LUA_HOOKCOUNT && signal_counter<3 && signal_counter>0){
+if(lua_pushthread(L)){
+lua_pop(L,1);
+signal_counter=0;
+luaL_error(L,"Lua Script Aborted According to User Request!");
+}else{
+lua_pop(L,1);
+signal_counter=0;
+lua_yield(L,0);
+}
+}
+}
+
+int thread_Set_Count_Hook(lua_State *L){
+lua_settop(L,1);
+luaL_argexpected(L,lua_isthread(L,-1),1,"thread");
+lua_State *Lc=lua_tothread(L,-1);
+lua_sethook(Lc,capi_Count_Hook_Function,LUA_MASKCOUNT,27000);
+return 0;
+}
+
+int thread_Recycle_LeftOvers(lua_State *L){
+lua_settop(L,1);
+luaL_argexpected(L,lua_isthread(L,-1),1,"thread");
+lua_State *Lc=lua_tothread(L,-1);
+int scraps=lua_gettop(Lc);
+lua_xmove(Lc,L,scraps);
+return scraps;
+}
+
 int multithread_Initiator(lua_State *L);
 
 const luaL_Reg c_UpBinds[]={
 {"chdir",chdir_Conveyed},
 {"sleep",sleep_Conveyed},
 {"prime_Generator",prime_Generator},
+{"thrd_SetHook",thread_Set_Count_Hook},
+{"thrd_CleanUp",thread_Recycle_LeftOvers},
 {"multithread_Initiator",multithread_Initiator},
 {NULL,NULL}
 };
@@ -8876,13 +8949,14 @@ struct multithread_context_of_threads *mt_ctx_thrds;
 
 int multithread_Terminator(lua_State *Lo,int status,lua_KContext ctx){
 lua_settop(Lo,1);
+if(!lua_istable(Lo,-1)&& !luaL_testudata(Lo,-1,"dual_Capable_Map")){
+lua_newtable(Lo);
+lua_replace(Lo,-2);
+}
 struct multithread_context *mt_ctx=(struct multithread_context*)ctx;
 if(status==LUA_YIELD){
 pthread_mutex_lock(&outcome_queue_lock);
-COLLECT_OUTCOMES(-2,0);
-pthread_mutex_unlock(&outcome_queue_lock);
-sleep(9);
-pthread_mutex_lock(&outcome_queue_lock);
+if(outcome_queue.start!=outcome_queue.end ||(outcome_queue.outcomes[outcome_queue.start-1<0?outcome_queue.queue_size-1:outcome_queue.start-1]!=NULL && outcome_queue.outcomes[1+outcome_queue.end<outcome_queue.queue_size?1+outcome_queue.end:0]!=NULL))
 COLLECT_OUTCOMES(-2,0);
 pthread_mutex_unlock(&outcome_queue_lock);
 sleep(9);
@@ -8893,7 +8967,10 @@ pthread_mutex_unlock(&outcome_queue_lock);
 }
 for(int idx=mt_ctx->mt_ctx_thrds->context_size-1;idx>=0;idx--)
 pthread_detach(mt_ctx->mt_ctx_thrds->threads[idx]);
+sleep(9);
 if(status==LUA_OK || tasks_assigned==outcomes_collected){
+for(int idx=mt_ctx->mt_ctx_stts->context_size-1;idx>=0;idx--)
+lua_close(mt_ctx->mt_ctx_stts->states[idx]);
 tasks_assigned=0;
 outcomes_collected=0;
 pthread_cond_broadcast(&await_task);
@@ -8913,6 +8990,10 @@ return 3;
 
 int multithread_Consolidator(lua_State *Lo,int status,lua_KContext ctx){
 lua_settop(Lo,5);
+if(!lua_istable(Lo,-3)&& !luaL_testudata(Lo,-3,"dual_Capable_Map")){
+lua_newtable(Lo);
+lua_replace(Lo,-4);
+}
 struct timespec wait_till;
 if(status==LUA_YIELD && lua_isboolean(Lo,-2)&& !lua_toboolean(Lo,-2)){
 upcome=0;
@@ -8942,7 +9023,12 @@ pthread_mutex_lock(&outcome_queue_lock);
 if(outcome_queue.start!=outcome_queue.end ||(outcome_queue.outcomes[outcome_queue.start-1<0?outcome_queue.queue_size-1:outcome_queue.start-1]!=NULL && outcome_queue.outcomes[1+outcome_queue.end<outcome_queue.queue_size?1+outcome_queue.end:0]!=NULL))
 COLLECT_OUTCOMES(-4,1);
 pthread_mutex_unlock(&outcome_queue_lock);
+if(!lua_istable(Lo,-4)&& !luaL_testudata(Lo,-4,"dual_Capable_Map"))
+goto assignment_impossible;
 lua_State *L=lua_tothread(Lo,-5);
+lua_rotate(Lo,-4,-1);
+lua_xmove(Lo,L,1);
+lua_insert(L,-3);
 pthread_mutex_lock(&task_queue_lock);
 if(lua_isnumber(Lo,-2)&& luaL_len(L,-3)>0){
 while(task_queue.start==task_queue.end && task_queue.tasks[task_queue.start-1<0?task_queue.queue_size-1:task_queue.start-1]!=NULL && task_queue.tasks[1+task_queue.end<task_queue.queue_size?1+task_queue.end:0]!=NULL){
@@ -9005,43 +9091,38 @@ COLLECT_OUTCOMES(-4,1);
 pthread_mutex_unlock(&outcome_queue_lock);
 collection_impossible:
 if(!upcome){
-lua_rotate(Lo,-5,-2);
-lua_pop(Lo,3);
-lua_copy(Lo,-2,-1);
-return lua_yieldk(Lo,1,(lua_KContext)mt_ctx,multithread_Terminator);
-}else if(tasks_assigned>outcomes_collected || luaL_len(Lo,-4)>0){
-lua_copy(Lo,-4,-2);
-lua_copy(Lo,-3,-1);
-return lua_yieldk(Lo,2,(lua_KContext)mt_ctx,multithread_Consolidator);
+lua_copy(Lo,-3,1);
+lua_settop(Lo,1);
+return lua_yieldk(Lo,1,ctx,multithread_Terminator);
+}else if(tasks_assigned>outcomes_collected ||(lua_gettop(Lo)<5 && luaL_len(L,-3)>0)){
+lua_copy(Lo,-3,2);
+lua_settop(Lo,2);
+return lua_yieldk(Lo,1,ctx,multithread_Consolidator);
 }
-lua_rotate(Lo,-5,-2);
-lua_pop(Lo,4);
-return multithread_Terminator(Lo,LUA_OK,(lua_KContext)mt_ctx);
+lua_copy(Lo,-3,1);
+lua_settop(Lo,1);
+return multithread_Terminator(Lo,LUA_OK,ctx);
 }
 
 int multithread_Initiator(lua_State *L){
-lua_settop(L,4);
-if(!lua_istable(L,-4)&& !luaL_testudata(L,-4,"dual_Capable_Map"))
-luaL_error(L,"Array of Tasks Instead of %s Required!",luaL_typename(L,-4));
-if(!lua_istable(L,-3)&& !luaL_testudata(L,-3,"dual_Capable_Map")){
-lua_newtable(L);
-lua_replace(L,-4);
-}
-task_queue.tasks=calloc(luaL_len(L,-4),sizeof(char*));
-task_queue.queue_size=luaL_len(L,-4);
+lua_settop(L,2);
+if(!lua_istable(L,-2)&& !luaL_testudata(L,-2,"dual_Capable_Map"))
+luaL_error(L,"Array of Tasks Instead of %s Required!",luaL_typename(L,-2));
+task_queue.tasks=calloc(luaL_len(L,-2),sizeof(char*));
+task_queue.queue_size=luaL_len(L,-2);
 task_queue.start=0;
 task_queue.end=0;
-outcome_queue.outcomes=calloc(luaL_len(L,-4),sizeof(struct array_of_results*));
-outcome_queue.queue_size=luaL_len(L,-4);
+outcome_queue.outcomes=calloc(luaL_len(L,-2),sizeof(struct array_of_results*));
+outcome_queue.queue_size=luaL_len(L,-2);
 outcome_queue.start=0;
 outcome_queue.end=0;
 struct multithread_context *mt_ctx=malloc(sizeof(struct multithread_context));
-mt_ctx->mt_ctx_stts=malloc(sizeof *mt_ctx->mt_ctx_stts+luaL_len(L,-4)*sizeof(lua_State*));
-memset(mt_ctx->mt_ctx_stts->states,0,luaL_len(L,-4)*sizeof(lua_State*));
-mt_ctx->mt_ctx_stts->context_size=luaL_len(L,-4);
-mt_ctx->mt_ctx_thrds=malloc(sizeof *mt_ctx->mt_ctx_thrds+luaL_len(L,-4)*sizeof(pthread_t));
-memset(mt_ctx->mt_ctx_thrds->threads,0,luaL_len(L,-4)*sizeof(pthread_t));
-mt_ctx->mt_ctx_thrds->context_size=luaL_len(L,-4);
+mt_ctx->mt_ctx_stts=malloc(sizeof *mt_ctx->mt_ctx_stts+luaL_len(L,-2)*sizeof(lua_State*));
+memset(mt_ctx->mt_ctx_stts->states,0,luaL_len(L,-2)*sizeof(lua_State*));
+mt_ctx->mt_ctx_stts->context_size=luaL_len(L,-2);
+mt_ctx->mt_ctx_thrds=malloc(sizeof *mt_ctx->mt_ctx_thrds+luaL_len(L,-2)*sizeof(pthread_t));
+memset(mt_ctx->mt_ctx_thrds->threads,0,luaL_len(L,-2)*sizeof(pthread_t));
+mt_ctx->mt_ctx_thrds->context_size=luaL_len(L,-2);
 pthread_condattr_t attr;
 pthread_condattr_init(&attr);
 pthread_condattr_setclock(&attr,CLOCK_MONOTONIC);
@@ -9052,7 +9133,7 @@ if(upcome!=1)
 upcome=1;
 lua_getglobal(L,"table");
 lua_getfield(L,-1,"remove");
-lua_pushvalue(L,-6);
+lua_rotate(L,-4,-1);
 lua_pushinteger(L,1);
 lua_pushcfunction(L,errMsg_Handler);
 for(int idx=luaL_len(L,-3)-1;idx>=0;idx--){
@@ -9075,8 +9156,10 @@ pthread_create(&mt_ctx->mt_ctx_thrds->threads[idx],NULL,individual_Thread,mt_ctx
 lua_pop(L,1);
 }
 lua_State *Ld=lua_newthread(L);
-lua_insert(L,-10);
-lua_xmove(L,Ld,4);
+lua_insert(L,-7);
+lua_rotate(L,-3,-1);
+lua_insert(L,-6);
+lua_xmove(L,Ld,3);
 lua_pop(L,1);
 return multithread_Consolidator(L,LUA_OK,(lua_KContext)mt_ctx);
 }
@@ -9583,17 +9666,7 @@ premature_end:
 return -1;
 }
 
-volatile sig_atomic_t signal_counter=0;
-
 sigjmp_buf context_for_jump;
-
-void interpreter_Count_Hook_Function(lua_State *L,lua_Debug *hook_arg){
-if(hook_arg->event==LUA_HOOKCOUNT && signal_counter<3 && signal_counter>0){
-signal_counter=0;
-luaL_error(L,"Lua Script Aborted According to User Request!");
-}
-}
-
 Dwfl *dwfl;
 
 void versatile_SigHandler(int signum){
@@ -9608,7 +9681,7 @@ void *preliminary_info[27];
 stack_depth=backtrace(preliminary_info,27);
 fprintf(stderr,"Trace Back to Stack Depth #%d:\n",stack_depth);
 for (int idx=0;idx<stack_depth;idx++){
-Dwarf_Addr addr=(Dwarf_Addr)preliminary_info[idx]-(idx>0);
+Dwarf_Addr addr=(Dwarf_Addr)preliminary_info[idx]/*-(idx>0)*/;
 Dwfl_Module *mod=dwfl_addrmodule(dwfl,addr);
 if(!mod)
 continue;
@@ -9729,7 +9802,7 @@ if((ctop=lua_gettop(L)-ctop)>0)
 lua_rotate(L,5,ctop);
 lua_pushcfunction(L,errMsg_Handler);
 lua_insert(L,4);
-lua_sethook(L,interpreter_Count_Hook_Function,LUA_MASKCOUNT,27000);
+lua_sethook(L,capi_Count_Hook_Function,LUA_MASKCOUNT,27000);
 PCALL_ERRH(lua_gettop(L)-5,LUA_MULTRET,4,"Error Executing Script File: %s!",CLEAR_STACK,3);
 lua_sethook(L,NULL,0,0);
 lua_remove(L,4);
